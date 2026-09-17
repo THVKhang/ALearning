@@ -217,6 +217,16 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Assignment data/outputs (all assignment1/2/3)
-data/
-outputs/
+# Dataset downloads and run artifacts, one entry per assignment.
+# Anchored to the assignment root on purpose: a bare `data/` pattern also matches
+# the source package assignment*/src/data/ and silently drops dataset.py from the repo.
+assignment1/data/
+assignment2/data/
+assignment3/data/
+
+assignment1/outputs/*
+assignment2/outputs/*
+assignment3/outputs/*
+!assignment1/outputs/.gitkeep
+!assignment2/outputs/.gitkeep
+!assignment3/outputs/.gitkeep

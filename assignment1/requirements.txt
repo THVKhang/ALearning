@@ -1,0 +1,16 @@
+# Versions actually used to produce the reported results (Windows 11, RTX 3050 Laptop, CUDA 13.0).
+# The torch/torchvision wheels below are CUDA builds and need PyTorch's own index.
+# CPU-only machine: drop the two +cu130 pins and install plain `torch torchvision` from PyPI.
+--extra-index-url https://download.pytorch.org/whl/cu130
+
+torch==2.14.0+cu130
+torchvision==0.29.0+cu130
+numpy==2.5.3
+scikit-learn==1.9.1
+matplotlib==3.11.2
+PyYAML==6.0.3
+
+# Notebook execution (notebooks/eda.ipynb)
+ipykernel==7.3.0
+nbformat==5.11.1
+nbconvert==7.17.1

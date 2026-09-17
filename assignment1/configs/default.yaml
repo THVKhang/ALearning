@@ -1,0 +1,23 @@
+seed: 42
+
+data:
+  dataset: fashion_mnist   # fashion_mnist = main results; mnist = debugging only
+  data_root: data
+  val_fraction: 0.1        # 6000 of the 60000 official training images
+  stratified: true
+  batch_size: 128
+  num_workers: 0           # >0 on Windows needs the __main__ guard in scripts/train.py
+  augment: false
+
+model:
+  name: linear             # linear | mlp
+  hidden_sizes: [256]      # MLP only
+  dropout: 0.2             # MLP only
+
+train:
+  epochs: 15
+  optimizer: adam          # adam | sgd
+  lr: 0.001
+  weight_decay: 0.0
+  monitor: macro_f1        # checkpoint selection metric on the validation split
+  early_stopping_patience: 5
