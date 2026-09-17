@@ -1,4 +1,4 @@
-# AI Usage Disclosure – Assignment 1
+# AI Usage Disclosure – Assignment 2
 
 **Course:** CO3133 – Deep Learning and Its Applications  
 **Semester:** 261  
