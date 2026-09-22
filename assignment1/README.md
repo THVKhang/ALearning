@@ -128,8 +128,8 @@ Held-out official test split, 10,000 images. Checkpoint = best validation macro-
 
 | Model | Params | Test accuracy | Test macro-F1 | Best epoch | Train time | Inference |
 |---|---|---|---|---|---|---|
-| Linear / softmax | 7,850 | 0.8440 | 0.8441 | 11 / 15 | 325.0 s (21.7 s/epoch) | 0.354 ms/image |
-| MLP (784-256-10, dropout 0.2) | 203,530 | 0.8909 | 0.8902 | 15 / 15 | 301.6 s (20.1 s/epoch) | 0.350 ms/image |
+| Linear / softmax | 7,850 | 0.8440 | 0.8441 | 11 / 15 | 87.3 s (5.8 s/epoch) | 0.097 ms/image |
+| MLP (784-256-10, dropout 0.2) | 203,530 | 0.8884 | 0.8878 | 15 / 15 | 91.3 s (6.1 s/epoch) | 0.095 ms/image |
 
 Accuracy and macro-F1 agree to within 0.001 for both models, which is what the balanced
 class distribution predicts.
@@ -138,41 +138,36 @@ class distribution predicts.
 
 | Class | Linear | MLP | Gain |
 |---|---|---|---|
-| Shirt | 0.5999 | 0.7138 | +0.114 |
-| Pullover | 0.7323 | 0.8091 | +0.077 |
-| Coat | 0.7442 | 0.8236 | +0.079 |
-| T-shirt/top | 0.8073 | 0.8430 | +0.036 |
-| Dress | 0.8492 | 0.8870 | +0.038 |
-| Sneaker | 0.9238 | 0.9509 | +0.027 |
-| Sandal | 0.9314 | 0.9641 | +0.033 |
-| Bag | 0.9355 | 0.9716 | +0.036 |
-| Ankle boot | 0.9499 | 0.9594 | +0.010 |
-| Trouser | 0.9672 | 0.9800 | +0.013 |
+| Shirt | 0.5999 | 0.7035 | +0.104 |
+| Pullover | 0.7323 | 0.8098 | +0.077 |
+| Coat | 0.7442 | 0.8177 | +0.074 |
+| T-shirt/top | 0.8073 | 0.8357 | +0.028 |
+| Dress | 0.8492 | 0.8901 | +0.041 |
+| Sneaker | 0.9238 | 0.9443 | +0.021 |
+| Sandal | 0.9314 | 0.9624 | +0.031 |
+| Bag | 0.9355 | 0.9744 | +0.039 |
+| Ankle boot | 0.9499 | 0.9557 | +0.006 |
+| Trouser | 0.9672 | 0.9840 | +0.017 |
 
 ### What the draft comparison does and does not show
 
-- The hidden layer buys **+4.6 macro-F1 points for 26x the parameters**. The gain is not
-  spread evenly: it averages **+0.076 on the four upper-body garments** (Shirt, Pullover,
-  Coat, T-shirt/top) against **+0.026 on the other six classes**, roughly a 3x
-  difference.
-- That split was predicted by the EDA before training: those four classes share almost
+- The hidden layer buys **+4.4 macro-F1 points for 26x the parameters**. The gain is not
+  spread evenly: it averages **+0.085 on the three hardest upper-body garments** (Shirt, Pullover,
+  Coat) against **+0.023 on the other seven classes**, roughly a 4x difference.
+- That split was predicted by the EDA before training: those classes share almost
   the same silhouette and differ in local texture, so a linear decision boundary over raw
   pixels cannot separate them, while every class with a distinctive global shape
-  (Trouser, Bag, Sneaker, Ankle boot) is already above 0.92 F1 for the linear model. This
-  is the concrete form the inductive-bias argument takes on this dataset, and it is the
-  hypothesis the CNN in M2 should push further.
+  (Trouser, Bag, Sneaker, Ankle boot) is already above 0.92 F1 for the linear model.
+  This is the concrete form the inductive-bias argument takes on this dataset.
 - **Shirt is the dominant error group** for both models, confusing with T-shirt/top,
   Pullover and Coat (see `confusion_matrix_test.png` in each run directory).
 - **The MLP is not converged.** Its best epoch is the last one in the budget (15/15) and
-  validation macro-F1 was still rising, so 0.8902 is a lower bound for this architecture,
-  not its ceiling. The linear model peaked at epoch 11 with validation loss drifting up
-  while training loss kept falling - mild overfitting, absorbed by the checkpoint rule.
-- **No speed claim can be made from this table.** The two timing columns are within 2-8%
-  of each other because both are bound by data loading, not computation (see the caveat
-  below). The MLP run is additionally contaminated: the EDA notebook was executing on the
-  same machine during its epochs 5-7, which is why those epochs are visibly faster in
-  `history.json` (another process released the CPU). Timing must be re-measured under a
-  quiet machine and a loader-independent protocol before it goes in the report.
+  validation macro-F1 was still rising, so 0.8878 is a lower bound for this architecture,
+  not its ceiling. The linear model peaked at epoch 11 — mild overfitting absorbed by
+  the checkpoint rule.
+- **No speed claim can be made from this table.** With `num_workers=0` the pipeline is
+  bound by data loading, not computation. Timing must be re-measured under a
+  loader-independent protocol before it goes in the M2 report.
 
 
 
@@ -203,7 +198,7 @@ timing method that excludes data loading.
 ## Deliverables
 
 - Source code: this directory
-- AI Usage Disclosure: [AI_USAGE.md](AI_USAGE.md) - **incomplete, see the TODO fields**
-- Assignment 1 page: `index.html` (to be written)
-- Report, slides, YouTube video: to be produced
+- AI Usage Disclosure: [AI_USAGE.md](AI_USAGE.md)
+- Assignment 1 page: [index.html](index.html)
+- Report, slides, YouTube video: to be produced for M2 Final
 - Checkpoints: `outputs/<run_name>/best.pt`, reproducible with the commands above

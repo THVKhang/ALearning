@@ -1,65 +1,176 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Assignment 1 – CO3133 | Nhóm CR7</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 1 &ndash; CO3133 | Group CR7</title>
   <style>
-    body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    h1, h2 { color: #003366; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    a { color: #0057b7; }
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 860px;
+      margin: 40px auto;
+      padding: 0 24px;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    h1 { font-size: 1.5em; color: #002060; margin-bottom: 4px; }
+    h2 { font-size: 1.12em; color: #003399; border-bottom: 1px solid #ccd6f6; padding-bottom: 3px; margin-top: 30px; }
+    h3 { font-size: 0.98em; color: #333; margin-bottom: 4px; }
+    .meta { color: #444; margin: 2px 0; font-size: 0.95em; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.92em; }
+    th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+    th { background: #eef1fb; font-weight: 600; }
+    tr:nth-child(even) td { background: #f8f9ff; }
+    code { font-family: Consolas, monospace; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.88em; }
+    a { color: #0044cc; }
+    .note { background: #fffbe6; border-left: 3px solid #e6a817; padding: 7px 12px; margin: 12px 0; font-size: 0.91em; }
+    .back { font-size: 0.88em; margin-bottom: 18px; }
+    ul { margin: 6px 0 8px 20px; }
+    li { margin-bottom: 3px; }
+    .status-done { color: #1a7a1a; font-weight: 600; }
   </style>
 </head>
 <body>
-  <p><a href="../index.html">← Back to Landing Page</a></p>
 
-  <h1>Assignment 1 – [Assignment Title]</h1>
-  <p><strong>Course:</strong> Deep Learning and Its Applications (CO3133) | <strong>Semester:</strong> 261</p>
-  <p><strong>Instructor:</strong> Lê Thành Sách</p>
+  <p class="back"><a href="../index.html">&larr; Back to Course Landing Page</a></p>
 
+  <h1>Assignment 1 &ndash; Foundations of Deep Learning Pipelines and Architectures</h1>
+  <p class="meta"><em>From Linear Models to Modern Sequence Models: A Comparative Study for Image Classification</em></p>
+  <p class="meta"><strong>Course:</strong> CO3133 Deep Learning and Its Applications &nbsp;&middot;&nbsp; <strong>Semester:</strong> 261</p>
+  <p class="meta"><strong>Instructor:</strong> L&ecirc; Th&agrave;nh S&aacute;ch &nbsp;&middot;&nbsp; <strong>Group:</strong> CR7</p>
+
+  <!-- Members -->
   <h2>Group Members</h2>
   <table>
-    <tr><th>Name</th><th>Student ID</th><th>Role</th></tr>
-    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td></td></tr>
-    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td></td></tr>
-    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td></td></tr>
+    <tr><th>Name</th><th>Student ID</th></tr>
+    <tr><td>Tr&#7847;n Ho&agrave;ng V&#7929; Khang</td><td>2352502</td></tr>
+    <tr><td>&#272;&#7895; &#272;&agrave;ng Khoa</td><td>2352554</td></tr>
+    <tr><td>D&#432;&#417;ng &#272;&agrave;ng Khoa</td><td>2352551</td></tr>
   </table>
 
+  <!-- Milestone -->
+  <h2>Milestone Status</h2>
+  <table>
+    <tr><th>Milestone</th><th>Due</th><th>Minimum Required</th><th>State</th></tr>
+    <tr>
+      <td>M1 Draft (25%)</td>
+      <td>23 Sep 2026</td>
+      <td>EDA, Dataset/DataLoader, train/val loop, Linear + MLP runnable</td>
+      <td class="status-done">Complete &#10003;</td>
+    </tr>
+    <tr>
+      <td>M2 Final (75%)</td>
+      <td>21 Oct 2026</td>
+      <td>All five models, full comparison, report, slides, video, checkpoints</td>
+      <td>Not started</td>
+    </tr>
+  </table>
+
+  <!-- 1. Problem -->
   <h2>1. Problem Statement</h2>
-  <p><!-- TODO --></p>
+  <p>
+    The goal is to compare neural network architectures (Linear, MLP, CNN, LSTM/GRU, Transformer)
+    on Fashion-MNIST classification and understand how each architectural choice affects performance.
+    Some classes like Trouser or Bag are easy to separate by shape alone, while Shirt/Pullover/Coat/T-shirt
+    share similar silhouettes and need the model to learn texture features &mdash; making this a useful
+    benchmark for comparing model capacity.
+  </p>
 
-  <h2>2. Dataset Description and EDA</h2>
-  <p><!-- TODO --></p>
+  <!-- 2. Dataset & EDA -->
+  <h2>2. Dataset and EDA</h2>
+  <p>
+    Dataset: <strong>Fashion-MNIST</strong> (Xiao et al., 2017) &mdash; 70,000 grayscale 28&times;28 images, 10 classes.
+    Full EDA: <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/notebooks/eda.ipynb" target="_blank"><code>notebooks/eda.ipynb</code></a> (executed, outputs saved).
+  </p>
+  <table>
+    <tr><th>Item</th><th>Value</th></tr>
+    <tr><td>Input shape</td><td>1 &times; 28 &times; 28 &nbsp;(784 features when flattened)</td></tr>
+    <tr><td>Classes</td><td>10 &mdash; T-shirt/top, Trouser, Pullover, Dress, Coat, Sandal, Shirt, Sneaker, Bag, Ankle boot</td></tr>
+    <tr><td>Class balance</td><td>Perfectly balanced; imbalance ratio = 1.0000, normalised entropy = 1.0000</td></tr>
+    <tr><td>Data split</td><td>54,000 train / 6,000 val (stratified, seed 42) / 10,000 official test</td></tr>
+    <tr><td>Preprocessing</td><td><code>ToTensor</code> + <code>Normalize(mean=0.2860, std=0.3530)</code>; no augmentation</td></tr>
+    <tr><td>Trivial baseline</td><td>10% (uniform random guess)</td></tr>
+  </table>
+  <p>Dataset is perfectly balanced, so accuracy ≈ macro-F1 throughout.</p>
 
-  <h2>3. Methodology</h2>
-  <p><!-- TODO --></p>
+  <!-- 3. What was built for M1 -->
+  <h2>3. What We Did for M1</h2>
+  <ul>
+    <li><strong>Data pipeline</strong> (<code>src/data/dataset.py</code>) &mdash; stratified 90/10 split, seed 42, normalisation, DataLoaders.</li>
+    <li><strong>Training engine</strong> (<code>src/engine/trainer.py</code>) &mdash; train/val loop, early stopping (patience 5), checkpoint on best val macro-F1.</li>
+    <li><strong>Linear classifier</strong> (<code>src/models/linear.py</code>) &mdash; 784 &rarr; 10, 7,850 params.</li>
+    <li><strong>MLP</strong> (<code>src/models/mlp.py</code>) &mdash; 784 &rarr; 256 &rarr; 10, ReLU, dropout 0.2, 203,530 params.</li>
+    <li><strong>Utils</strong>: <code>metrics.py</code> (accuracy, macro-F1), <code>plots.py</code> (curves, confusion matrix, sample grids), <code>seed.py</code>.</li>
+    <li><strong>Scripts</strong>: <code>train.py</code> and <code>eval.py</code>.</li>
+  </ul>
+  <p class="note">CNN, LSTM/GRU, Transformer &mdash; in repo but empty, part of M2 Final.</p>
 
-  <h2>4. Experimental Setup</h2>
-  <p><!-- TODO --></p>
+  <!-- 4. Setup -->
+  <h2>4. Training Setup</h2>
+  <table>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Optimizer</td><td>Adam, lr = 0.001, weight decay = 0, batch size = 128</td></tr>
+    <tr><td>Max epochs / early stop</td><td>15 epochs, stop after 5 with no improvement</td></tr>
+    <tr><td>Checkpoint metric</td><td>Best validation macro-F1</td></tr>
+    <tr><td>Seed</td><td>42 (<code>random</code>, <code>numpy</code>, <code>torch</code>, <code>torch.cuda</code>)</td></tr>
+    <tr><td>Hardware</td><td>NVIDIA RTX 3050 Laptop (4 GB), Windows 11</td></tr>
+    <tr><td>Software</td><td>Python 3.13.14, PyTorch 2.14.0+cu130, torchvision 0.29.0+cu130, NumPy 2.5.3, scikit-learn 1.9.1</td></tr>
+  </table>
+  <p>Test split is never seen during training; evaluated once per model after training.</p>
 
-  <h2>5. Results</h2>
-  <p><!-- TODO --></p>
+  <!-- 5. Results -->
+  <h2>5. Results (M1 Draft, Fashion-MNIST, seed 42)</h2>
+  <p>Test split is the official 10,000-image held-out set:</p>
+  <table>
+    <tr>
+      <th>Model</th><th>Params</th><th>Test Acc.</th><th>Test Macro-F1</th>
+      <th>Best Epoch</th><th>Train Time</th>
+    </tr>
+    <tr>
+      <td>Linear / Softmax</td>
+      <td>7,850</td><td>0.8440</td><td>0.8441</td>
+      <td>11 / 15</td><td>87 s</td>
+    </tr>
+    <tr>
+      <td>MLP (784&rarr;256&rarr;10, dropout 0.2)</td>
+      <td>203,530</td><td>0.8884</td><td>0.8878</td>
+      <td>15 / 15</td><td>91 s</td>
+    </tr>
+  </table>
 
-  <h2>6. Comparison and Discussion</h2>
-  <p><!-- TODO --></p>
+  <h3>Per-class F1</h3>
+  <table>
+    <tr><th>Class</th><th>Linear</th><th>MLP</th><th>Gain</th></tr>
+    <tr><td>Shirt</td><td>0.5999</td><td>0.7035</td><td>+0.104</td></tr>
+    <tr><td>Pullover</td><td>0.7323</td><td>0.8098</td><td>+0.077</td></tr>
+    <tr><td>Coat</td><td>0.7442</td><td>0.8177</td><td>+0.074</td></tr>
+    <tr><td>T-shirt/top</td><td>0.8073</td><td>0.8357</td><td>+0.028</td></tr>
+    <tr><td>Dress</td><td>0.8492</td><td>0.8901</td><td>+0.041</td></tr>
+    <tr><td>Sneaker</td><td>0.9238</td><td>0.9443</td><td>+0.021</td></tr>
+    <tr><td>Sandal</td><td>0.9314</td><td>0.9624</td><td>+0.031</td></tr>
+    <tr><td>Bag</td><td>0.9355</td><td>0.9744</td><td>+0.039</td></tr>
+    <tr><td>Ankle boot</td><td>0.9499</td><td>0.9557</td><td>+0.006</td></tr>
+    <tr><td>Trouser</td><td>0.9672</td><td>0.9840</td><td>+0.017</td></tr>
+  </table>
 
-  <h2>7. Error Analysis</h2>
-  <p><!-- TODO --></p>
+  <p>
+    MLP gains +4.4 macro-F1 points vs. linear, using 26&times; more parameters.
+    Most of the gain is on the three hardest upper-body classes (Shirt, Pullover, Coat: avg. +0.085),
+    vs. only +0.023 on the other seven &mdash; matches the EDA prediction.
+    MLP stopped at epoch 15/15 with F1 still rising, so 0.8878 is a lower bound.
+  </p>
+  <p class="note">Train time is unreliable for speed comparison (<code>num_workers=0</code>, bottleneck is the data loader).</p>
 
-  <h2>8. Limitations and Conclusion</h2>
-  <p><!-- TODO --></p>
-
+  <!-- Links -->
   <h2>Links</h2>
   <ul>
-    <li><strong>Source code:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment1" target="_blank">GitHub – assignment1</a></li>
-    <li><strong>Checkpoint(s):</strong> <!-- TODO: link or reproduction instructions --></li>
-    <li><strong>Report / Slides:</strong> <!-- TODO --></li>
-    <li><strong>YouTube presentation:</strong> <!-- TODO --></li>
+    <li><strong>Source code:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment1" target="_blank">GitHub &ndash; assignment1/</a></li>
+    <li><strong>EDA notebook:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/notebooks/eda.ipynb" target="_blank">notebooks/eda.ipynb</a> (executed with outputs)</li>
+    <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
+    <li><strong>Report, slides, video, checkpoints:</strong> to be added at M2 Final (due 21 Oct 2026)</li>
   </ul>
 
-  <h2>AI Usage Disclosure</h2>
-  <p>See <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/AI_USAGE.md" target="_blank">AI_USAGE.md</a> for details.</p>
 </body>
 </html>
