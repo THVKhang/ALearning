@@ -23,6 +23,7 @@ from src.data.dataset import get_dataloaders
 from src.engine.trainer import fit
 from src.models.linear import LinearClassifier
 from src.models.mlp import MLP
+from src.models.cnn import CNN
 from src.utils.metrics import count_parameters
 from src.utils.plots import plot_curves
 from src.utils.seed import set_seed
@@ -31,7 +32,7 @@ from src.utils.seed import set_seed
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
-    parser.add_argument("--model", choices=["linear", "mlp"])
+    parser.add_argument("--model", choices=["linear", "mlp","cnn"])
     parser.add_argument("--dataset", choices=["fashion_mnist", "mnist"])
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--batch-size", type=int)
@@ -73,6 +74,10 @@ def build_model(model_config, input_shape, num_classes):
         return LinearClassifier(input_shape, num_classes)
     if name == "mlp":
         return MLP(input_shape, tuple(model_config["hidden_sizes"]), num_classes,
+                   model_config.get("dropout", 0.0))
+    if name == "cnn":
+        return CNN(input_shape, tuple(model_config["channels"]),
+                   model_config["classifier_hidden"], num_classes,
                    model_config.get("dropout", 0.0))
     raise ValueError(f"unknown model: {name}")
 
