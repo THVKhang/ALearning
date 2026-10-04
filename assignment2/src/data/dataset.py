@@ -10,6 +10,8 @@ IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 DEPTH_SUFFIX = "_depth.npy"
 MASK_SUFFIX = "_depth_mask.npy"
+# from train EDA: above this is < 0.01% of valid pixels, treated as noise
+MAX_DEPTH = {"indoor": 50.0, "outdoor": 200.0}
 
 
 def list_samples(split_dir):
@@ -29,7 +31,7 @@ def domain_of(sample_id):
 class DiodeDepthDataset(Dataset):
     """Returns rgb (3,H,W), depth (1,H,W) in metres, mask (1,H,W) with 0/1."""
 
-    def __init__(self, root, split="train", normalize=True, hflip=False):
+    def __init__(self, root, split="train", normalize=True, hflip=False, max_depth=MAX_DEPTH):
         if split not in SPLITS:
             raise ValueError(f"split must be one of {SPLITS}")
         self.dir = os.path.join(root, split)
@@ -37,6 +39,7 @@ class DiodeDepthDataset(Dataset):
         self.ids = list_samples(self.dir)
         self.normalize = normalize
         self.hflip = hflip
+        self.max_depth = max_depth
 
     def __len__(self):
         return len(self.ids)
@@ -53,8 +56,10 @@ class DiodeDepthDataset(Dataset):
         if mask.ndim == 3:
             mask = mask[..., 0]
 
-        # bad pixels (mask 0, nan, depth <= 0) -> depth 0
+        # bad pixels (mask 0, nan, depth <= 0, too far) -> depth 0
         valid = (mask > 0) & np.isfinite(depth) & (depth > 0)
+        if self.max_depth:
+            valid &= depth <= self.max_depth[domain_of(sid)]
         depth = np.where(valid, depth, 0.0).astype(np.float32)
 
         rgb = torch.from_numpy(rgb).permute(2, 0, 1).contiguous()
