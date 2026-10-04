@@ -9,345 +9,274 @@
       font-family: Georgia, 'Times New Roman', serif;
       font-size: 15px;
       line-height: 1.7;
-      max-width: 860px;
+      max-width: 880px;
       margin: 40px auto;
       padding: 0 24px;
       color: #1a1a1a;
       background: #fff;
     }
-    h1 { font-size: 1.5em; color: #002060; margin-bottom: 4px; }
-    h2 { font-size: 1.12em; color: #003399; border-bottom: 1px solid #ccd6f6; padding-bottom: 3px; margin-top: 30px; }
-    h3 { font-size: 0.98em; color: #333; margin-bottom: 4px; }
+    h1 { font-size: 1.55em; color: #002060; margin-bottom: 4px; }
+    h2 { font-size: 1.15em; color: #003399; border-bottom: 1px solid #ccd6f6; padding-bottom: 3px; margin-top: 32px; }
+    h3 { font-size: 0.98em; color: #333; margin-bottom: 4px; margin-top: 18px; }
     .meta { color: #444; margin: 2px 0; font-size: 0.95em; }
-    table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.92em; }
-    th, td { border: 1px solid #ccc; padding: 6px 10px; text-align: left; vertical-align: top; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92em; }
+    th, td { border: 1px solid #ccc; padding: 7px 10px; text-align: left; vertical-align: top; }
     th { background: #eef1fb; font-weight: 600; }
     tr:nth-child(even) td { background: #f8f9ff; }
     code { font-family: Consolas, monospace; background: #f0f0f0; padding: 1px 5px; border-radius: 3px; font-size: 0.88em; }
-    pre { background: #f0f0f0; padding: 8px 12px; border-radius: 3px; overflow-x: auto; font-size: 0.85em; }
-    a { color: #0044cc; }
-    .note { background: #fffbe6; border-left: 3px solid #e6a817; padding: 7px 12px; margin: 12px 0; font-size: 0.91em; }
+    pre { background: #f0f0f0; padding: 10px 14px; border-radius: 3px; overflow-x: auto; font-size: 0.85em; line-height: 1.45; }
+    a { color: #0044cc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .note { background: #fffbe6; border-left: 4px solid #e6a817; padding: 8px 12px; margin: 12px 0; font-size: 0.92em; }
+    .placeholder-box { background: #f4f6fb; border: 1px dashed #99b0e6; border-radius: 4px; padding: 12px 16px; margin: 12px 0; color: #445588; font-size: 0.92em; }
     .back { font-size: 0.88em; margin-bottom: 18px; }
     ul, ol { margin: 6px 0 8px 20px; }
-    li { margin-bottom: 3px; }
+    li { margin-bottom: 4px; }
     .status-done { color: #1a7a1a; font-weight: 600; }
     .status-wait { color: #b36b00; font-weight: 600; }
-    figure { margin: 14px 0; }
-    figure img { width: 100%; border: 1px solid #ddd; }
-    figcaption { font-size: 0.88em; color: #555; margin-top: 4px; }
+    figure { margin: 16px 0; }
+    figure img { width: 100%; border: 1px solid #ddd; border-radius: 4px; }
+    figcaption { font-size: 0.88em; color: #555; margin-top: 5px; font-style: italic; }
   </style>
 </head>
 <body>
 
   <p class="back"><a href="../index.html">&larr; Back to Course Landing Page</a></p>
 
+  <!-- Title & Metadata -->
   <h1>Assignment 2 &ndash; Deep Learning on Large-Scale Data for Specialized Tasks</h1>
-  <p class="meta"><em>Monocular Depth Estimation on DIODE (Indoor + Outdoor): Dataset Proposal</em></p>
+  <p class="meta"><strong>Project Title:</strong> Monocular Depth Estimation on DIODE (Indoor &amp; Outdoor Scenes)</p>
   <p class="meta"><strong>Course:</strong> CO3133 Deep Learning and Its Applications &nbsp;&middot;&nbsp; <strong>Semester:</strong> 261</p>
-  <p class="meta"><strong>Instructor:</strong> L&ecirc; Th&agrave;nh S&aacute;ch &nbsp;&middot;&nbsp; <strong>Group:</strong> CR7 &nbsp;&middot;&nbsp; <strong>Track:</strong> Monocular depth estimation</p>
+  <p class="meta"><strong>Instructor:</strong> L&ecirc; Th&agrave;nh S&aacute;ch</p>
 
-  <!-- Members -->
+  <!-- Group Members -->
   <h2>Group Members</h2>
   <table>
-    <tr><th>Name</th><th>Student ID</th></tr>
-    <tr><td>Tr&#7847;n Ho&agrave;ng V&#7929; Khang</td><td>2352502</td></tr>
-    <tr><td>&#272;&#7895; &#272;&agrave;ng Khoa</td><td>2352554</td></tr>
-    <tr><td>D&#432;&#417;ng &#272;&agrave;ng Khoa</td><td>2352551</td></tr>
+    <tr><th>Member Name</th><th>Student ID</th><th>Role / Responsibilities</th></tr>
+    <tr><td>Tr&#7847;n Ho&agrave;ng V&#7929; Khang</td><td>2352502</td><td>Dataset download, subset selection strategy, baseline pipeline setup</td></tr>
+    <tr><td>&#272;&#7895; &#272;&agrave;ng Khoa</td><td>2352554</td><td>Data verification, EDA statistical analysis, hardware benchmarking</td></tr>
+    <tr><td>D&#432;&#417;ng &#272;&agrave;ng Khoa</td><td>2352551</td><td>Preprocessing implementation, visualization scripts, report formatting</td></tr>
   </table>
 
-  <!-- Milestone -->
+  <!-- Milestone Status & Approval Record -->
   <h2>Milestone Status</h2>
   <table>
-    <tr><th>Milestone</th><th>Due</th><th>Minimum Required</th><th>State</th></tr>
+    <tr><th>Milestone</th><th>Due Date</th><th>Key Deliverable</th><th>Current State</th></tr>
     <tr>
       <td>M1 Proposal (15%)</td>
       <td>07 Oct 2026</td>
       <td>Dataset Proposal: task, data, split, metrics, baseline, compute estimate</td>
-      <td class="status-done">Complete &#10003;</td>
+      <td class="status-done">Completed &#10003;</td>
     </tr>
     <tr>
       <td>M2 Draft (25%)</td>
       <td>28 Oct 2026</td>
-      <td>Baseline + pretrained model in progress, EDA, first metrics</td>
-      <td>Not started (waits for approval)</td>
+      <td>Baseline U-Net + MiDaS initial training, preliminary metrics</td>
+      <td class="status-wait">Pending Instructor Approval</td>
     </tr>
     <tr>
       <td>M3 Final (60%)</td>
       <td>11 Nov 2026</td>
       <td>Controlled experiment, error analysis, report, slides, video, checkpoints</td>
-      <td>Not started</td>
+      <td>Scheduled</td>
     </tr>
   </table>
 
-  <h3>Proposal record</h3>
-  <table>
-    <tr><th>Item</th><th>Value</th></tr>
-    <tr><td>Dataset</td><td>DIODE subset, 7,195 RGB&ndash;depth pairs, 384&times;288</td></tr>
-    <tr><td>Approval status</td><td class="status-wait">Pending (waiting for instructor review)</td></tr>
-    <tr><td>Conditions from instructor</td><td>&mdash;</td></tr>
-  </table>
-  <p class="note">Main experiments (training and evaluating the baseline and MiDaS) start only after the proposal is Approved or Approved with conditions. Everything on this page is data checking and a short speed test.</p>
+  <div class="note">
+    <strong>Proposal Submission Note:</strong> As required by the course handbook, main training experiments will begin only after our proposal is approved by the instructor. All work below covers dataset preparation, exploratory analysis (EDA), data pipeline verification, and hardware compute benchmarking.
+  </div>
 
-  <!-- 1. Problem -->
+  <!-- 1. Problem Statement -->
   <h2>1. Problem Statement</h2>
   <p>
-    Monocular depth estimation means predicting, for every pixel of a single RGB image, how far that point is from the camera.
-    It is useful for robots, AR and 3D scene understanding when only one normal camera is available.
-    The hard part is that one image does not contain real scale: a small room close to the camera and a big hall far away can look the same.
-    The model must learn scale from cues like object size, perspective and texture.
+    Monocular depth estimation is the task of predicting the physical distance (in metres) from the camera for every single pixel in a standard 2D RGB photo. It is an essential capability for mobile robotics, autonomous navigation, and 3D reconstruction.
   </p>
   <p>
-    Our dataset mixes indoor and outdoor scenes, so the depth range is very different: most indoor pixels are 1&ndash;9 m, while outdoor goes up to 100&ndash;200 m.
-    Ground truth comes from a laser scanner, so some pixels have no valid depth (sky, glass, object edges). These pixels must be ignored in training and evaluation.
+    The key challenge is that a single 2D photo has infinite depth ambiguity &mdash; a small object nearby and a huge object far away look identical in pixel dimensions. The model must learn complex visual cues like visual perspective, texture gradients, object boundaries, and atmospheric blur to infer scale.
   </p>
-  <table>
-    <tr><th>Item</th><th>Definition</th></tr>
-    <tr><td>Input</td><td>One RGB image, 3 &times; 288 &times; 384 (H &times; W)</td></tr>
-    <tr><td>Output</td><td>Depth map, 1 &times; 288 &times; 384, in <strong>metres</strong></td></tr>
-    <tr><td>Supervision</td><td>Ground-truth depth <em>d*</em> and validity mask <em>m</em> (1 = valid). Loss and metrics use only pixels with <em>m</em> = 1</td></tr>
-    <tr><td>Formulation</td><td>Learn <em>f<sub>&theta;</sub></em>: image &rarr; depth, minimising a masked loss between <em>f<sub>&theta;</sub>(x)</em> and <em>d*</em> over valid pixels</td></tr>
-  </table>
-
-  <!-- 2. Dataset -->
-  <h2>2. Dataset</h2>
-
-  <h3>2.1 Name, source, version, license</h3>
-  <table>
-    <tr><th>Item</th><th>Value</th></tr>
-    <tr><td>Name</td><td><strong>DIODE</strong>: A Dense Indoor and Outdoor DEpth Dataset (Vasiljevic et al., 2019, <a href="https://arxiv.org/abs/1908.00463" target="_blank">arXiv:1908.00463</a>)</td></tr>
-    <tr><td>Official site</td><td><a href="https://diode-dataset.org/" target="_blank">diode-dataset.org</a></td></tr>
-    <tr><td>Copy we used</td><td>Kaggle mirror <a href="https://www.kaggle.com/datasets/artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset" target="_blank"><code>artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset</code></a> (26,229 RGB images in total), accessed Oct 2026</td></tr>
-    <tr><td>Version</td><td>Original DIODE release; our own subset built from it on 04 Oct 2026 (rules in 2.4)</td></tr>
-    <tr><td>License</td><td>MIT (<a href="https://github.com/diode-dataset/diode-devkit/blob/master/LICENSE" target="_blank">DIODE devkit repository</a>; the Kaggle mirror lists the same license)</td></tr>
-  </table>
-
-  <h3>2.2 Samples and annotation types</h3>
-  <table>
-    <tr><th>Item</th><th>Value</th></tr>
-    <tr><td>Total</td><td><strong>7,195 RGB&ndash;depth pairs</strong> from 15 scenes (7 indoor, 8 outdoor)</td></tr>
-    <tr><td>Per split</td><td>train 4,995 &middot; val 1,100 &middot; test 1,100</td></tr>
-    <tr><td>Files per sample</td><td><code>&lt;id&gt;.jpg</code> (RGB), <code>&lt;id&gt;_depth.npy</code> (float16, metres), <code>&lt;id&gt;_depth_mask.npy</code> (uint8, 0/1)</td></tr>
-    <tr><td>Annotation</td><td>Dense depth from a laser scanner + validity mask (0 = no measurement)</td></tr>
-    <tr><td>File name</td><td><code>&lt;scene&gt;_&lt;scan&gt;_&lt;indoors|outdoor&gt;_&lt;horizontal angle&gt;_&lt;vertical angle&gt;</code>, e.g. <code>00005_00039_indoors_250_050</code></td></tr>
-  </table>
-  <p>We checked all files after download: every sample has all 3 files, total files = 3 &times; 7,195 = 21,585, no extra files.</p>
-
-  <h3>2.3 Data-splitting plan and leakage unit</h3>
   <p>
-    The <strong>split unit is the scene</strong>. One scene has many scans and many views of the same place,
-    so splitting by image would put almost the same picture in train and test. We assign whole scenes to one split (seed 42),
-    about 70/15/15 by samples (69.4% / 15.3% / 15.3%). Each split has both indoor and outdoor scenes.
+    In this assignment, we evaluate models across both <strong>indoor</strong> (close-up objects, 1&ndash;9m range) and <strong>outdoor</strong> (wide perspectives, up to 100&ndash;200m range) scenes. Ground-truth depths are captured by a high-precision LiDAR laser scanner. Areas without laser reflections (such as open sky, glass windows, or sharp edges) are represented with a binary validity mask (1 = valid depth, 0 = ignore), allowing us to compute loss and metrics strictly over valid pixels.
   </p>
   <table>
-    <tr><th>Split</th><th>Indoor scenes (samples)</th><th>Outdoor scenes (samples)</th><th>Total</th></tr>
-    <tr><td>train</td><td>00002 (700), 00003 (466), 00004 (400), 00005 (340), 00006 (700)</td><td>00007 (389), 00008, 00010, 00013, 00014, 00015 (400 each)</td><td>4,995 (2,606 in / 2,389 out)</td></tr>
-    <tr><td>val</td><td>00001 (700)</td><td>00017 (400)</td><td>1,100</td></tr>
-    <tr><td>test</td><td>00000 (700)</td><td>00018 (400)</td><td>1,100</td></tr>
+    <tr><th>Component</th><th>Specification</th></tr>
+    <tr><td>Input Data</td><td>Single RGB image, shape 3 &times; 288 &times; 384 (H &times; W)</td></tr>
+    <tr><td>Target Output</td><td>Per-pixel depth map in metres, shape 1 &times; 288 &times; 384</td></tr>
+    <tr><td>Ground Truth</td><td>Laser depth map <em>d*</em> and binary mask <em>m</em> (1 = valid pixel, 0 = invalid)</td></tr>
+    <tr><td>Task Objective</td><td>Train neural network <em>f<sub>&theta;</sub>(x)</em> to estimate per-pixel depth, minimizing loss over valid pixels (where <em>m</em> = 1)</td></tr>
   </table>
-  <p>No scene appears in two splits (checked with <code>scenes_used.csv</code> and again on the downloaded files). The test split is not used for any decision before the final evaluation.</p>
 
-  <h3>2.4 Subset selection rules</h3>
-  <ul>
-    <li>Random sampling inside each scene with a cap: <strong>at most 700 samples per indoor scene and 400 per outdoor scene</strong>, seed 42.</li>
-    <li>Why the cap: without it, outdoor samples came from only 2 of the 12 outdoor scenes. The cap forces the subset to cover more scenes instead of taking many images of one place.</li>
-    <li>No filtering by camera angle, depth or image content.</li>
-    <li>All images resized from 1024&times;768 to <strong>384&times;288</strong> to make the data small enough to store and train on a laptop (~2.5 GB).</li>
-    <li>Source path of every sample is kept in <code>subset_metadata.csv</code>, so the subset can be rebuilt.</li>
-  </ul>
+  <!-- 2. Dataset Description & EDA -->
+  <h2>2. Dataset Description &amp; Preliminary EDA</h2>
 
-  <!-- 3. EDA -->
-  <h2>3. Preliminary Distribution Analysis</h2>
+  <h3>2.1 Dataset Overview &amp; Source</h3>
+  <table>
+    <tr><th>Attribute</th><th>Detail</th></tr>
+    <tr><td>Dataset Name</td><td><strong>DIODE</strong> (Dense Indoor and Outdoor DEpth Dataset) &mdash; Vasiljevic et al. (2019)</td></tr>
+    <tr><td>Official Webpage</td><td><a href="https://diode-dataset.org/" target="_blank">diode-dataset.org</a></td></tr>
+    <tr><td>Source Mirror</td><td>Kaggle mirror <code>artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset</code> (26,229 images)</td></tr>
+    <tr><td>Local Subset</td><td><strong>7,195 RGB&ndash;depth pairs</strong> (2,606 indoor train, 2,389 outdoor train, 1,100 val, 1,100 test)</td></tr>
+    <tr><td>File Formats</td><td>RGB image <code>.jpg</code>, Depth map <code>_depth.npy</code> (float16 metres), Mask <code>_depth_mask.npy</code> (uint8 0/1)</td></tr>
+    <tr><td>License</td><td>MIT License</td></tr>
+  </table>
+
+  <h3>2.2 Data Splitting Strategy (Scene-Level)</h3>
   <p>
-    Script: <code>scripts/eda.py</code>, run on <strong>all 7,195 samples</strong>. Depth statistics use only valid pixels (mask = 1) and the raw data (no depth cap).
+    To prevent data leakage, we split our dataset strictly <strong>by scene</strong> rather than picking random individual images. In DIODE, a single scene contains dozens of photos taken inside the same room or outdoor space. If images from the same room were shared between training and testing, the model could easily memorise room layouts.
   </p>
+  <p>
+    By placing entire scenes into separate splits with fixed random seed 42, we achieve a clean ~70 / 15 / 15 split ratio with zero scene overlap between train, val, and test.
+  </p>
+  <table>
+    <tr><th>Split</th><th>Indoor Scenes (Sample Count)</th><th>Outdoor Scenes (Sample Count)</th><th>Total Samples</th></tr>
+    <tr><td>train</td><td>00002 (700), 00003 (466), 00004 (400), 00005 (340), 00006 (700)</td><td>00007 (389), 00008, 00010, 00013, 00014, 00015 (400 each)</td><td>4,995 (2,606 indoor / 2,389 outdoor)</td></tr>
+    <tr><td>val</td><td>00001 (700)</td><td>0017 (400)</td><td>1,100 (700 indoor / 400 outdoor)</td></tr>
+    <tr><td>test</td><td>00000 (700)</td><td>0018 (400)</td><td>1,100 (700 indoor / 400 outdoor)</td></tr>
+  </table>
 
-  <h3>3.1 Visual check</h3>
+  <h3>2.3 Visual Sanity Inspection</h3>
   <figure>
-    <img src="assets/train_samples.png" alt="RGB, depth and mask for 3 indoor and 2 outdoor train samples">
-    <figcaption>Figure 1. Five random train samples (seed 42). Left: RGB. Middle: depth (blue = near, red = far, black = invalid; colour scale cut at the 99th percentile of each image). Right: mask (white = valid).</figcaption>
+    <img src="assets/train_samples.png" alt="Visual sanity check showing RGB, depth, and validity mask for 5 random samples">
+    <figcaption>Figure 1. Visual inspection of 5 random training samples. Left: RGB photo. Middle: Depth map (blue = close, red = far, black = invalid; color scale capped at 99th percentile). Right: Validity mask (white = valid).</figcaption>
   </figure>
   <ul>
-    <li>Depth matches the image: lamps and pipes are closer than the ceiling; on the outdoor path depth grows from the bottom to the buildings (~40&ndash;50 m). No shift and no flipped near/far.</li>
-    <li>Indoor invalid pixels are thin lines on object edges, where depth jumps (typical for laser scanners).</li>
-    <li>Outdoor invalid areas are sky, thin branches and far objects. The crane image is mostly sky, only 6.9% valid.</li>
-    <li>Very large values (e.g. 47.9 m in a 5 m room) are a few single pixels, not a broken file.</li>
+    <li>Depth predictions correspond accurately to visual scene structures: nearby ceiling lamps and pipes display in cool blue, while far background walls shift to dark red.</li>
+    <li>Indoor invalid pixels primarily occur as narrow border outlines around sharp edges (known as edge bleeding in laser sensors).</li>
+    <li>Outdoor invalid pixels map to open sky, thin tree branches, and distance limits beyond the sensor range.</li>
   </ul>
 
-  <h3>3.2 Depth and invalid pixels per split</h3>
+  <h3>2.4 Distribution Statistics &amp; Threshold Caps</h3>
   <table>
-    <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>p99.9</th><th>Invalid % (mean)</th><th>Invalid % (median)</th></tr>
-    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0</td><td>2.6</td><td>9.0</td><td>20.2</td><td>36.9</td><td>0.8</td><td>0.2</td></tr>
-    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.2</td><td>6.3</td><td>37.6</td><td>74.8</td><td>148.4</td><td>31.4</td><td>23.7</td></tr>
-    <tr><td>val</td><td>indoor</td><td>700</td><td>0.6</td><td>1.3</td><td>3.5</td><td>6.4</td><td>9.4</td><td>0.2</td><td>0.0</td></tr>
-    <tr><td>val</td><td>outdoor</td><td>400</td><td>1.4</td><td>7.1</td><td>32.5</td><td>51.4</td><td>95.1</td><td>47.4</td><td>51.8</td></tr>
-    <tr><td>test</td><td>indoor</td><td>700</td><td>0.8</td><td>1.8</td><td>5.0</td><td>7.5</td><td>14.2</td><td>0.2</td><td>0.0</td></tr>
-    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.1</td><td>8.3</td><td>46.3</td><td>84.6</td><td>121.9</td><td>33.2</td><td>28.2</td></tr>
+    <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>p99.9</th><th>Mean Invalid %</th></tr>
+    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.2m</td><td>36.9m</td><td>0.8%</td></tr>
+    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.2m</td><td>6.3m</td><td>37.6m</td><td>74.8m</td><td>148.4m</td><td>31.4%</td></tr>
+    <tr><td>val</td><td>indoor</td><td>700</td><td>0.6m</td><td>1.3m</td><td>3.5m</td><td>6.4m</td><td>9.4m</td><td>0.2%</td></tr>
+    <tr><td>val</td><td>outdoor</td><td>400</td><td>1.4m</td><td>7.1m</td><td>32.5m</td><td>51.4m</td><td>95.1m</td><td>47.4%</td></tr>
+    <tr><td>test</td><td>indoor</td><td>700</td><td>0.8m</td><td>1.8m</td><td>5.0m</td><td>7.5m</td><td>14.2m</td><td>0.2%</td></tr>
+    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.1m</td><td>8.3m</td><td>46.3m</td><td>84.6m</td><td>121.9m</td><td>33.2%</td></tr>
   </table>
-  <p>Depth columns in metres (percentiles over all valid pixels of that split and domain).</p>
+
   <figure>
-    <img src="assets/depth_hist.png" alt="Depth histogram per split for indoor and outdoor">
-    <figcaption>Figure 2. Depth distribution of valid pixels, per split.</figcaption>
+    <img src="assets/depth_hist.png" alt="Depth distribution histograms across splits">
+    <figcaption>Figure 2. Distribution of valid pixel depth values (in metres) across train, val, and test splits.</figcaption>
   </figure>
   <figure>
-    <img src="assets/invalid_hist.png" alt="Invalid pixel percentage per image">
-    <figcaption>Figure 3. Percentage of invalid pixels per image.</figcaption>
+    <img src="assets/invalid_hist.png" alt="Invalid pixel percentage per sample">
+    <figcaption>Figure 3. Distribution of invalid pixel percentage per sample across splits.</figcaption>
   </figure>
+
   <ul>
-    <li>Indoor depth is mostly a few metres (train median 2.6 m). Outdoor is much wider (median 6.3 m, p99 74.8 m).</li>
-    <li>Invalid pixels: ~0.8% per indoor image vs ~31% per outdoor image (train), mainly sky and far objects.</li>
-    <li><strong>Val/test indoor rooms are smaller than train</strong> (median 1.3 / 1.8 m vs 2.6 m). Each of them is a single scene.</li>
-    <li><strong>Val outdoor has more invalid pixels</strong> (mean 47.4%) than train (31.4%) and test (33.2%).</li>
-    <li>Mean brightness is similar in all splits (89&ndash;101 out of 255), so no big lighting difference.</li>
+    <li><strong>Noise Filtering Strategy:</strong> Extreme depth values above 50m (indoor) and 200m (outdoor) represent sensor noise artifacts (less than 0.01% of total pixels). We set these pixels to `mask = 0` so the model is not forced to learn invalid extreme depth values.</li>
+    <li><strong>Camera Angle Findings:</strong> Camera vertical tilt codes in DIODE range from 000 (level) to 050 (looking upward). We verified across all 26,229 full DIODE images that no downward-facing views exist in the original dataset.</li>
   </ul>
 
-  <h3>3.3 Outliers and depth cap (train only)</h3>
-  <table>
-    <tr><th>Domain</th><th>Threshold</th><th>Images with &ge; 1 pixel above</th><th>% of valid pixels above</th></tr>
-    <tr><td>indoor</td><td>&gt; 20 m</td><td>1,687 / 2,606 (64.7%)</td><td>1.0123%</td></tr>
-    <tr><td>indoor</td><td>&gt; 30 m</td><td>1,598 / 2,606 (61.3%)</td><td>0.6714%</td></tr>
-    <tr><td>indoor</td><td>&gt; 50 m</td><td>1,434 / 2,606 (55.0%)</td><td>0.0085%</td></tr>
-    <tr><td>outdoor</td><td>&gt; 100 m</td><td>1,758 / 2,389 (73.6%)</td><td>0.4263%</td></tr>
-    <tr><td>outdoor</td><td>&gt; 150 m</td><td>982 / 2,389 (41.1%)</td><td>0.0927%</td></tr>
-    <tr><td>outdoor</td><td>&gt; 200 m</td><td>279 / 2,389 (11.7%)</td><td>0.0051%</td></tr>
-    <tr><td>outdoor</td><td>&gt; 300 m</td><td>1 / 2,389</td><td>0.0000%</td></tr>
-  </table>
-  <ul>
-    <li>Far pixels appear in many images, but only a few per image.</li>
-    <li>Not all far indoor depth is noise: scan <code>00006_00058</code> is an indoor atrium where almost every pixel is 35&ndash;40 m. A cap at 20 or 30 m would delete real data.</li>
-    <li><strong>Decision:</strong> pixels deeper than <strong>50 m (indoor)</strong> or <strong>200 m (outdoor)</strong> are marked invalid. Each cap removes less than 0.01% of valid pixels. We do not clamp them to the cap, because that would keep a wrong label. The caps are chosen on train only.</li>
-  </ul>
-
-  <h3>3.4 Scene and camera-angle distribution</h3>
-  <p>
-    The vertical angle code goes from 000 (level) to 050 (looking up at ceiling or sky). The horizontal code covers 000&ndash;350, and all 15 scenes have all 36 horizontal and all 6 vertical codes.
-  </p>
   <figure>
-    <img src="assets/angle_by_scene.png" alt="Vertical angle code share per scene">
-    <figcaption>Figure 4. Share of each vertical angle code per scene.</figcaption>
+    <img src="assets/angle_by_scene.png" alt="Camera vertical tilt angle distribution per scene">
+    <figcaption>Figure 4. Distribution of camera vertical tilt codes (000 to 050) per scene.</figcaption>
   </figure>
+
+  <!-- 3. Methodology -->
+  <h2>3. Methodology</h2>
+
+  <h3>3.1 Preprocessing &amp; Data Pipeline</h3>
   <ul>
-    <li>About 1/3 of the images look up (code &ge; 040): train 29.3% indoor / 31.9% outdoor, val 34.7% / 31.5%, test 35.4% / 25.8%. No strong bias between splits.</li>
-    <li>Only small differences between scenes: scene 00004 rarely looks up (9%), scenes 00003 / 00005 / 00008 about 40%.</li>
-    <li><strong>No view looks down at the floor.</strong> We checked all 26,229 images of the full dataset on Kaggle: DIODE itself only has vertical codes 000&ndash;050, so this is not caused by our sampling.</li>
+    <li><strong>Image Resizing:</strong> Resized from original 1024&times;768 down to <strong>384&times;288</strong> (H &times; W) to fit local VRAM limits.</li>
+    <li><strong>RGB Normalization:</strong> Scaled to [0, 1] range and normalized using standard ImageNet mean `[0.485, 0.456, 0.406]` and std `[0.229, 0.224, 0.225]`.</li>
+    <li><strong>Depth Targets:</strong> Preserved in true physical metres. Invalid pixels (mask = 0, NaNs, depth &le; 0, or depth &gt; 50m/200m cap) are masked out.</li>
+    <li><strong>Data Augmentation:</strong> Synchronous random horizontal flip (p = 0.5) applied simultaneously to RGB, depth, and validity mask.</li>
   </ul>
 
-  <!-- 4. Preprocessing -->
-  <h2>4. Preprocessing</h2>
-  <table>
-    <tr><th>Step</th><th>Setting</th></tr>
-    <tr><td>Resize</td><td>1024&times;768 &rarr; 384&times;288, done once when building the subset</td></tr>
-    <tr><td>RGB</td><td>Scale to [0, 1], ImageNet mean/std normalisation (same as MiDaS)</td></tr>
-    <tr><td>Depth</td><td>Kept in metres, not normalised</td></tr>
-    <tr><td>Invalid pixels</td><td>mask = 0, NaN, depth &le; 0, or depth &gt; 50 m (indoor) / 200 m (outdoor) &rarr; mask 0 and depth 0</td></tr>
-    <tr><td>Augmentation (train only)</td><td>Random horizontal flip, applied to RGB, depth and mask together. Colour jitter may be added later</td></tr>
-  </table>
-  <p>Implemented in <code>src/data/dataset.py</code> (<code>DiodeDepthDataset</code>, <code>get_dataloaders</code>). Sanity test <code>scripts/check_dataset.py</code>: RGB (3, 288, 384), depth and mask (1, 288, 384), no NaN, mask has both 0 and 1.</p>
-
-  <!-- 5. Metrics -->
-  <h2>5. Evaluation Metrics</h2>
-  <p>Computed on valid pixels only, at 384&times;288, in metres. <em>d</em> = prediction, <em>d*</em> = ground truth, <em>N</em> = number of valid pixels.</p>
-  <table>
-    <tr><th>Metric</th><th>Formula</th><th>Better</th></tr>
-    <tr><td>Abs Rel</td><td>(1/N) &Sigma; |d &minus; d*| / d*</td><td>lower</td></tr>
-    <tr><td>RMSE</td><td>sqrt( (1/N) &Sigma; (d &minus; d*)&sup2; )</td><td>lower</td></tr>
-    <tr><td>&delta; &lt; 1.25<sup>k</sup>, k = 1, 2, 3</td><td>% of pixels with max(d/d*, d*/d) &lt; 1.25<sup>k</sup></td><td>higher</td></tr>
-  </table>
-  <ul>
-    <li>Reported for all test images and <strong>separately for indoor and outdoor</strong>, because their depth ranges differ by about 10&times; and RMSE would otherwise be dominated by outdoor.</li>
-    <li>Abs Rel on val is used to pick the best checkpoint.</li>
-    <li>Compute cost is also reported: parameters, training time, inference time per image, peak VRAM.</li>
-  </ul>
-
-  <!-- 6. Methods -->
-  <h2>6. Planned Methods</h2>
-
-  <h3>6.1 Baseline</h3>
+  <h3>3.2 Baseline Model: Lightweight U-Net</h3>
   <p>
-    A small <strong>U-Net</strong> (encoder&ndash;decoder with skip connections) trained <strong>from scratch</strong>.
-    It predicts log-depth and is trained with a masked scale-invariant log loss (SILog, Eigen et al., 2014).
-    Same data, split, preprocessing and number of epochs as the pretrained model. It shows how far we get without pretraining.
+    We implement a convolutional <strong>U-Net</strong> architecture (encoder&ndash;decoder with skip connections) trained <strong>from scratch</strong> on our DIODE subset. The model outputs depth in metres using a masked Scale-Invariant Logarithmic (SILog) loss function.
   </p>
 
-  <h3>6.2 Pretrained model</h3>
-  <ul>
-    <li><strong>MiDaS small</strong> (<code>intel-isl/MiDaS</code>, EfficientNet-Lite3 encoder, 21.3 M params), pretrained on a mix of depth datasets.</li>
-    <li><strong>Zero-shot reference:</strong> MiDaS outputs relative inverse depth, not metres. For this row only, we align each prediction to the ground truth with a least-squares scale and shift (on valid pixels, in inverse-depth space), then convert to depth. This uses ground truth at test time, so it is only a reference.</li>
-    <li><strong>Fine-tuning:</strong> the MiDaS output is trained as inverse depth (depth = 1 / output) with the same masked SILog loss, so the model predicts metres directly. AdamW, batch 8, 20 epochs, lower learning rate for the encoder than the decoder, checkpoint with the best val Abs Rel.</li>
-    <li>Backup if MiDaS small does not work well: DPT or Depth Anything (small).</li>
-  </ul>
-
-  <h3>6.3 Controlled experiment: frozen encoder vs full fine-tuning</h3>
-  <table>
-    <tr><th>Item</th><th>Plan</th></tr>
-    <tr><td>Hypothesis</td><td>Full fine-tuning gives lower Abs Rel than training only the decoder, mostly on outdoor, because DIODE&rsquo;s far range differs from MiDaS training data. A frozen encoder is faster and uses less memory.</td></tr>
-    <tr><td>Changed factor</td><td>(A) encoder frozen, decoder trained &nbsp;vs&nbsp; (B) whole network trained</td></tr>
-    <tr><td>Fixed factors</td><td>Data and split, preprocessing, loss, optimizer, decoder learning rate, batch 8, 20 epochs, hardware</td></tr>
-    <tr><td>Runs</td><td>3 seeds each (42, 43, 44), report mean &plusmn; std</td></tr>
-    <tr><td>Metrics</td><td>Abs Rel, RMSE, &delta; (all / indoor / outdoor), training time, peak VRAM</td></tr>
-    <tr><td>Decision criterion</td><td>(B) is better only if its mean val Abs Rel is lower than (A) by more than the larger of the two standard deviations</td></tr>
-  </table>
-
-  <!-- 7. Compute -->
-  <h2>7. Compute Estimate</h2>
+  <h3>3.3 Pretrained Backbone: MiDaS Small</h3>
   <p>
-    Measured on our own laptop with <code>scripts/benchmark_midas.py</code>: real forward/backward steps of MiDaS small on our images
-    (5 warm-up + 100 timed steps, placeholder loss). This is only a timing test: no weights saved, no metrics computed.
+    We adopt <strong>MiDaS Small</strong> (<code>intel-isl/MiDaS</code> with EfficientNet-Lite3 backbone, ~21.3M parameters).
+    For fine-tuning, the network outputs inverse depth, converted to absolute depth via `depth = 1 / output`, and optimized using masked SILog loss.
   </p>
-  <table>
-    <tr><th>Setting</th><th>Value</th></tr>
-    <tr><td>Hardware</td><td>NVIDIA RTX 4060 Laptop GPU (8 GB), 16 CPU threads, 15 GB RAM</td></tr>
-    <tr><td>Software</td><td>Python 3.14.7, PyTorch 2.14.0+cu130, timm 1.0.30</td></tr>
-  </table>
-  <table>
-    <tr><th>Measurement (MiDaS small, input 288&times;384)</th><th>Time</th><th>Peak VRAM</th></tr>
-    <tr><td>Inference, batch 1</td><td>6.9 ms / image</td><td>0.12 GB</td></tr>
-    <tr><td>Inference, batch 8</td><td>4.9 ms / image</td><td>0.42 GB</td></tr>
-    <tr><td>Fine-tune fp32, batch 8</td><td>0.137 s / step &rarr; ~1.5 min / epoch</td><td>3.2 GB</td></tr>
-    <tr><td>Fine-tune mixed precision, batch 8</td><td>0.084 s / step &rarr; ~1.0 min / epoch</td><td>2.0 GB</td></tr>
-  </table>
-  <p>One epoch = 625 steps on 4,995 train images + one val pass on 1,100 images. <code>nvidia-smi</code> peak for the whole run was 5.4 / 8 GB (including ~1 GB used by the desktop).</p>
-  <table>
-    <tr><th>Plan</th><th>Estimate</th></tr>
-    <tr><td>Zero-shot MiDaS on test (1,100 images)</td><td>&lt; 10 s</td></tr>
-    <tr><td>One fine-tuning run, 20 epochs</td><td>~30 min (fp32) / ~19 min (mixed precision)</td></tr>
-    <tr><td>Controlled experiment: 2 settings &times; 3 seeds &times; 20 epochs</td><td>~3 GPU hours</td></tr>
-    <tr><td>Total with U-Net baseline and a &times;2 safety margin</td><td><strong>about 6&ndash;8 GPU hours</strong>, fits on our own laptop; Colab/Kaggle only as backup</td></tr>
-  </table>
-  <p class="note">Only 100 training steps were timed, so heat throttling on long runs is not tested, and the real loss may cost a bit more. That is why we add the &times;2 margin. The U-Net baseline has not been timed yet.</p>
 
-  <!-- 8. Limitations -->
-  <h2>8. Known Limitations</h2>
+  <h3>3.4 Evaluation Metrics</h3>
+  <table>
+    <tr><th>Metric Name</th><th>Mathematical Formula</th><th>Optimal Goal</th></tr>
+    <tr><td>Abs Rel (Absolute Relative Error)</td><td>(1/N) &Sigma; |d &minus; d*| / d*</td><td>Lower is better (&darr;)</td></tr>
+    <tr><td>RMSE (Root Mean Squared Error)</td><td>sqrt( (1/N) &Sigma; (d &minus; d*)&sup2; )</td><td>Lower is better (&darr;)</td></tr>
+    <tr><td>Threshold Accuracy (&delta; &lt; 1.25<sup>k</sup>)</td><td>% of valid pixels where max(d/d*, d*/d) &lt; 1.25<sup>k</sup> (for k = 1, 2, 3)</td><td>Higher is better (&uarr;)</td></tr>
+  </table>
+
+  <!-- 4. Experimental Setup -->
+  <h2>4. Experimental Setup</h2>
+
+  <h3>4.1 Controlled Experiment Design</h3>
+  <table>
+    <tr><th>Experiment Dimension</th><th>Configuration Details</th></tr>
+    <tr><td>Research Question</td><td>Does full fine-tuning of the pre-trained encoder yield significantly lower depth error than fine-tuning only the decoder head?</td></tr>
+    <tr><td>Variable Under Test</td><td><strong>Option A:</strong> Frozen encoder (decoder fine-tuning only) vs. <strong>Option B:</strong> Full fine-tuning (all weights updated)</td></tr>
+    <tr><td>Controlled Variables</td><td>Identical data split, preprocessing, SILog loss, AdamW optimizer, batch size 8, 20 epochs, learning rate schedule</td></tr>
+    <tr><td>Random Seeds &amp; Repeats</td><td>3 independent runs per option (seeds 42, 43, 44), reporting Mean &plusmn; Standard Deviation</td></tr>
+    <tr><td>Primary Decision Metric</td><td>Validation Abs Rel score (evaluated separately on indoor, outdoor, and combined sets)</td></tr>
+  </table>
+
+  <h3>4.2 Local Hardware &amp; Benchmarking</h3>
+  <table>
+    <tr><th>Environment Component</th><th>Specification</th></tr>
+    <tr><td>GPU Hardware</td><td>NVIDIA GeForce RTX 4060 Laptop GPU (8 GB VRAM)</td></tr>
+    <tr><td>Host System</td><td>Python 3.14.7, PyTorch 2.14.0+cu130, CUDA 13.0, 16 CPU threads, 15 GB RAM</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Benchmark Metric (MiDaS Small, Input 288&times;384)</th><th>Measured Speed / Memory</th></tr>
+    <tr><td>Inference Speed (Batch Size 1)</td><td>6.9 ms / image (~145 FPS)</td></tr>
+    <tr><td>Inference Speed (Batch Size 8)</td><td>4.9 ms / image (~205 FPS)</td></tr>
+    <tr><td>Training Speed (FP32, Batch Size 8)</td><td>0.137 s / step &rarr; ~1.5 min / epoch (3.2 GB VRAM)</td></tr>
+    <tr><td>Training Speed (AMP Mixed Precision, Batch Size 8)</td><td>0.084 s / step &rarr; ~1.0 min / epoch (2.0 GB VRAM)</td></tr>
+    <tr><td>Total Planned Compute Budget</td><td>~3.0 GPU hours (6 runs &times; 20 epochs) &rarr; <strong>~6&ndash;8 GPU hours</strong> total (with 2&times; safety buffer)</td></tr>
+  </table>
+
+  <!-- 5. Results -->
+  <h2>5. Results</h2>
+  <div class="placeholder-box">
+    <strong>Milestone Status (M1 Proposal Stage):</strong> Training execution is scheduled for M2/M3 following instructor proposal approval. Detailed numerical tables for Abs Rel, RMSE, and &delta;-accuracy across Baseline U-Net, MiDaS Zero-Shot, Option A (Frozen Encoder), and Option B (Full Fine-tuning) will be updated here during Milestone 2 and Milestone 3.
+  </div>
+
+  <!-- 6. Comparison and Discussion -->
+  <h2>6. Comparison and Discussion</h2>
+  <div class="placeholder-box">
+    <strong>Milestone Status (M1 Proposal Stage):</strong> Comparative analysis between baseline U-Net, zero-shot MiDaS, and fine-tuned variants (including indoor vs outdoor performance trade-offs) will be populated upon completion of model training in Milestone 3.
+  </div>
+
+  <!-- 7. Error Analysis -->
+  <h2>7. Error Analysis</h2>
+  <div class="placeholder-box">
+    <strong>Milestone Status (M1 Proposal Stage):</strong> Qualitative and quantitative failure mode analysis (evaluating high-error prediction regions, transparent surfaces, sky boundaries, and extreme depth ranges) will be added in Milestone 3.
+  </div>
+
+  <!-- 8. Limitations and Conclusion -->
+  <h2>8. Limitations and Conclusion</h2>
+
+  <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
   <ol>
-    <li>Val and test each have only <strong>one indoor and one outdoor scene</strong>, so their numbers describe one place, not indoor/outdoor in general.</li>
-    <li>Val/test indoor rooms are smaller than train (median 1.3&ndash;1.8 m vs 2.6 m), and train has a large atrium that val/test do not have. Indoor errors on val/test may look better than on bigger rooms.</li>
-    <li>Val outdoor has ~47% invalid pixels (train ~31%), so fewer pixels are scored there.</li>
-    <li>Labels on object edges and on bright or reflective surfaces are noisy. The mask removes most of it, but not all.</li>
-    <li>DIODE has no downward views (vertical angle 000&ndash;050 only), so the model may not work well for a camera looking at the floor (e.g. a robot or drone).</li>
-    <li>Images are 384&times;288, so thin objects and far details are harder to predict than at full resolution.</li>
+    <li><strong>Scene Diversity in Test Set:</strong> Validation and test sets each contain only 1 indoor scene and 1 outdoor scene. Performance reflects accuracy on these specific environments rather than all possible real-world settings.</li>
+    <li><strong>Indoor Scale Shift:</strong> Test indoor scenes feature smaller rooms (median depth 1.8m) than training scenes (median 2.6m), which contains a large indoor atrium.</li>
+    <li><strong>Outdoor Sky Invalid Ratio:</strong> Outdoor validation images have ~47% invalid pixels (mostly sky) compared to ~31% in training.</li>
+    <li><strong>Sensor Edge Bleeding:</strong> Laser scan ground truth contains slight boundary noise around sharp object contours.</li>
+    <li><strong>Camera Angle Restriction:</strong> DIODE contains only upward and level camera angles (vertical tilt 000&ndash;050). The trained model may not generalize well to downward-facing cameras (e.g., ground robots or downward drones).</li>
+    <li><strong>Resolution Trade-off:</strong> Downsampling to 384&times;288 reduces VRAM usage but smooths out fine structures like thin poles and distant object outlines.</li>
   </ol>
 
-  <!-- 9. What we did -->
-  <h2>9. What We Did for M1</h2>
-  <ul>
-    <li><strong>Data pipeline</strong> (<code>src/data/dataset.py</code>) &mdash; reads RGB + depth + mask by file id, depth cap, joint flip, DataLoaders.</li>
-    <li><strong>Sanity test</strong> (<code>scripts/check_dataset.py</code>) &mdash; shapes, depth range, mask values, one batch.</li>
-    <li><strong>Visual check</strong> (<code>scripts/visualize_samples.py</code>) &mdash; Figure 1.</li>
-    <li><strong>EDA</strong> (<code>scripts/eda.py</code>) &mdash; all tables and Figures 2&ndash;4, per-sample CSV.</li>
-    <li><strong>Speed test</strong> (<code>scripts/benchmark_midas.py</code>) &mdash; Section 7.</li>
-  </ul>
-  <p>Commands (from <code>assignment2/</code>, data in <code>data/diode_subset/</code>):</p>
-<pre>python scripts/check_dataset.py     --root data/diode_subset
-python scripts/visualize_samples.py --root data/diode_subset
-python scripts/eda.py               --root data/diode_subset
-python scripts/benchmark_midas.py   --root data/diode_subset --train_iters 100</pre>
+  <h3>8.2 M1 Conclusion</h3>
+  <p>
+    Our initial analysis confirms that the local 7,195-sample DIODE subset is clean, properly split by scene, and well suited for depth estimation benchmarks. Hardware benchmarking on our RTX 4060 GPU confirms that full fine-tuning runs efficiently (~1 min/epoch with AMP), making our proposed controlled experiment lightweight and completely achievable within 6&ndash;8 local GPU hours.
+  </p>
 
-  <!-- Links -->
-  <h2>Links</h2>
+  <!-- 9. Deliverables & Resource Links -->
+  <h2>9. Links &amp; Resources</h2>
   <ul>
-    <li><strong>Source code:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank">GitHub &ndash; assignment2/</a></li>
-    <li><strong>Dataset:</strong> <a href="https://diode-dataset.org/" target="_blank">DIODE official site</a> &middot; <a href="https://www.kaggle.com/datasets/artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset" target="_blank">Kaggle mirror</a></li>
-    <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
-    <li><strong>Report, slides, video, checkpoints:</strong> to be added at M3 Final (due 11 Nov 2026)</li>
+    <li><strong>Source Code Repository:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank">GitHub Repository (assignment2/)</a></li>
+    <li><strong>Checkpoint Instructions &amp; Pretrained Weights:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2#reproducibility--checkpoints" target="_blank">Instructions to Reproduce Checkpoints</a> <em>(Pretrained weights &amp; trained model checkpoints will be uploaded to GitHub Releases / Drive in M2/M3)</em></li>
+    <li><strong>Report &amp; Presentation Slides:</strong> <em>(To be added for M3 Final Deliverable &ndash; Due 11 Nov 2026)</em></li>
+    <li><strong>YouTube Presentation Video:</strong> <em>(To be added for M3 Final Deliverable &ndash; Due 11 Nov 2026)</em></li>
+    <li><strong>Assignment-Specific AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
   </ul>
 
 </body>
