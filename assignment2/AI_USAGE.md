@@ -8,11 +8,26 @@
 
 ## General Policy Declaration
 
-All core problem formulations, data sampling strategies, pipeline designs, code implementations, experimental methodologies, and report conclusions are completely directed, implemented, and owned by group CR7. AI tools were utilized strictly as secondary assistants for code cleanliness checking, error debugging, output validation, and compliance verification under direct human supervision.
+All core problem formulations, data sampling strategies, pipeline designs, code implementations, experimental methodologies, and report conclusions are completely directed, implemented, and owned by group CR7. AI tools were utilized strictly as secondary assistants for code cleanliness checking, error debugging, output validation, visualization formatting, and compliance verification under direct human supervision.
 
 ---
 
-## M1 Proposal Disclosure Logs
+## M1 Proposal Disclosure Summary
+
+| # | Task / Stage | Purpose / Category | Affected Files | Verification Method | Member Responsible |
+|---|---|---|---|---|---|
+| **1** | M1 Data Exploration | Data validation & depth mask checks | `src/data/dataset.py`, `scripts/check_dataset.py` | Local Python script verification & PyTorch docs | Đỗ Đăng Khoa |
+| **2** | M1 Hardware Benchmark | Debugging Torch Hub non-interactive issue | `scripts/benchmark_midas.py` | Local execution on RTX 4060 GPU & terminal log | Đỗ Đăng Khoa |
+| **3** | M1 Visualization | Colormap scaling & 99th percentile capping | `scripts/visualize_samples.py` | Visual inspection of `assets/train_samples.png` | Đỗ Đăng Khoa |
+| **4** | M1 Statistical EDA | Memory optimization for quantile computation | `scripts/eda.py` | Execution runtime check & CSV log verification | Đỗ Đăng Khoa |
+| **5** | M1 Experiment Setup | Controlled experiment & seed isolation review | `assignment2/index.html` Sec. 4 | Handbook Sec. 18 & PyTorch seed docs | Đỗ Đăng Khoa |
+| **6** | M1 Leakage Check | Scene-level data split disjunction verification | `scenes_used.csv`, Report Sec. 2.3 | Set intersection check in Python & CSV lookup | Đỗ Đăng Khoa |
+| **7** | M1 Loss Formulation | SILog loss mathematical formula verification | Report Sec. 3.2 & Sec. 5 | Eigen et al. (2014) NIPS paper cross-reference | Đỗ Đăng Khoa |
+| **8** | M1 Proposal Report | Report formatting & 16-point checklist review | `assignment2/index.html` | Visual check at `http://localhost:8085` & Handbook Sec. 18 | Đỗ Đăng Khoa |
+
+---
+
+## M1 Detailed Log Entries
 
 ### Log Entry 1: Data Pipeline Validation & Mask Format Spot-Check
 
@@ -36,32 +51,123 @@ All core problem formulations, data sampling strategies, pipeline designs, code 
 | Field | Record |
 |---|---|
 | **Tool Name & Version** | Antigravity AI Assistant |
-| **Member Who Used It** | Trần Hoàng Vỹ Khang |
+| **Member Who Used It** | Đỗ Đăng Khoa |
 | **Development Stage** | M1 Proposal Hardware Benchmarking (04 October 2026) |
 | **Purpose / Category** | Debugging & performance measurement |
 | **Affected Sections / Files** | `assignment2/scripts/benchmark_midas.py`, Report Sec. 4 & Sec. 7 |
 | **Representative Prompt** | *"Script benchmark MiDaS bị treo khi gọi torch.hub.load('intel-isl/MiDaS', 'MiDaS_small') trong môi trường non-interactive, cách fix như thế nào?"* |
 | **AI Contribution** | Identified that `torch.hub.load` was prompting for interactive confirmation when downloading dependencies (EfficientNet backbone repo `rwightman/gen-efficientnet-pytorch`) and recommended passing `trust_repo=True`. |
 | **Student Verification & Editing** | Updated `benchmark_midas.py` with `trust_repo=True`, ran full 100-iter benchmark on local NVIDIA RTX 4060 GPU, and verified VRAM and latency output logs. |
-| **Responsible Member** | Trần Hoàng Vỹ Khang |
+| **Responsible Member** | Đỗ Đăng Khoa |
 | **Verification Sources** | PyTorch `torch.hub` official documentation & local GPU execution terminal log. |
 
 ---
 
-### Log Entry 3: HTML Report Structure & Handbook Compliance Check
+### Log Entry 3: Depth Map Visualization & Percentile Scaling
 
 | Field | Record |
 |---|---|
 | **Tool Name & Version** | Antigravity AI Assistant |
-| **Member Who Used It** | Dương Đăng Khoa |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M1 Proposal Visual Inspection (04 October 2026) |
+| **Purpose / Category** | Figure generation & visualization formatting |
+| **Affected Sections / Files** | `assignment2/scripts/visualize_samples.py`, Report Sec. 3.1 & Figure 1 |
+| **Representative Prompt** | *"Khi vẽ depth map bằng matplotlib, dùng `vmax=max_depth` bị lỗi 1 pixel nhiễu kéo cả ảnh về 1 màu tối. Có cách chọn colormap và scaling nào đẹp và đúng bản chất dữ liệu không?"* |
+| **AI Contribution** | Recommended setting upper colormap bound `vmax` to each image's 99th percentile depth (`np.percentile(valid_depths, 99)`) and setting invalid mask pixels to black for crisp object boundary contrast. |
+| **Student Verification & Editing** | Implemented percentile scaling in `scripts/visualize_samples.py`, generated `assets/train_samples.png`, and visually inspected image alignment across all 5 random samples. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | Matplotlib colormap API documentation & visual output image verification. |
+
+---
+
+### Log Entry 4: EDA Statistical Computation & RAM Optimization
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M1 Proposal EDA Analysis (04 October 2026) |
+| **Purpose / Category** | Result analysis & coding optimization |
+| **Affected Sections / Files** | `assignment2/scripts/eda.py`, Report Sec. 3.2 & Figures 2–4 |
+| **Representative Prompt** | *"Hàm tính percentile trên 7.195 mẫu depthmap của DIODE bị chậm và ngốn RAM khi dồn hết numpy array vào RAM. Có cách nào tính percentile theo batch rồi tổng hợp lại không?"* |
+| **AI Contribution** | Suggested chunking EDA calculations scene-by-scene, accumulating per-image summary statistics (p5, median, p95, p99, invalid %) into lightweight dictionary records, and exporting to CSV. |
+| **Student Verification & Editing** | Executed `scripts/eda.py` locally, confirmed execution time under 45 seconds, verified generated plots (`depth_hist.png`, `invalid_hist.png`, `angle_by_scene.png`), and checked CSV log for 7,195 valid rows. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | NumPy array memory optimization guides & generated dataset CSV metadata. |
+
+---
+
+### Log Entry 5: Controlled Experiment Setup & Seed Isolation Review
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M1 Proposal Experiment Design (04 October 2026) |
+| **Purpose / Category** | Architecture & experiment design review |
+| **Affected Sections / Files** | `assignment2/index.html` Sec. 4 & Sec. 6 |
+| **Representative Prompt** | *"Rà soát giúp mình phần Controlled Experiment: Option A (Frozen encoder) vs Option B (Full fine-tuning) xem cách chia random seed và giữ nguyên hyperparameters đã đủ chặt chẽ chưa."* |
+| **AI Contribution** | Reviewed the controlled matrix, confirming that using 3 fixed random seeds (42, 43, 44), identical SILog loss, and identical batch size (8) isolates trainable parameter status as the single variable factor. |
+| **Student Verification & Editing** | Cross-referenced matrix against handbook Section 18 controlled experiment criteria and finalized experiment design table in report. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | CO3133 Course Handbook Section 18 & PyTorch reproducibility best practices. |
+
+---
+
+### Log Entry 6: Scene-Level Data Split & Leakage Disjunction Check
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M1 Proposal Data Splitting (04 October 2026) |
+| **Purpose / Category** | Data validation & leakage prevention check |
+| **Affected Sections / Files** | `assignment2/src/data/dataset.py`, Report Sec. 2.3 |
+| **Representative Prompt** | *"Nhóm mình chia train/val/test theo scene trong DIODE để tránh data leakage. Nhờ AI check xem logic phân chia trong `scenes_used.csv` có bị trùng lặp scene nào giữa các split không."* |
+| **AI Contribution** | Verified scene ID sets across train (`00002..00015`), val (`00001`, `00017`), and test (`00000`, `00018`), confirming 0% scene overlap across all splits. |
+| **Student Verification & Editing** | Ran set intersection check in Python (`set(train_scenes) & set(val_scenes)`), verified 0 common elements, and exported final mapping table to `scenes_used.csv`. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | Python set operations check & DIODE metadata documentation. |
+
+---
+
+### Log Entry 7: SILog Loss Mathematical Formulation Check
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M1 Proposal Methodology (04 October 2026) |
+| **Purpose / Category** | Concept explanation & mathematical formulation |
+| **Affected Sections / Files** | Report Sec. 3.2 & Sec. 5 |
+| **Representative Prompt** | *"Check giúp mình công thức hàm Scale-Invariant Log Loss (SILog) của Eigen et al. (2014) dùng cho Depth Estimation xem công thức LaTeX ghi trong report đã chuẩn chưa."* |
+| **AI Contribution** | Provided standard mathematical notation for SILog loss equation including per-pixel valid mask $m_i$ and variance regularization term $\lambda = 0.5$. |
+| **Student Verification & Editing** | Cross-referenced equation with Eigen et al. (NIPS 2014) paper and verified PyTorch implementation logic. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | Eigen et al. (2014) *"Depth Map Prediction from a Single Image using a Multi-Scale Deep Network"* & PyTorch loss function implementation. |
+
+---
+
+### Log Entry 8: HTML Report Structure & Handbook Compliance Check
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Đỗ Đăng Khoa |
 | **Development Stage** | M1 Proposal Documentation (04 October 2026) |
 | **Purpose / Category** | Report formatting & compliance check |
 | **Affected Sections / Files** | `assignment2/index.html` |
 | **Representative Prompt** | *"Rà soát giúp mình file index.html xem đã có đủ 16 mục bắt buộc của Assignment page theo handbook Section 18 chưa."* |
 | **AI Contribution** | Highlighted missing dedicated section headers for Results, Comparison & Discussion, Error Analysis, and Links to Checkpoints/Slides/Video, and provided standard HTML section template. |
 | **Student Verification & Editing** | Manually organized all HTML sections, populated M1 metrics and figures, added placeholder notes for M2/M3, and verified layout rendering locally at `http://localhost:8085`. |
-| **Responsible Member** | Dương Đăng Khoa |
+| **Responsible Member** | Đỗ Đăng Khoa |
 | **Verification Sources** | CO3133 Course Handbook (Section 18 Dataset Proposal Requirements & Section 5 AI Disclosure). |
+
+---
+
+## Future Milestone Disclosure Logs (M2 Draft & M3 Final)
+
+*Logs for Milestone 2 (Baseline & Pretrained Training) and Milestone 3 (Controlled Experiment & Error Analysis) will be recorded here as development progresses.*
 
 ---
 
