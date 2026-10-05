@@ -5,20 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Assignment 1 – CO3133 | Nhóm CR7</title>
   <style>
-    body { font-family: sans-serif; line-height: 1.6; max-width: 860px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
-    h1, h2 { color: #003366; }
-    h2 { margin-top: 2em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    a { color: #0057b7; }
-    code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
-    pre { background: #f7f7f7; border: 1px solid #e0e0e0; padding: 12px; overflow-x: auto; }
-    .status { background: #fff8e1; border-left: 4px solid #D55E00; padding: 12px 16px; margin: 20px 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 880px;
+      margin: 30px auto;
+      padding: 0 20px;
+      color: #222;
+      background: #fff;
+    }
+    h1 { font-size: 1.6em; color: #003366; margin-bottom: 6px; }
+    h2 { font-size: 1.2em; color: #004080; border-bottom: 2px solid #e6ecf5; padding-bottom: 4px; margin-top: 28px; }
+    h3 { font-size: 1.0em; color: #333; margin-bottom: 6px; margin-top: 16px; }
+    .meta { color: #555; margin: 3px 0; font-size: 0.95em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92em; }
+    th, td { border: 1px solid #d0d7de; padding: 7px 10px; text-align: left; vertical-align: top; }
+    th { background: #f3f6fa; font-weight: 600; }
+    tr:nth-child(even) td { background: #f9fbfd; }
+    code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; background: #f0f3f8; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; }
+    pre { background: #f0f3f8; padding: 10px 14px; border-radius: 4px; overflow-x: auto; font-size: 0.86em; line-height: 1.45; }
+    a { color: #0055cc; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    .note { background: #fffbe6; border-left: 4px solid #e6a817; padding: 10px 14px; margin: 14px 0; font-size: 0.92em; border-radius: 0 4px 4px 0; }
+    .back { font-size: 0.9em; margin-bottom: 16px; }
+    ul, ol { margin: 6px 0 10px 20px; padding-left: 0; }
+    li { margin-bottom: 4px; }
+    .status-done { color: #1e7e34; font-weight: 600; }
+    .status-wait { color: #d97706; font-weight: 600; }
     .todo { color: #6b6b6b; font-style: italic; }
-    figure { margin: 18px 0; }
-    figure img { width: 100%; height: auto; border: 1px solid #e0e0e0; border-radius: 4px; }
-    figcaption { font-size: 0.9em; color: #555; margin-top: 6px; font-style: italic; }
+    figure { margin: 16px 0; }
+    figure img { width: 100%; height: auto; border: 1px solid #e1e4e8; border-radius: 6px; }
+    figcaption { font-size: 0.88em; color: #666; margin-top: 6px; font-style: italic; }
     .figpair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 700px) { .figpair { grid-template-columns: 1fr; } }
   </style>
@@ -32,18 +50,6 @@
      <strong>Instructor:</strong> Lê Thành Sách<br>
      <strong>Institution:</strong> Ho Chi Minh City University of Technology – VNU-HCM, Faculty of Computer Science and Engineering</p>
 
-  <div class="status">
-    <strong>Milestone status — working toward M2 Final.</strong> M1 Draft (handbook Section 7.4)
-    was submitted at commit <code>8476977</code> on 22 Sep 2026. All five mandatory models of
-    Section 11.1 are now implemented, trained and compared on this page: Linear/softmax, MLP, CNN,
-    LSTM and GRU, and a Transformer encoder. Outstanding M2 Final deliverables are the report, the
-    slides and the presentation video; items marked <span class="todo">pending</span> below are
-    deliberately left empty rather than filled with unverified content. All six runs on this page
-    were trained and evaluated back to back on 05 Oct 2026 from the code at commit
-    <code>8e407ed</code>, on one machine in one session — see the reproduction note under
-    <a href="#links">Links</a>.
-  </div>
-
   <h2>Group Members</h2>
   <table>
     <tr><th>Name</th><th>Student ID</th><th>Role</th><th>GitHub</th></tr>
@@ -51,6 +57,33 @@
     <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Experiments &amp; Analysis, Delivery</td><td><a href="https://github.com/Kras2508" target="_blank">Kras2508</a></td></tr>
     <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>Modeling &amp; Methods</td><td><a href="https://github.com/kortav0103" target="_blank">kortav0103</a></td></tr>
   </table>
+
+  <!-- Milestone Status -->
+  <h2>Milestone Status</h2>
+  <table>
+    <tr><th>Milestone</th><th>Deadline</th><th>Deliverable Summary</th><th>Status</th></tr>
+    <tr>
+      <td>M1 Draft (25%)</td>
+      <td>23 Sep 2026</td>
+      <td>EDA, Dataset/DataLoader, train/validation loop, Linear + MLP runnable</td>
+      <td class="status-done">Completed &#10003;</td>
+    </tr>
+    <tr>
+      <td>M2 Final (75%)</td>
+      <td>21 Oct 2026</td>
+      <td>All five mandatory models, full comparison, report, slides, video</td>
+      <td class="status-wait">In progress</td>
+    </tr>
+  </table>
+  <p class="note"><strong>Where this page stands.</strong> M1 Draft was submitted at commit
+     <code>8476977</code> on 22 Sep 2026. All five mandatory architectures of handbook
+     Section 11.1 are now implemented, trained and compared below: Linear/softmax, MLP, CNN,
+     LSTM and GRU, and a Transformer encoder. All six runs were trained and evaluated back to
+     back on 05 Oct 2026 from the code at commit <code>8e407ed</code>, on one machine in one
+     session, so the timing columns are mutually comparable &mdash; see the reproduction note
+     under <a href="#links">Links</a>. Outstanding for M2 Final are the report, the slides and
+     the presentation video; items marked <span class="todo">pending</span> below are
+     deliberately left empty rather than filled with unverified content.</p>
 
   <h2>1. Problem Statement</h2>
   <p><strong>Task.</strong> Single-label image classification over 10 clothing categories.
