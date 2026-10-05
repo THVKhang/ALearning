@@ -38,10 +38,10 @@
     Section 11.1 are now implemented, trained and compared on this page: Linear/softmax, MLP, CNN,
     LSTM and GRU, and a Transformer encoder. Outstanding M2 Final deliverables are the report, the
     slides and the presentation video; items marked <span class="todo">pending</span> below are
-    deliberately left empty rather than filled with unverified content. The CNN, LSTM, GRU and
-    Transformer runs were produced by a working tree that is not yet committed — see the
-    reproduction note under <a href="#links">Links</a> — so their commit hash is still to be
-    recorded.
+    deliberately left empty rather than filled with unverified content. All six runs on this page
+    were trained and evaluated back to back on 05 Oct 2026 from the code at commit
+    <code>3db3b6f</code>, on one machine in one session — see the reproduction note under
+    <a href="#links">Links</a>.
   </div>
 
   <h2>Group Members</h2>
@@ -80,6 +80,17 @@
      with <code>--dataset mnist</code>. No extension dataset such as CIFAR-10 was evaluated.</p>
 
   <h3>EDA findings</h3>
+  <div class="figpair">
+    <figure>
+      <img src="assets/eda_samples_per_class.png" alt="Grid of sample training images for each of the ten classes">
+      <figcaption>Figure 1. Random training samples per class.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/eda_class_mean_images.png" alt="Per-class mean image for each of the ten classes">
+      <figcaption>Figure 2. Per-class mean images. T-shirt/top, Pullover, Coat and Shirt average to
+        nearly the same silhouette, which is why they dominate the error analysis below.</figcaption>
+    </figure>
+  </div>
   <table>
     <tr><th>Item</th><th>Value</th></tr>
     <tr><td>Input size</td><td>1×28×28 grayscale; 784 features when flattened</td></tr>
@@ -283,12 +294,13 @@
     <tr><td>Epochs</td><td>15 (maximum budget)</td></tr>
     <tr><td>Scheduler</td><td>none</td></tr>
     <tr><td>Regularization</td><td>dropout 0.2 on every model except the linear baseline; weight decay 0</td></tr>
-    <tr><td>Early stopping</td><td>patience 5 epochs on validation macro-F1; triggered only for the CNN, at epoch 14</td></tr>
+    <tr><td>Early stopping</td><td>patience 5 epochs on validation macro-F1; never triggered — all six runs used the full 15-epoch budget</td></tr>
     <tr><td>Checkpoint criterion</td><td>best validation macro-F1</td></tr>
     <tr><td>Sequence representation</td><td>rows — 28 timesteps of 28 pixels, shared by LSTM, GRU and Transformer</td></tr>
     <tr><td>Seed</td><td>42, applied to <code>random</code>, <code>numpy</code>, <code>torch</code> and <code>torch.cuda</code></td></tr>
+    <tr><td>Determinism</td><td><code>cudnn.deterministic = True</code> with the cuDNN autotuner disabled. Without this the CNN does not reproduce from its seed; see the reproduction note under <a href="#links">Links</a></td></tr>
     <tr><td>Hyperparameter selection</td><td>none — every model deliberately uses the same default configuration so the comparison isolates the architecture. No per-model tuning was performed, which is a stated limitation rather than an oversight.</td></tr>
-    <tr><td>Hardware</td><td>NVIDIA GeForce RTX 3050 Laptop GPU (4 GB), Windows 11</td></tr>
+    <tr><td>Hardware</td><td>NVIDIA GeForce RTX 3050 Laptop GPU (4 GB), Windows 11 build 10.0.26300</td></tr>
     <tr><td>Software</td><td>Python 3.13.14, torch 2.14.0+cu130, torchvision 0.29.0+cu130, numpy 2.5.3, scikit-learn 1.9.1, CUDA 13.0</td></tr>
     <tr><td>Mixed precision</td><td>not used</td></tr>
     <tr><td>DataLoader workers</td><td>0 — relevant to the timing discussion in Section 6</td></tr>
@@ -300,14 +312,14 @@
      Section 12.2.</p>
   <table>
     <tr><th>Model</th><th>Params</th><th>Test accuracy</th><th>Test macro-F1</th><th>Best epoch</th><th>Training time</th><th>Inference, model only</th><th>Inference, end to end</th></tr>
-    <tr><td>Linear / softmax</td><td>7,850</td><td>0.8440</td><td>0.8441</td><td>11 / 15</td><td>325.0 s (21.7 s/epoch)</td><td>0.0005 ms/image</td><td>0.2151 ms/image</td></tr>
-    <tr><td>MLP (784-256-10, dropout 0.2)</td><td>203,530</td><td>0.8909</td><td>0.8902</td><td>15 / 15</td><td>301.6 s (20.1 s/epoch)</td><td>0.0016 ms/image</td><td>0.2179 ms/image</td></tr>
-    <tr><td><strong>CNN (32-64 conv-pool)</strong></td><td><strong>50,378</strong></td><td><strong>0.9154</strong></td><td><strong>0.9145</strong></td><td>9 / 14</td><td>216.8 s (15.5 s/epoch)</td><td>0.0097 ms/image</td><td>0.2368 ms/image</td></tr>
-    <tr><td>LSTM (28 row steps, hidden 128)</td><td>82,186</td><td>0.8906</td><td>0.8898</td><td>13 / 15</td><td>168.9 s (11.3 s/epoch)</td><td>0.0086 ms/image</td><td>0.1615 ms/image</td></tr>
-    <tr><td>GRU (28 row steps, hidden 128)</td><td>61,962</td><td>0.9017</td><td>0.9010</td><td>13 / 15</td><td>220.5 s (14.7 s/epoch)</td><td>0.0051 ms/image</td><td>0.1587 ms/image</td></tr>
-    <tr><td>Transformer (28 row tokens, d_model 128, 4 heads, 2 layers)</td><td>274,058</td><td>0.8846</td><td>0.8825</td><td>15 / 15</td><td>250.4 s (16.7 s/epoch)</td><td>0.0152 ms/image</td><td>0.2302 ms/image</td></tr>
+    <tr><td>Linear / softmax</td><td>7,850</td><td>0.8440</td><td>0.8441</td><td>11 / 15</td><td>125.2 s (8.3 s/epoch)</td><td>0.0006 ms/image</td><td>0.1992 ms/image</td></tr>
+    <tr><td>MLP (784-256-10, dropout 0.2)</td><td>203,530</td><td>0.8909</td><td>0.8902</td><td>15 / 15</td><td>137.6 s (9.2 s/epoch)</td><td>0.0015 ms/image</td><td>0.1816 ms/image</td></tr>
+    <tr><td><strong>CNN (32-64 conv-pool)</strong></td><td><strong>50,378</strong></td><td><strong>0.9165</strong></td><td><strong>0.9163</strong></td><td>13 / 15</td><td>253.6 s (16.9 s/epoch)</td><td>0.0096 ms/image</td><td>0.1712 ms/image</td></tr>
+    <tr><td>LSTM (28 row steps, hidden 128)</td><td>82,186</td><td>0.8906</td><td>0.8898</td><td>13 / 15</td><td>200.7 s (13.4 s/epoch)</td><td>0.0085 ms/image</td><td>0.1538 ms/image</td></tr>
+    <tr><td>GRU (28 row steps, hidden 128)</td><td>61,962</td><td>0.9017</td><td>0.9010</td><td>13 / 15</td><td>218.9 s (14.6 s/epoch)</td><td>0.0050 ms/image</td><td>0.1465 ms/image</td></tr>
+    <tr><td>Transformer (28 row tokens, d_model 128, 4 heads, 2 layers)</td><td>274,058</td><td>0.8846</td><td>0.8825</td><td>15 / 15</td><td>259.2 s (17.3 s/epoch)</td><td>0.0151 ms/image</td><td>0.1549 ms/image</td></tr>
   </table>
-  <p>Ranking by test macro-F1: <strong>CNN 0.9145 &gt; GRU 0.9010 &gt; MLP 0.8902 ≈ LSTM 0.8898
+  <p>Ranking by test macro-F1: <strong>CNN 0.9163 &gt; GRU 0.9010 &gt; MLP 0.8902 ≈ LSTM 0.8898
      &gt; Transformer 0.8825 &gt; Linear 0.8441</strong>. Accuracy and macro-F1 agree to within
      0.003 for every model, which is what the perfectly balanced class distribution found in the
      EDA predicts.</p>
@@ -315,28 +327,40 @@
   <h3>Training behavior</h3>
   <p>The linear model reaches its best validation macro-F1 at epoch 11; after that, validation loss
      drifts upward while training loss keeps falling — mild overfitting, absorbed by the
-     checkpoint-on-best-validation rule. The CNN peaked earliest, at epoch 9, and is the only run
-     where early stopping fired, at epoch 14. Both recurrent models peaked at epoch 13. <strong>The
-     MLP and the Transformer both selected the last epoch in the budget (15 / 15) with validation
-     macro-F1 still rising</strong>, so their figures are lower bounds for those architectures
-     rather than their ceilings. Curves: <code>outputs/&lt;run_name&gt;/curves.png</code>, with the
-     per-epoch numbers behind them in <code>history.json</code>.</p>
+     checkpoint-on-best-validation rule. The CNN and both recurrent models peaked at epoch 13.
+     Early stopping never fired: every run used the full 15-epoch budget. <strong>The MLP and the
+     Transformer both selected the last epoch in the budget (15 / 15) with validation macro-F1
+     still rising</strong>, so their figures are lower bounds for those architectures rather than
+     their ceilings. The per-epoch numbers behind every curve are in each run directory as
+     <code>history.json</code>.</p>
+  <div class="figpair">
+    <figure>
+      <img src="assets/curves_linear.png" alt="Linear model training and validation curves over 15 epochs">
+      <figcaption>Figure 3. Linear baseline. Validation loss turns upward after epoch 11 while
+        training loss keeps falling — the mild overfitting the checkpoint rule absorbs.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/curves_cnn.png" alt="CNN training and validation curves over 15 epochs">
+      <figcaption>Figure 4. CNN. Best validation macro-F1 at epoch 13, with the gap between
+        training and validation loss staying narrow throughout.</figcaption>
+    </figure>
+  </div>
 
   <h3>Per-class F1 on the test split</h3>
   <p>Sorted by how hard the class is for the linear baseline. The CNN is the best model on all ten
      classes, so the ranking above is not an artifact of averaging.</p>
   <table>
     <tr><th>Class</th><th>Linear</th><th>MLP</th><th>CNN</th><th>LSTM</th><th>GRU</th><th>Transformer</th></tr>
-    <tr><td>Shirt</td><td>0.5999</td><td>0.7138</td><td><strong>0.7399</strong></td><td>0.7024</td><td>0.7220</td><td>0.6636</td></tr>
-    <tr><td>Pullover</td><td>0.7323</td><td>0.8091</td><td><strong>0.8699</strong></td><td>0.8235</td><td>0.8431</td><td>0.8129</td></tr>
-    <tr><td>Coat</td><td>0.7442</td><td>0.8236</td><td><strong>0.8737</strong></td><td>0.8229</td><td>0.8419</td><td>0.8094</td></tr>
-    <tr><td>T-shirt/top</td><td>0.8073</td><td>0.8430</td><td><strong>0.8629</strong></td><td>0.8326</td><td>0.8503</td><td>0.8343</td></tr>
-    <tr><td>Dress</td><td>0.8492</td><td>0.8870</td><td><strong>0.9094</strong></td><td>0.8905</td><td>0.9004</td><td>0.8777</td></tr>
-    <tr><td>Sneaker</td><td>0.9238</td><td>0.9509</td><td><strong>0.9652</strong></td><td>0.9439</td><td>0.9575</td><td>0.9491</td></tr>
-    <tr><td>Sandal</td><td>0.9314</td><td>0.9641</td><td><strong>0.9832</strong></td><td>0.9619</td><td>0.9759</td><td>0.9670</td></tr>
-    <tr><td>Bag</td><td>0.9355</td><td>0.9716</td><td><strong>0.9798</strong></td><td>0.9790</td><td>0.9755</td><td>0.9692</td></tr>
-    <tr><td>Ankle boot</td><td>0.9499</td><td>0.9594</td><td><strong>0.9728</strong></td><td>0.9599</td><td>0.9630</td><td>0.9630</td></tr>
-    <tr><td>Trouser</td><td>0.9672</td><td>0.9800</td><td><strong>0.9885</strong></td><td>0.9814</td><td>0.9804</td><td>0.9784</td></tr>
+    <tr><td>Shirt</td><td>0.5999</td><td>0.7138</td><td><strong>0.7586</strong></td><td>0.7024</td><td>0.7220</td><td>0.6636</td></tr>
+    <tr><td>Pullover</td><td>0.7323</td><td>0.8091</td><td><strong>0.8701</strong></td><td>0.8235</td><td>0.8431</td><td>0.8129</td></tr>
+    <tr><td>Coat</td><td>0.7442</td><td>0.8236</td><td><strong>0.8659</strong></td><td>0.8229</td><td>0.8419</td><td>0.8094</td></tr>
+    <tr><td>T-shirt/top</td><td>0.8073</td><td>0.8430</td><td><strong>0.8789</strong></td><td>0.8326</td><td>0.8503</td><td>0.8343</td></tr>
+    <tr><td>Dress</td><td>0.8492</td><td>0.8870</td><td><strong>0.9117</strong></td><td>0.8905</td><td>0.9004</td><td>0.8777</td></tr>
+    <tr><td>Sneaker</td><td>0.9238</td><td>0.9509</td><td><strong>0.9587</strong></td><td>0.9439</td><td>0.9575</td><td>0.9491</td></tr>
+    <tr><td>Sandal</td><td>0.9314</td><td>0.9641</td><td><strong>0.9762</strong></td><td>0.9619</td><td>0.9759</td><td>0.9670</td></tr>
+    <tr><td>Bag</td><td>0.9355</td><td>0.9716</td><td><strong>0.9814</strong></td><td>0.9790</td><td>0.9755</td><td>0.9692</td></tr>
+    <tr><td>Ankle boot</td><td>0.9499</td><td>0.9594</td><td><strong>0.9720</strong></td><td>0.9599</td><td>0.9630</td><td>0.9630</td></tr>
+    <tr><td>Trouser</td><td>0.9672</td><td>0.9800</td><td><strong>0.9894</strong></td><td>0.9814</td><td>0.9804</td><td>0.9784</td></tr>
   </table>
 
   <h3>Where the differences live</h3>
@@ -347,14 +371,14 @@
     <tr><th>Model</th><th>Mean F1, upper-body 4</th><th>Mean F1, other 6</th><th>Gap</th></tr>
     <tr><td>Linear / softmax</td><td>0.7209</td><td>0.9261</td><td>0.2052</td></tr>
     <tr><td>MLP</td><td>0.7974</td><td>0.9522</td><td>0.1548</td></tr>
-    <tr><td><strong>CNN</strong></td><td><strong>0.8366</strong></td><td><strong>0.9664</strong></td><td><strong>0.1298</strong></td></tr>
+    <tr><td><strong>CNN</strong></td><td><strong>0.8434</strong></td><td><strong>0.9649</strong></td><td><strong>0.1215</strong></td></tr>
     <tr><td>LSTM</td><td>0.7954</td><td>0.9528</td><td>0.1574</td></tr>
     <tr><td>GRU</td><td>0.8143</td><td>0.9588</td><td>0.1444</td></tr>
     <tr><td>Transformer</td><td>0.7801</td><td>0.9507</td><td>0.1707</td></tr>
   </table>
   <p>The other six classes are effectively saturated: every model except the linear baseline is
-     above 0.94 on them and the spread across models is only 0.016. The upper-body spread is 0.057,
-     3.5× wider. <strong>The entire ranking is decided inside those four classes.</strong></p>
+     above 0.94 on them and the spread across models is only 0.014. The upper-body spread is 0.063,
+     4.5× wider. <strong>The entire ranking is decided inside those four classes.</strong></p>
 
   <h3>Qualitative results</h3>
   <p>Each run directory holds the confusion matrix (<code>confusion_matrix_test.png</code>) and
@@ -365,12 +389,22 @@
      categories are almost never confused with anything outside their own group. The difficult but
      correct cases are mostly long-sleeved shirts, which sit right at the Shirt / Pullover
      boundary.</p>
+  <figure>
+    <img src="assets/examples_incorrect_cnn.png" alt="Grid of CNN misclassifications with true and predicted labels">
+    <figcaption>Figure 5. CNN misclassifications on the test split, each labelled with its true and
+      predicted class. Almost every error is one upper-body garment read as another; footwear and
+      bags are rarely confused outside their own group.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/examples_correct_cnn.png" alt="Grid of images the CNN classified correctly">
+    <figcaption>Figure 6. Correctly classified test images for comparison.</figcaption>
+  </figure>
 
   <h2>6. Comparison and Discussion</h2>
   <ul>
     <li><strong>Inductive bias beats raw capacity, and that is the main finding.</strong> The CNN
         wins with <strong>50,378 parameters — 4.0× fewer than the MLP and 5.4× fewer than the
-        Transformer</strong> — for +0.024 macro-F1 over the MLP. Convolution supplies two priors for
+        Transformer</strong> — for +0.026 macro-F1 over the MLP. Convolution supplies two priors for
         free that every other model has to learn from 54,000 images: neighbouring pixels are
         related, and a feature means the same thing wherever it appears. At this dataset size that
         is worth more than parameters. The parameter ranking and the accuracy ranking are almost
@@ -401,19 +435,22 @@
         is supported is "CNN beats Transformer under an equal and short epoch budget".</li>
     <li><strong>The two inference columns answer different questions.</strong> The model-only column
         times the forward pass with batches already on the GPU, and it is monotone in computation as
-        it should be: linear 0.0005 &lt; MLP 0.0016 &lt; GRU 0.0051 &lt; LSTM 0.0086 &lt; CNN 0.0097
-        &lt; Transformer 0.0152 ms/image. The end-to-end column adds the data loader and collapses
-        to 0.16–0.24 ms/image for every model, because with <code>num_workers: 0</code> loading
-        costs <strong>15× to 400×</strong> the forward pass. Deployment throughput at this scale is
+        it should be: linear 0.0006 &lt; MLP 0.0015 &lt; GRU 0.0050 &lt; LSTM 0.0085 &lt; CNN 0.0096
+        &lt; Transformer 0.0151 ms/image. The end-to-end column adds the data loader and collapses
+        to 0.15–0.20 ms/image for every model, because with <code>num_workers: 0</code> loading
+        costs <strong>10× to 330×</strong> the forward pass. Deployment throughput at this scale is
         a property of the data pipeline, not of the architecture; only the model-only column
         compares models. The M1 Draft page reported a single loader-bound figure, which made the CNN
         look faster than a single linear layer; that measurement has been replaced.</li>
-    <li><strong>The training-time column is not a model property either.</strong> It is loader-bound
-        for the same reason and is not even monotone in model cost — the LSTM run averaged
-        11.3 s/epoch against 21.7 for the linear model. Run-to-run machine noise exceeds the real
-        difference: during the MLP run the EDA notebook was executing on the same machine, visibly
-        shortening its epochs 5–7 in <code>history.json</code>. Models must not be ranked by this
-        column.</li>
+    <li><strong>The training-time column includes the data loader.</strong> With
+        <code>num_workers: 0</code> each per-epoch figure is model time plus loader time. All six
+        runs in this table were executed back to back in one session on an otherwise idle machine,
+        and under those conditions the ordering is almost monotone in model cost: linear 8.3 &lt;
+        MLP 9.2 &lt; LSTM 13.4 &lt; GRU 14.6 &lt; CNN 16.9 &lt; Transformer 17.3 s/epoch, with only
+        the LSTM and GRU inverted against the model-only ranking. It remains a cost figure for this
+        pipeline on this machine rather than an architecture property: an earlier set of runs of
+        the <em>same code</em>, spread over two sessions, put the linear model at 21.7 s/epoch
+        instead of 8.3.</li>
     <li><strong>What still cannot be concluded.</strong> Each model ran once at a single seed, so no
         variance estimate exists and differences of a few thousandths are not interpretable — the
         MLP-versus-LSTM gap of 0.0004 is well inside that range and those two should be read as
@@ -423,28 +460,40 @@
   </ul>
 
   <h2>7. Error Analysis</h2>
-  <p>Total test errors fall from 1,560 for the linear baseline to 846 for the CNN. The error
+  <p>Total test errors fall from 1,560 for the linear baseline to 835 for the CNN. The error
      <em>structure</em>, however, barely changes: it is concentrated in one group of classes for
      every model. Percentages are shares of that model total.</p>
   <table>
     <tr><th>Error group</th><th>Linear</th><th>MLP</th><th>CNN</th><th>LSTM</th><th>GRU</th><th>Transformer</th></tr>
-    <tr><td>Total errors</td><td>1,560</td><td>1,091</td><td><strong>846</strong></td><td>1,094</td><td>983</td><td>1,154</td></tr>
-    <tr><td>Shirt → T-shirt/top</td><td>134 (8.6%)</td><td>106 (9.7%)</td><td>146 (17.3%)</td><td>161 (14.7%)</td><td>137 (13.9%)</td><td>146 (12.7%)</td></tr>
-    <tr><td>T-shirt/top → Shirt</td><td>109 (7.0%)</td><td>105 (9.6%)</td><td>44 (5.2%)</td><td>79 (7.2%)</td><td>82 (8.3%)</td><td>77 (6.7%)</td></tr>
-    <tr><td>Pullover ↔ Coat</td><td>223 (14.3%)</td><td>165 (15.1%)</td><td>94 (11.1%)</td><td>161 (14.7%)</td><td>140 (14.2%)</td><td>177 (15.3%)</td></tr>
-    <tr><td>Shirt → Pullover / Coat</td><td>211 (13.5%)</td><td>143 (13.1%)</td><td>150 (17.7%)</td><td>150 (13.7%)</td><td>137 (13.9%)</td><td>213 (18.5%)</td></tr>
-    <tr><td><strong>All confusions inside {T-shirt/top, Pullover, Coat, Shirt}</strong></td><td>935 (59.9%)</td><td>674 (61.8%)</td><td>547 (<strong>64.7%</strong>)</td><td>691 (63.2%)</td><td>620 (63.1%)</td><td>722 (62.6%)</td></tr>
-    <tr><td>Clothing ↔ footwear / bag (cross-group)</td><td>121 (7.8%)</td><td>53 (4.9%)</td><td>34 (4.0%)</td><td>38 (3.5%)</td><td>49 (5.0%)</td><td>58 (5.0%)</td></tr>
+    <tr><td>Total errors</td><td>1,560</td><td>1,091</td><td><strong>835</strong></td><td>1,094</td><td>983</td><td>1,154</td></tr>
+    <tr><td>Shirt → T-shirt/top</td><td>134 (8.6%)</td><td>106 (9.7%)</td><td>113 (13.5%)</td><td>161 (14.7%)</td><td>137 (13.9%)</td><td>146 (12.7%)</td></tr>
+    <tr><td>T-shirt/top → Shirt</td><td>109 (7.0%)</td><td>105 (9.6%)</td><td>56 (6.7%)</td><td>79 (7.2%)</td><td>82 (8.3%)</td><td>77 (6.7%)</td></tr>
+    <tr><td>Pullover ↔ Coat</td><td>223 (14.3%)</td><td>165 (15.1%)</td><td>95 (11.4%)</td><td>161 (14.7%)</td><td>140 (14.2%)</td><td>177 (15.3%)</td></tr>
+    <tr><td>Shirt → Pullover / Coat</td><td>211 (13.5%)</td><td>143 (13.1%)</td><td>97 (11.6%)</td><td>150 (13.7%)</td><td>137 (13.9%)</td><td>213 (18.5%)</td></tr>
+    <tr><td><strong>All confusions inside {T-shirt/top, Pullover, Coat, Shirt}</strong></td><td>935 (59.9%)</td><td>674 (61.8%)</td><td>528 (<strong>63.2%</strong>)</td><td>691 (63.2%)</td><td>620 (63.1%)</td><td>722 (62.6%)</td></tr>
+    <tr><td>Clothing ↔ footwear / bag (cross-group)</td><td>121 (7.8%)</td><td>53 (4.9%)</td><td>32 (3.8%)</td><td>38 (3.5%)</td><td>49 (5.0%)</td><td>58 (5.0%)</td></tr>
   </table>
   <p><strong>The better the model, the larger the share of its errors that falls inside the
-     upper-body group</strong> — 59.9% for the linear baseline rising to 64.7% for the CNN — while
-     cross-group errors drop from 7.8% to 4.0%. Architectures fix the easy structure first and leave
+     upper-body group</strong> — 59.9% for the linear baseline rising to 63.2% for the CNN — while
+     cross-group errors drop from 7.8% to 3.8%. Architectures fix the easy structure first and leave
      the same residue behind.</p>
+  <div class="figpair">
+    <figure>
+      <img src="assets/confusion_matrix_linear.png" alt="Row-normalized confusion matrix for the linear model">
+      <figcaption>Figure 7. Linear baseline, row-normalized.</figcaption>
+    </figure>
+    <figure>
+      <img src="assets/confusion_matrix_cnn.png" alt="Row-normalized confusion matrix for the CNN">
+      <figcaption>Figure 8. CNN, row-normalized. The off-diagonal mass thins everywhere except in
+        the 4×4 upper-body block, which is the visual form of the table above.</figcaption>
+    </figure>
+  </div>
   <p><strong>One confusion resists every architecture.</strong> Shirt predicted as T-shirt/top stays
-     in a band of 106–161 images across all six models while total errors nearly halve; the CNN
-     makes 146 of them, <em>more in absolute terms than the linear baseline makes</em>. Shirt is the
-     worst class for every model, from F1 0.5999 to 0.7399, and even the best model leaves it 0.23
-     F1 below its own average. The distinguishing evidence between a short-sleeved shirt and a
+     in a band of 106–161 images across all six models even as total errors fall by nearly half.
+     It is also disproportionately stubborn: moving from the linear baseline to the CNN removes 46%
+     of all errors (1,560 to 835) but only 16% of this one (134 to 113). Shirt is the worst class
+     for every model, from F1 0.5999 to 0.7586, and even the best model leaves it 0.16 F1 below its
+     own macro-F1. The distinguishing evidence between a short-sleeved shirt and a
      T-shirt is a collar or a button placket a few pixels wide, which at 28×28 grayscale is often
      simply not present in the image. This is label ambiguity in the dataset, not a capacity limit,
      and scaling a model up is unlikely to remove it.</p>
@@ -480,14 +529,15 @@
      figures that measure the data loader more than the model; and a single dataset, with no
      robustness, augmentation or interpretability ablation.</p>
   <p><strong>Conclusion.</strong> Across all five mandatory architectures under one split and one
-     protocol, test macro-F1 ranges from 0.8441 to 0.9145, and the ordering is governed by how much
+     protocol, test macro-F1 ranges from 0.8441 to 0.9163, and the ordering is governed by how much
      spatial structure each input representation preserves rather than by parameter count: the CNN
      is best with 4× fewer parameters than the MLP and 5.4× fewer than the Transformer, and the GRU
-     beats the MLP with 3.3× fewer. The differences are concentrated, by a factor of 3.5, in the
+     beats the MLP with 3.3× fewer. The differences are concentrated, by a factor of 4.5, in the
      four classes the EDA had already identified as sharing a silhouette and differing in local
      texture — which is the concrete form the inductive-bias argument takes on this dataset. The
-     residual errors are dominated by one confusion, Shirt against T-shirt/top, that no architecture
-     here reduces, indicating a limit of the data rather than of the models.</p>
+     residual errors are dominated by one confusion, Shirt against T-shirt/top, which falls far more
+     slowly than the error count as a whole, indicating a limit of the data rather than of the
+     models.</p>
   <p><strong>Future work.</strong> A loader-independent training-time protocol; multiple seeds
      reported as mean ± standard deviation; longer schedules for the two unconverged models; a patch
      representation for the Transformer; a matched-parameter comparison; and an augmentation
@@ -521,15 +571,23 @@ python assignment1\scripts\eval.py --run-dir assignment1\outputs\transformer_fas
         This writes <code>best.pt</code>, <code>history.json</code>, <code>config.json</code> and
         <code>metrics_test.json</code> into <code>assignment1/outputs/&lt;run_name&gt;/</code>.
         Every run used seed 42.</li>
-    <li><strong>Reproduction note — revision traceability.</strong> The Linear and MLP rows were
-        produced by the code at tag <code>tags/a1-draft</code> (commit <code>8476977</code>); their
-        accuracy and macro-F1 are unchanged from the M1 Draft submission and only their inference
-        timings were re-measured. The CNN, LSTM, GRU and Transformer rows were produced by a
-        working tree that adds <code>src/models/{cnn,rnn,transformer}.py</code>,
-        <code>src/data/sequence.py</code> and a rewritten inference-timing function, and
-        <strong>that tree is not yet committed</strong>. Handbook Section 4.2 requires every main
-        result to be traceable to a commit or tag, so this page will carry that hash once the tree
-        is committed.</li>
+    <li><strong>Reproduction note — revision traceability.</strong> Every row in the results
+        table comes from the code at commit <code>3db3b6f</code>. All six models were trained and
+        evaluated back to back on 05 Oct 2026 on one machine, so the timing columns are mutually
+        comparable; each run directory carries its own <code>config.json</code>, and those files are
+        tracked in the repository from commit <code>e4e4ee2</code> onward.</li>
+    <li><strong>Reproduction note — why the seed alone was not enough.</strong> Seeding
+        <code>random</code>, <code>numpy</code> and <code>torch</code> reproduces the Linear, MLP,
+        LSTM, GRU and Transformer runs to every recorded digit, but not the CNN: cuDNN selects a
+        convolution algorithm at run time and some choices accumulate gradients with atomics.
+        Measured on this machine with the same seed, GPU and library versions, the CNN moved from
+        best epoch 9 (validation macro-F1 0.9208) to best epoch 13 (0.9202) across two runs.
+        Pinning <code>torch.backends.cudnn.deterministic</code> and disabling the autotuner fixes
+        it: the CNN was then run twice at three epochs and matched epoch for epoch on train loss
+        0.4268 / 0.2987 / 0.2680 and validation macro-F1 0.8763 / 0.8950 / 0.9066.
+        <code>torch.use_deterministic_algorithms(True)</code> is deliberately not used, because it
+        raises unless <code>CUBLAS_WORKSPACE_CONFIG</code> is set and cuDNN has no deterministic RNN
+        backward, which would make the LSTM and GRU runs fail instead of reproduce.</li>
     <li><strong>Report / slides:</strong> <span class="todo">pending — M2 Final</span></li>
     <li><strong>YouTube presentation:</strong> <span class="todo">pending — M2 Final</span></li>
   </ul>

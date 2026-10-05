@@ -1,0 +1,130 @@
+{
+  "run_name": "transformer_fashion_mnist_seed42",
+  "config": {
+    "seed": 42,
+    "data": {
+      "dataset": "fashion_mnist",
+      "data_root": "C:\\Users\\Admin\\Documents\\GitHub\\ALearning\\assignment1\\data",
+      "val_fraction": 0.1,
+      "stratified": true,
+      "batch_size": 128,
+      "num_workers": 0,
+      "augment": false
+    },
+    "model": {
+      "name": "transformer",
+      "hidden_sizes": [
+        256
+      ],
+      "channels": [
+        32,
+        64
+      ],
+      "sequence": "rows",
+      "patch_size": 7,
+      "hidden_size": 128,
+      "num_layers": 1,
+      "d_model": 128,
+      "nhead": 4,
+      "encoder_layers": 2,
+      "dim_feedforward": 256,
+      "dropout": 0.2
+    },
+    "train": {
+      "epochs": 15,
+      "optimizer": "adam",
+      "lr": 0.001,
+      "weight_decay": 0.0,
+      "monitor": "macro_f1",
+      "early_stopping_patience": 5
+    }
+  },
+  "data": {
+    "dataset": "fashion_mnist",
+    "classes": [
+      "T-shirt/top",
+      "Trouser",
+      "Pullover",
+      "Dress",
+      "Coat",
+      "Sandal",
+      "Shirt",
+      "Sneaker",
+      "Bag",
+      "Ankle boot"
+    ],
+    "num_classes": 10,
+    "input_shape": [
+      1,
+      28,
+      28
+    ],
+    "normalize": {
+      "mean": 0.286,
+      "std": 0.353
+    },
+    "augment": false,
+    "stratified": true,
+    "val_fraction": 0.1,
+    "seed": 42,
+    "batch_size": 128,
+    "split_sizes": {
+      "train": 54000,
+      "val": 6000,
+      "test": 10000
+    },
+    "class_counts": {
+      "train": [
+        5400,
+        5400,
+        5400,
+        5400,
+        5400,
+        5400,
+        5400,
+        5400,
+        5400,
+        5400
+      ],
+      "val": [
+        600,
+        600,
+        600,
+        600,
+        600,
+        600,
+        600,
+        600,
+        600,
+        600
+      ],
+      "test": [
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000,
+        1000
+      ]
+    }
+  },
+  "parameters": {
+    "total": 274058,
+    "trainable": 274058
+  },
+  "environment": {
+    "python": "3.13.14",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "torch": "2.14.0+cu130",
+    "torchvision": "0.29.0+cu130",
+    "numpy": "2.5.3",
+    "scikit_learn": "1.9.1",
+    "device": "cuda",
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "cuda": "13.0"
+  }
+}
