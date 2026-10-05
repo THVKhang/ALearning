@@ -8,7 +8,9 @@
 
 ## General Policy Declaration
 
-All core problem formulations, data sampling strategies, pipeline designs, code implementations, experimental methodologies, and report conclusions are completely directed, implemented, and owned by group CR7. AI tools were utilized strictly as secondary assistants for code cleanliness checking, error debugging, output validation, visualization formatting, and compliance verification under direct human supervision.
+All core problem formulations, data sampling strategies, pipeline designs, experimental methodologies, and report conclusions are directed and owned by group CR7. The dataset choice, the scene-level split, the controlled-experiment design and every number reported on the assignment page come from work the group performed itself.
+
+AI tools were used in two distinct ways, and the distinction matters for this disclosure. In log entries 1 to 8 the tool acted as a **secondary assistant**: code cleanliness checking, error debugging, output validation, visualization formatting and compliance verification, with a member making every edit. In log entry 9 it acted as an **author**: the files and report items named there were drafted by the tool and are pending line-by-line review by the responsible member, as handbook Section 5.5 requires.
 
 ---
 
@@ -21,7 +23,7 @@ All core problem formulations, data sampling strategies, pipeline designs, code 
 | **3** | M1 Visualization | Colormap scaling & 99th percentile capping | `scripts/visualize_samples.py` | Visual inspection of `assets/train_samples.png` | Đỗ Đăng Khoa |
 | **4** | M1 Statistical EDA | Memory optimization for quantile computation | `scripts/eda.py` | Execution runtime check & CSV log verification | Đỗ Đăng Khoa |
 | **5** | M1 Experiment Setup | Controlled experiment & seed isolation review | `assignment2/index.html` Sec. 4 | Handbook Sec. 18 & PyTorch seed docs | Đỗ Đăng Khoa |
-| **6** | M1 Leakage Check | Scene-level data split disjunction verification | `scenes_used.csv`, Report Sec. 2.3 | Set intersection check in Python & CSV lookup | Đỗ Đăng Khoa |
+| **6** | M1 Leakage Check | Scene-level data split disjunction verification | `proposal/scenes_used.csv`, `scripts/export_scenes.py`, Report Sec. 2.2 | Set intersection check in Python & CSV lookup | Đỗ Đăng Khoa |
 | **7** | M1 Loss Formulation | SILog loss mathematical formula verification | Report Sec. 3.2 & Sec. 5 | Eigen et al. (2014) NIPS paper cross-reference | Đỗ Đăng Khoa |
 | **8** | M1 Proposal Report | Report formatting & 16-point checklist review | `assignment2/index.html` | Visual check at `http://localhost:8085` & Handbook Sec. 18 | Đỗ Đăng Khoa |
 
@@ -125,7 +127,7 @@ All core problem formulations, data sampling strategies, pipeline designs, code 
 | **Affected Sections / Files** | `assignment2/src/data/dataset.py`, Report Sec. 2.3 |
 | **Representative Prompt** | *"Nhóm mình chia train/val/test theo scene trong DIODE để tránh data leakage. Nhờ AI check xem logic phân chia trong `scenes_used.csv` có bị trùng lặp scene nào giữa các split không."* |
 | **AI Contribution** | Verified scene ID sets across train (`00002..00015`), val (`00001`, `00017`), and test (`00000`, `00018`), confirming 0% scene overlap across all splits. |
-| **Student Verification & Editing** | Ran set intersection check in Python (`set(train_scenes) & set(val_scenes)`), verified 0 common elements, and exported final mapping table to `scenes_used.csv`. |
+| **Student Verification & Editing** | Ran set intersection check in Python (`set(train_scenes) & set(val_scenes)`), verified 0 common elements, and exported the final mapping table. The table is committed as `proposal/scenes_used.csv` and is regenerated from the data by `scripts/export_scenes.py`, which exits with an error if any scene appears in more than one split. |
 | **Responsible Member** | Đỗ Đăng Khoa |
 | **Verification Sources** | Python set operations check & DIODE metadata documentation. |
 
@@ -165,6 +167,23 @@ All core problem formulations, data sampling strategies, pipeline designs, code 
 
 ---
 
+### Log Entry 9: Proposal Compliance Gaps (Section 18 and Section 21)
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Claude Code CLI; Claude Opus 5 |
+| **Member Who Used It** | Trần Hoàng Vỹ Khang |
+| **Development Stage** | M1 Proposal compliance review and correction (05 October 2026) |
+| **Purpose / Category** | Compliance check against the handbook; **code and report writing** (authoring, not only review) |
+| **Affected Sections / Files** | `assignment2/scripts/export_scenes.py` (new, AI-authored), `assignment2/proposal/scenes_used.csv` (new, AI-authored), and in `assignment2/index.html`: the version/license/citation items in Section 2.1, the split-provenance and scene-manifest items in Section 2.2, the hypothesis, decision-criterion and determinism items in Section 4.1, and items 7 and 8 of Section 8.1 |
+| **Representative Prompt** | *"ở phần bài tập lớn 2, tôi nên chọn dataset như thế nào"*; *"có nhánh đã push a2, hãy review xem có nên push lên main không"*; *"1,11 làm như nào"*; *"hãy làm tiếp"*. The full session transcript is kept locally by the member and is not published. |
+| **AI Contribution** | Audited the proposal against handbook Sections 18, 19.6, 20, 21 and 22 and found four gaps: the dataset version and license were absent (Section 18 field 1), no subset selection rule was stated although the subset reduces 26,229 images to 7,195 (field 11), `scenes_used.csv` was cited as evidence for the no-leakage claim but was not in the repository, and the controlled experiment had no decision criterion (Section 21). Retrieved the upstream license (MIT, stated on diode-dataset.org and in the official devkit) and the official split sizes, which confirmed the 26,229 figure. Established from the official devkit that DIODE publishes no test set and that the official validation set holds 771 images, fewer than this group's validation split, from which it follows that all three splits are carved from the official training set. Drafted the scene manifest, the export script, the decision criterion and the two added limitations. |
+| **Student Verification & Editing** | **Outstanding.** The license and version still require confirmation by a member against the exact Kaggle mirror page used, since a mirror may carry terms that differ from the upstream MIT license; those two fields are marked as pending on the page rather than filled in. `scripts/export_scenes.py` has not been executed, because the subset is not present on the machine where it was written: a member must run it against the data and confirm it reproduces `proposal/scenes_used.csv` exactly. The AI-authored text and code listed above have not yet been reviewed line by line by the responsible member. |
+| **Responsible Member** | Trần Hoàng Vỹ Khang |
+| **Verification Sources** | diode-dataset.org; `diode-dataset/diode-devkit`; Vasiljevic et al. (2019), CoRR abs/1908.00463; CO3133 Course Handbook Sections 18, 19.6, 20, 21, 22 |
+
+---
+
 ## Future Milestone Disclosure Logs (M2 Draft & M3 Final)
 
 *Logs for Milestone 2 (Baseline & Pretrained Training) and Milestone 3 (Controlled Experiment & Error Analysis) will be recorded here as development progresses.*
@@ -173,4 +192,6 @@ All core problem formulations, data sampling strategies, pipeline designs, code 
 
 ## Declaration of Ownership
 
-All code, data preprocessing choices, baseline models, statistical findings, and conclusions presented in this assignment are fully understood, verified, and owned by group CR7.
+All code, data preprocessing choices, baseline models, statistical findings, and conclusions presented in this assignment are owned by group CR7, and no reported number was produced by anything other than an executed run on group hardware.
+
+**The material listed in log entry 9 is not yet signed off.** The responsible member must read it, confirm the dataset version and license against the Kaggle mirror actually used, and run `scripts/export_scenes.py` against the data before submission. This file will be updated to record that review when it is done. The group accepts that the instructor may interview any member and request explanation, live edits, metric interpretation or partial reproduction (handbook Section 5.5).

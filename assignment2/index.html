@@ -112,7 +112,21 @@
 
   <h3>2.1 Dataset Overview &amp; Processing Workflow</h3>
   <ul>
-    <li><strong>Source Dataset:</strong> DIODE (Vasiljevic et al., 2019) &mdash; Kaggle mirror (26,229 total RGB images).</li>
+    <li><strong>Source Dataset:</strong> DIODE &mdash; Dense Indoor and Outdoor DEpth (Vasiljevic et al., 2019),
+        <a href="https://diode-dataset.org/" target="_blank">diode-dataset.org</a>. Obtained through a Kaggle
+        mirror of the official release. The upstream release totals 26,229 RGB images
+        (train 8,574 indoor + 16,884 outdoor; val 325 indoor + 446 outdoor), which matches the mirror
+        we downloaded.</li>
+    <li><strong>Version:</strong> <span class="todo">to be confirmed &mdash; record the release used
+        (the original 2019 DIODE or the later DIODEv2), the exact Kaggle dataset URL, its Kaggle
+        version number, and the download date</span>.</li>
+    <li><strong>License:</strong> <strong>MIT</strong>, as stated on diode-dataset.org and in the
+        official devkit repository <code>diode-dataset/diode-devkit</code>. <span class="todo">The
+        Kaggle mirror carries its own license field, which may differ from the upstream terms;
+        record it here alongside the MIT upstream license once checked</span>.</li>
+    <li><strong>Citation:</strong> I. Vasiljevic, N. Kolkin, S. Zhang, R. Luo, H. Wang, F. Z. Dai,
+        A. F. Daniele, M. Mostajabi, S. Basart, M. R. Walter and G. Shakhnarovich.
+        <em>DIODE: A Dense Indoor and Outdoor DEpth Dataset.</em> CoRR abs/1908.00463, 2019.</li>
     <li><strong>Sample Volume:</strong> <strong>7,195 RGB&ndash;Depth pairs</strong> (4,995 train, 1,100 val, 1,100 test across 15 scenes).</li>
     <li><strong>Sample Modality:</strong> Each sample consists of an RGB image, a high-precision laser depth map in metres, and a binary validity mask indicating measured laser reflections.</li>
     <li><strong>Processing Rule:</strong> Raw data is loaded dynamically during training via PyTorch DataLoaders; raw data files are kept local and excluded from repository version control.</li>
@@ -122,6 +136,17 @@
   <ul>
     <li><strong>Leakage Prevention:</strong> Data is partitioned strictly by <strong>Scene (physical location / room)</strong> rather than random image sampling. This ensures no overlapping scenes exist between training and evaluation splits, preventing memory shortcut leakage.</li>
     <li><strong>Split Ratio:</strong> ~70% Train / 15% Val / 15% Test (seed 42). Verified to have <strong>0% scene overlap across splits</strong>.</li>
+    <li><strong>Provenance of the three splits.</strong> DIODE has not released a public test set
+        (the official devkit lists it as "coming soon"), and the official validation set holds only
+        771 images, fewer than our validation split alone. <strong>All three splits below are
+        therefore carved from the official DIODE training set</strong>, partitioned by scene. This
+        is a deliberate choice and it has a consequence we state rather than hide: our numbers are
+        not comparable to published DIODE benchmark results, which use the official protocol.</li>
+    <li><strong>Scene manifest:</strong> the scene-to-split assignment is committed as
+        <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank"><code>proposal/scenes_used.csv</code></a>
+        and is regenerated from the data by <code>scripts/export_scenes.py</code>, which fails if any
+        scene appears in more than one split. That script is the evidence for the no-leakage claim
+        above.</li>
   </ul>
 
   <table>
@@ -205,6 +230,19 @@
     <li><strong>Variable Factor:</strong> <strong>Option A:</strong> Frozen encoder (decoder only) vs. <strong>Option B:</strong> Full fine-tuning (all layers updated).</li>
     <li><strong>Controlled Factors:</strong> Identical dataset split, preprocessing, SILog loss, AdamW optimizer, batch size 8, 20 epochs.</li>
     <li><strong>Runs &amp; Seeds:</strong> 3 independent random seeds (42, 43, 44), reporting Mean &plusmn; Standard Deviation.</li>
+    <li><strong>Hypothesis:</strong> full fine-tuning adapts the MiDaS encoder to the DIODE depth
+        scale and sensor characteristics, which a frozen encoder cannot, so Option B achieves lower
+        Abs Rel than Option A.</li>
+    <li><strong>Decision criterion:</strong> Option B is judged better than Option A only if its
+        mean test Abs Rel is lower <em>and</em> the two mean &plusmn; 1 standard deviation intervals
+        over the three seeds do not overlap. If the intervals overlap, the result is reported as
+        <em>no measurable difference at n = 3</em>, not as a win for either option. The same rule is
+        applied to RMSE and &delta; &lt; 1.25 as secondary checks; Abs Rel decides.</li>
+    <li><strong>Determinism:</strong> each run pins its seed across <code>random</code>,
+        <code>numpy</code> and <code>torch</code> and sets
+        <code>torch.backends.cudnn.deterministic = True</code> with the cuDNN autotuner disabled.
+        Without that last step a convolutional encoder does not reproduce from its seed, so the
+        seed-to-seed spread this experiment measures would be confounded by run-to-run noise.</li>
   </ul>
 
   <h3>4.2 Hardware &amp; Speed Benchmark</h3>
@@ -244,6 +282,12 @@
     <li>Laser ground-truth depth has minor noise at sharp object boundaries (edge bleeding).</li>
     <li>DIODE lacks downward floor-facing camera tilt (vertical angles cover 000&ndash;050 only).</li>
     <li>Downsampling to 384&times;288 smooths fine structures like distant wires and thin branches.</li>
+    <li>All three splits are carved from the official DIODE training set because no public test set
+        exists, so results here cannot be compared against published DIODE benchmark numbers.</li>
+    <li>The subset selection rule is documented but not yet executable: the resize and the
+        scene-level partition were performed outside this repository, so the subset cannot currently
+        be regenerated from the upstream dataset. A <code>scripts/make_subset.py</code> that encodes
+        the rule is outstanding.</li>
   </ol>
 
   <h3>8.2 M1 Conclusion</h3>

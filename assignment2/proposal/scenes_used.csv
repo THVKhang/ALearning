@@ -1,0 +1,16 @@
+scene,split,domain,samples
+00000,test,indoor,700
+00001,val,indoor,700
+00002,train,indoor,700
+00003,train,indoor,466
+00004,train,indoor,400
+00005,train,indoor,340
+00006,train,indoor,700
+00007,train,outdoor,389
+00008,train,outdoor,400
+00010,train,outdoor,400
+00013,train,outdoor,400
+00014,train,outdoor,400
+00015,train,outdoor,400
+00017,val,outdoor,400
+00018,test,outdoor,400
