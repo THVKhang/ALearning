@@ -263,7 +263,7 @@ global shape, makes the pattern explicit:
 | Hardware | NVIDIA GeForce RTX 3050 Laptop GPU (4 GB), Windows 11 build 10.0.26300 |
 | Software | Python 3.13.14, torch 2.14.0+cu130, torchvision 0.29.0+cu130, numpy 2.5.3, scikit-learn 1.9.1 |
 | Mixed precision | not used |
-| Code revision, all six runs | commit `3db3b6f` |
+| Code revision, all six runs | commit `8e407ed` |
 | Run session | all six trained and evaluated back to back, 05 Oct 2026 |
 
 Every number reported above is traceable to a run directory under `outputs/`: the model
@@ -280,7 +280,7 @@ epoch 9 with validation macro-F1 0.9208 to best epoch 13 with 0.9202 across two 
 `torch.backends.cudnn.deterministic` and disabling the autotuner fixes it: the CNN was then
 run twice at three epochs and agreed epoch for epoch on train loss 0.4268 / 0.2987 / 0.2680
 and validation macro-F1 0.8763 / 0.8950 / 0.9066. Every row above comes from the patched code
-at commit `3db3b6f`, so `python scripts/train.py --model <name>` reproduces it.
+at commit `8e407ed`, so `python scripts/train.py --model <name>` reproduces it.
 
 `torch.use_deterministic_algorithms(True)` is deliberately not used. It raises unless
 `CUBLAS_WORKSPACE_CONFIG` is set, and cuDNN provides no deterministic RNN backward, so it
@@ -292,7 +292,7 @@ Two further notes on revision hygiene:
   mixed two sessions and, for the Linear and MLP rows, two machines: a run recorded on
   22 Sep 2026 reported MLP macro-F1 0.8878, which this machine does not reproduce. Because
   `outputs/` was ignored at the time, that run left no `config.json` and cannot be
-  adjudicated. Run metadata is tracked from commit `e4e4ee2` onward so this cannot recur.
+  adjudicated. Run metadata is tracked from commit `f979da8` onward so this cannot recur.
 - Write `tags/a1-draft`, not `a1-draft`, in any command that has to mean the M1 tag. A branch
   of the same name exists, so the bare name is ambiguous once that branch moves past the tag.
 

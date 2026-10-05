@@ -40,7 +40,7 @@
     slides and the presentation video; items marked <span class="todo">pending</span> below are
     deliberately left empty rather than filled with unverified content. All six runs on this page
     were trained and evaluated back to back on 05 Oct 2026 from the code at commit
-    <code>3db3b6f</code>, on one machine in one session — see the reproduction note under
+    <code>8e407ed</code>, on one machine in one session — see the reproduction note under
     <a href="#links">Links</a>.
   </div>
 
@@ -572,10 +572,10 @@ python assignment1\scripts\eval.py --run-dir assignment1\outputs\transformer_fas
         <code>metrics_test.json</code> into <code>assignment1/outputs/&lt;run_name&gt;/</code>.
         Every run used seed 42.</li>
     <li><strong>Reproduction note — revision traceability.</strong> Every row in the results
-        table comes from the code at commit <code>3db3b6f</code>. All six models were trained and
+        table comes from the code at commit <code>8e407ed</code>. All six models were trained and
         evaluated back to back on 05 Oct 2026 on one machine, so the timing columns are mutually
         comparable; each run directory carries its own <code>config.json</code>, and those files are
-        tracked in the repository from commit <code>e4e4ee2</code> onward.</li>
+        tracked in the repository from commit <code>f979da8</code> onward.</li>
     <li><strong>Reproduction note — why the seed alone was not enough.</strong> Seeding
         <code>random</code>, <code>numpy</code> and <code>torch</code> reproduces the Linear, MLP,
         LSTM, GRU and Transformer runs to every recorded digit, but not the CNN: cuDNN selects a
