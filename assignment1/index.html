@@ -16,6 +16,11 @@
     pre { background: #f7f7f7; border: 1px solid #e0e0e0; padding: 12px; overflow-x: auto; }
     .status { background: #fff8e1; border-left: 4px solid #D55E00; padding: 12px 16px; margin: 20px 0; }
     .todo { color: #6b6b6b; font-style: italic; }
+    figure { margin: 18px 0; }
+    figure img { width: 100%; height: auto; border: 1px solid #e0e0e0; border-radius: 4px; }
+    figcaption { font-size: 0.9em; color: #555; margin-top: 6px; font-style: italic; }
+    .figpair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 700px) { .figpair { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
