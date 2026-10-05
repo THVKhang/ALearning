@@ -119,28 +119,46 @@ def fit(model, train_loader, val_loader, device, epochs, optimizer="adam", lr=1e
 
 @torch.no_grad()
 def measure_inference_time(model, loader, device, repeats=3):
-    """Median wall-clock time for one full forward pass over `loader`."""
-    model.eval()
-    for inputs, _ in loader:  # warm up kernels / allocator before timing
-        model(inputs.to(device))
-        break
+    """Median wall-clock time for one forward pass over the whole split, measured two ways.
 
-    times = []
-    for _ in range(repeats):
+    `ms_per_image` times the model alone: every batch is moved to `device` once, before the
+    clock starts, so the figure compares architectures. Timing the loader instead makes the
+    comparison meaningless - with `num_workers: 0` the single-process CPU decode and
+    normalization dominate, and a heavier model can come out "faster" than a lighter one
+    purely from run-to-run noise in the loader.
+
+    `end_to_end_ms_per_image` keeps the loader-inclusive number, which is the throughput a
+    deployment would actually see. Report both, and compare models only within one column.
+    """
+    model.eval()
+    batches = [inputs.to(device) for inputs, _ in loader]
+
+    model(batches[0])  # warm up kernels / allocator before timing
+
+    def time_forwards(source):
         if device.type == "cuda":
             torch.cuda.synchronize()
         start = time.perf_counter()
-        for inputs, _ in loader:
-            model(inputs.to(device, non_blocking=True))
+        for inputs in source:
+            model(inputs)
         if device.type == "cuda":
             torch.cuda.synchronize()
-        times.append(time.perf_counter() - start)
+        return time.perf_counter() - start
 
-    total = float(np.median(times))
+    model_times = [time_forwards(batches) for _ in range(repeats)]
+    end_to_end_times = [
+        time_forwards(inputs.to(device, non_blocking=True) for inputs, _ in loader)
+        for _ in range(repeats)
+    ]
+
+    total = float(np.median(model_times))
+    end_to_end = float(np.median(end_to_end_times))
     num_images = len(loader.dataset)
     return {
         "total_seconds": total,
         "ms_per_image": 1000.0 * total / num_images,
+        "end_to_end_seconds": end_to_end,
+        "end_to_end_ms_per_image": 1000.0 * end_to_end / num_images,
         "num_images": num_images,
         "batch_size": loader.batch_size,
     }

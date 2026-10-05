@@ -102,8 +102,10 @@ def main():
     print(f"{config['model']['name']} on {args.split}: "
           f"accuracy {metrics['accuracy']:.4f} | macro-F1 {metrics['macro_f1']:.4f}")
     print(f"parameters: {report['parameters']['total']:,}")
-    print(f"inference : {timing['ms_per_image']:.4f} ms/image "
+    print(f"inference : {timing['ms_per_image']:.4f} ms/image model-only "
           f"({timing['total_seconds']:.2f}s for {timing['num_images']} images)")
+    print(f"            {timing['end_to_end_ms_per_image']:.4f} ms/image end-to-end "
+          f"(includes the data loader)")
     print(f"artifacts : {run_dir}")
 
 

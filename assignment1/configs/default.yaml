@@ -10,9 +10,18 @@ data:
   augment: false
 
 model:
-  name: linear             # linear | mlp
+  name: linear             # linear | mlp | cnn | lstm | gru | transformer
   hidden_sizes: [256]      # MLP only
-  dropout: 0.2             # MLP only
+  channels: [32, 64]       # CNN only: one conv-pool block per entry
+  sequence: rows           # LSTM/GRU/Transformer: rows | columns | patches
+  patch_size: 7            # only read when sequence: patches
+  hidden_size: 128         # LSTM/GRU only
+  num_layers: 1            # LSTM/GRU only
+  d_model: 128             # Transformer only: token width after projection
+  nhead: 4                 # Transformer only: must divide d_model
+  encoder_layers: 2        # Transformer only
+  dim_feedforward: 256     # Transformer only
+  dropout: 0.2             # every model except linear
 
 train:
   epochs: 15

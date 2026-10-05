@@ -21,8 +21,11 @@ if str(ROOT) not in sys.path:  # lets `python scripts/train.py` work, not only `
 
 from src.data.dataset import get_dataloaders
 from src.engine.trainer import fit
+from src.models.cnn import CNN
 from src.models.linear import LinearClassifier
 from src.models.mlp import MLP
+from src.models.rnn import RecurrentClassifier
+from src.models.transformer import TransformerClassifier
 from src.utils.metrics import count_parameters
 from src.utils.plots import plot_curves
 from src.utils.seed import set_seed
@@ -31,7 +34,8 @@ from src.utils.seed import set_seed
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default=str(ROOT / "configs" / "default.yaml"))
-    parser.add_argument("--model", choices=["linear", "mlp"])
+    parser.add_argument("--model",
+                        choices=["linear", "mlp", "cnn", "lstm", "gru", "transformer"])
     parser.add_argument("--dataset", choices=["fashion_mnist", "mnist"])
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--batch-size", type=int)
@@ -74,6 +78,26 @@ def build_model(model_config, input_shape, num_classes):
     if name == "mlp":
         return MLP(input_shape, tuple(model_config["hidden_sizes"]), num_classes,
                    model_config.get("dropout", 0.0))
+    if name == "cnn":
+        return CNN(input_shape, tuple(model_config["channels"]), num_classes,
+                   model_config.get("dropout", 0.0))
+    if name in ("lstm", "gru"):
+        return RecurrentClassifier(
+            input_shape, cell=name, hidden_size=model_config["hidden_size"],
+            num_layers=model_config["num_layers"], num_classes=num_classes,
+            dropout=model_config.get("dropout", 0.0),
+            sequence=model_config.get("sequence", "rows"),
+            patch_size=model_config.get("patch_size", 7),
+        )
+    if name == "transformer":
+        return TransformerClassifier(
+            input_shape, d_model=model_config["d_model"], nhead=model_config["nhead"],
+            num_layers=model_config["encoder_layers"],
+            dim_feedforward=model_config["dim_feedforward"], num_classes=num_classes,
+            dropout=model_config.get("dropout", 0.0),
+            sequence=model_config.get("sequence", "rows"),
+            patch_size=model_config.get("patch_size", 7),
+        )
     raise ValueError(f"unknown model: {name}")
 
 

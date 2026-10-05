@@ -1,65 +1,550 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Assignment 1 – CO3133 | Nhóm CR7</title>
   <style>
-    body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    body { font-family: sans-serif; line-height: 1.6; max-width: 860px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
     h1, h2 { color: #003366; }
+    h2 { margin-top: 2em; border-bottom: 1px solid #e0e0e0; padding-bottom: 4px; }
     table { width: 100%; border-collapse: collapse; margin: 15px 0; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background-color: #f2f2f2; }
     a { color: #0057b7; }
+    code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+    pre { background: #f7f7f7; border: 1px solid #e0e0e0; padding: 12px; overflow-x: auto; }
+    .status { background: #fff8e1; border-left: 4px solid #D55E00; padding: 12px 16px; margin: 20px 0; }
+    .todo { color: #6b6b6b; font-style: italic; }
   </style>
 </head>
 <body>
   <p><a href="../index.html">← Back to Landing Page</a></p>
 
-  <h1>Assignment 1 – [Assignment Title]</h1>
-  <p><strong>Course:</strong> Deep Learning and Its Applications (CO3133) | <strong>Semester:</strong> 261</p>
-  <p><strong>Instructor:</strong> Lê Thành Sách</p>
+  <h1>Assignment 1 – Foundations of Deep Learning Pipelines and Architectures</h1>
+  <p><em>From Linear Models to Modern Sequence Models: A Comparative Study for Image Classification</em></p>
+  <p><strong>Course:</strong> Deep Learning and Its Applications (CO3133) | <strong>Semester:</strong> 261<br>
+     <strong>Instructor:</strong> Lê Thành Sách<br>
+     <strong>Institution:</strong> Ho Chi Minh City University of Technology – VNU-HCM, Faculty of Computer Science and Engineering</p>
+
+  <div class="status">
+    <strong>Milestone status — working toward M2 Final.</strong> M1 Draft (handbook Section 7.4)
+    was submitted at commit <code>8476977</code> on 22 Sep 2026. All five mandatory models of
+    Section 11.1 are now implemented, trained and compared on this page: Linear/softmax, MLP, CNN,
+    LSTM and GRU, and a Transformer encoder. Outstanding M2 Final deliverables are the report, the
+    slides and the presentation video; items marked <span class="todo">pending</span> below are
+    deliberately left empty rather than filled with unverified content. The CNN, LSTM, GRU and
+    Transformer runs were produced by a working tree that is not yet committed — see the
+    reproduction note under <a href="#links">Links</a> — so their commit hash is still to be
+    recorded.
+  </div>
 
   <h2>Group Members</h2>
   <table>
-    <tr><th>Name</th><th>Student ID</th><th>Role</th></tr>
-    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td></td></tr>
-    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td></td></tr>
-    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td></td></tr>
+    <tr><th>Name</th><th>Student ID</th><th>Role</th><th>GitHub</th></tr>
+    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td>Data &amp; Reproducibility (Lead)</td><td><a href="https://github.com/THVKhang" target="_blank">THVKhang</a></td></tr>
+    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Experiments &amp; Analysis, Delivery</td><td><a href="https://github.com/Kras2508" target="_blank">Kras2508</a></td></tr>
+    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>Modeling &amp; Methods</td><td><a href="https://github.com/kortav0103" target="_blank">kortav0103</a></td></tr>
   </table>
 
   <h2>1. Problem Statement</h2>
-  <p><!-- TODO --></p>
+  <p><strong>Task.</strong> Single-label image classification over 10 clothing categories.
+     <strong>Input:</strong> one 28×28 grayscale image, a tensor of shape <code>(1, 28, 28)</code>
+     (784 values once flattened). <strong>Output:</strong> one class index in
+     <code>{0, …, 9}</code>. <strong>Prediction unit:</strong> one image.</p>
+  <p>Formally we learn a map <code>f: R^(1×28×28) → R^10</code> producing unnormalized logits, and
+     minimize the cross-entropy between <code>softmax(f(x))</code> and the one-hot label over the
+     training split. The predicted class is the <code>argmax</code> of the logits.</p>
+  <p><strong>Motivation.</strong> Automatic garment categorization underpins catalogue indexing and
+     inventory tagging in retail, where items arrive as photographs with no reliable text label.</p>
+  <p><strong>Main difficulties.</strong> The images are low-resolution and uniformly centred, so
+     colour and context give no help at all. Several categories share almost the same silhouette
+     (Shirt, T-shirt/top, Pullover, Coat) and differ only in local texture and small details such as
+     sleeve length or a button placket. That is what makes the dataset a useful testbed for
+     comparing inductive biases: a model that consumes flattened pixels has no way to express local
+     structure.</p>
 
   <h2>2. Dataset Description and EDA</h2>
-  <p><!-- TODO --></p>
+  <p><strong>Source.</strong> Fashion-MNIST (Xiao, Rasul &amp; Vollgraf, 2017), published by Zalando
+     Research under the MIT license and obtained through
+     <code>torchvision.datasets.FashionMNIST</code>. 70,000 grayscale 28×28 images (60,000 official
+     train, 10,000 official test), 10 classes, about 30 MB on disk in the original IDX format.
+     Labels come with the published dataset; the group performed no labelling.</p>
+  <p><strong>Dataset roles, as handbook Section 10 requires.</strong> Fashion-MNIST is the dataset
+     for every main result on this page. MNIST is used for development and debugging only, selectable
+     with <code>--dataset mnist</code>. No extension dataset such as CIFAR-10 was evaluated.</p>
+
+  <h3>EDA findings</h3>
+  <table>
+    <tr><th>Item</th><th>Value</th></tr>
+    <tr><td>Input size</td><td>1×28×28 grayscale; 784 features when flattened</td></tr>
+    <tr><td>Class distribution</td><td>10 classes, exactly 6,000 training and 1,000 test images each</td></tr>
+    <tr><td>Imbalance analysis</td><td>imbalance ratio 1.0000, normalized entropy 1.0000 — perfectly balanced, so no class weighting or resampling is needed and accuracy and macro-F1 are expected to agree closely</td></tr>
+    <tr><td>Trivial baseline</td><td>10% accuracy (uniform guess)</td></tr>
+    <tr><td>Pixel statistics</td><td>measured mean 0.2860 and std 0.3530 over the 60,000 training images; 50.2% of all pixels are exactly zero (black background)</td></tr>
+    <tr><td>Representative samples</td><td>a sample grid per class and a per-class mean image, both in the notebook</td></tr>
+  </table>
+  <p>The per-class mean images are the qualitatively important finding. Trouser, Bag, Sandal,
+     Sneaker and Ankle boot each average to a visibly distinct silhouette, whereas Shirt,
+     T-shirt/top, Pullover and Coat average to nearly the same shape. This predicted, before any
+     model was trained, where the errors would fall.</p>
+  <p>Full analysis with executed outputs:
+     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/notebooks/eda.ipynb" target="_blank">notebooks/eda.ipynb</a>.</p>
+
+  <h3>Data splitting</h3>
+  <table>
+    <tr><th>Property</th><th>Value</th></tr>
+    <tr><td>Split</td><td>official test set kept untouched; official training set split 90/10 into train and validation</td></tr>
+    <tr><td>Exact sizes</td><td>54,000 train / 6,000 validation / 10,000 test</td></tr>
+    <tr><td>Per class</td><td>5,400 train / 600 validation / 1,000 test</td></tr>
+    <tr><td>Seed</td><td>42</td></tr>
+    <tr><td>Stratification</td><td>stratified by class label</td></tr>
+    <tr><td>Split unit</td><td>one image — Fashion-MNIST has no subject, session or group structure that could leak across splits</td></tr>
+    <tr><td>Leakage prevention</td><td><code>scripts/train.py</code> never builds or reads the test loader. The test split is touched only by <code>scripts/eval.py</code>, after a checkpoint has already been selected on validation macro-F1. Every model shares the same split and the same seed.</td></tr>
+  </table>
+
+  <h3>Preprocessing</h3>
+  <p><code>ToTensor()</code>, which scales pixels to [0,1], followed by
+     <code>Normalize(mean=0.2860, std=0.3530)</code> using statistics measured on the training
+     split itself. No augmentation is used (<code>augment: false</code>) for any of the five
+     models, so the comparison is not confounded by it; a random-crop and horizontal-flip pipeline
+     is implemented and can be switched on for an ablation. When
+     augmentation is enabled it applies to the training subset only: the loaders are built from two
+     separate views of the 60,000-image training set, so validation never sees augmented data.
+     There are no invalid or missing annotations to handle.</p>
+  <p><strong>Input tensor shape, one example batch after preprocessing:</strong>
+     <code>(128, 1, 28, 28)</code>, dtype <code>float32</code>, measured mean 0.0073 and std
+     0.9989 — confirming the normalization constants are the right ones for this split.</p>
 
   <h2>3. Methodology</h2>
-  <p><!-- TODO --></p>
+  <h3>Pipeline overview</h3>
+  <pre>Raw IDX files → ToTensor + Normalize → stratified 90/10 split → DataLoader (batch 128)
+    → model (logits) → CrossEntropyLoss → Adam → argmax prediction
+    → accuracy / macro-F1 / confusion matrix</pre>
+
+  <h3>Models</h3>
+  <p>All five mandatory architectures of handbook Section 11.1, trained under one shared split and
+     protocol. LSTM and GRU are both reported, which also covers the optional LSTM-versus-GRU
+     comparison of Section 11.2.</p>
+  <table>
+    <tr><th>Model</th><th>Architecture</th><th>Input representation</th><th>Parameters</th></tr>
+    <tr>
+      <td>Linear / softmax (baseline)</td>
+      <td><code>Flatten → Linear(784, 10)</code></td>
+      <td>flattened pixel vector</td>
+      <td>7,850</td>
+    </tr>
+    <tr>
+      <td>MLP</td>
+      <td><code>Flatten → Linear(784, 256) → ReLU → Dropout(0.2) → Linear(256, 10)</code></td>
+      <td>flattened pixel vector</td>
+      <td>203,530</td>
+    </tr>
+    <tr>
+      <td>CNN</td>
+      <td><code>[Conv3×3(1→32) → BN → ReLU → MaxPool2] → [Conv3×3(32→64) → BN → ReLU → MaxPool2] → Flatten → Dropout(0.2) → Linear(3136, 10)</code></td>
+      <td>1×28×28 image, spatial structure intact</td>
+      <td>50,378</td>
+    </tr>
+    <tr>
+      <td>LSTM</td>
+      <td><code>LSTM(input 28 → hidden 128, 1 layer) → last hidden state → Dropout(0.2) → Linear(128, 10)</code></td>
+      <td>28 row tokens of 28 pixels</td>
+      <td>82,186</td>
+    </tr>
+    <tr>
+      <td>GRU</td>
+      <td><code>GRU(input 28 → hidden 128, 1 layer) → last hidden state → Dropout(0.2) → Linear(128, 10)</code></td>
+      <td>28 row tokens of 28 pixels</td>
+      <td>61,962</td>
+    </tr>
+    <tr>
+      <td>Transformer encoder</td>
+      <td><code>Linear(28 → 128) + CLS token + learned positions → 2 × EncoderLayer(d_model 128, 4 heads, FFN 256, pre-norm, GELU) → LayerNorm → Linear(128, 10)</code></td>
+      <td>28 row tokens of 28 pixels</td>
+      <td>274,058</td>
+    </tr>
+  </table>
+  <p><strong>Loss.</strong> <code>nn.CrossEntropyLoss</code> for every model. All five output raw
+     logits and no softmax is applied before the loss, because <code>nn.CrossEntropyLoss</code>
+     already applies log-softmax internally; applying it twice would flatten the gradients. This was
+     verified by searching the whole source tree for softmax calls and by checking that no model
+     contains a softmax module.</p>
+  <p><strong>Activation and regularization (MLP).</strong> The hidden layer uses ReLU,
+     <code>max(0, z)</code>. Without a nonlinearity the two stacked linear layers would collapse
+     into a single linear map and the MLP would be mathematically identical to the baseline — the
+     nonlinearity is the entire reason the extra layer can help. ReLU was chosen over sigmoid or
+     tanh because its gradient is exactly 1 on the positive side and therefore does not shrink as it
+     propagates backwards. Regularization is dropout at rate 0.2 on the hidden activations: a random
+     fifth of the hidden units is zeroed at each training step, so the classifier cannot come to
+     depend on any single unit. Dropout is inactive at evaluation time through
+     <code>model.eval()</code>. No weight decay is used (<code>weight_decay: 0.0</code>).</p>
+  <p><strong>Convolution, pooling and feature maps (CNN).</strong> A convolution layer slides a
+     learned 3×3 kernel across its input and takes the weighted sum under the window. The same
+     kernel is reused at every position, so a pattern such as a vertical edge is detected wherever
+     it appears, and one output channel costs 3·3·C<sub>in</sub> weights rather than one weight per
+     pixel position as in a linear layer. With <code>padding=1</code> the kernel leaves height and
+     width unchanged, so all downsampling comes from the pooling layers. Each kernel produces one
+     <em>feature map</em>, an image whose value at (i, j) measures how strongly that kernel pattern
+     is present around pixel (i, j); the first block emits 32 such maps, the second convolves across
+     all 32 at once and emits 64, so its kernels combine edges into corners, textures and then into
+     sleeve, heel or strap shapes. <code>MaxPool2d(2)</code> keeps only the largest value in each
+     2×2 window, halving height and width: 28×28 → 14×14 → 7×7. It discards where inside the window
+     the feature fired while keeping that it fired, which buys a little translation tolerance, cuts
+     the activation tensor fourfold, and doubles the area of the original image the next kernel can
+     see. BatchNorm normalizes each feature map over the batch, keeping the activation scale stable
+     across blocks.</p>
+  <p><strong>Timestep, input size and hidden representation (LSTM / GRU).</strong> A 28×28 image has
+     no natural notion of time, so the sequence representation is an explicit choice:
+     <code>src/data/sequence.py</code> offers rows, columns or patches, and both sequence models use
+     <strong>rows</strong>, reading the garment top to bottom. The <em>timestep</em> is therefore one
+     image row and there are 28 of them. The <em>input size</em> is the length of one token,
+     channels × width = 28 values. The <em>hidden representation</em> is a state h<sub>t</sub> of 128
+     values rewritten at every step from the pair (x<sub>t</sub>, h<sub>t-1</sub>): a GRU does this
+     with two gates, update and reset, deciding how much of the previous state to keep and how much
+     of the new candidate to write; an LSTM adds a separate cell state c<sub>t</sub> and a third
+     gate, so it can carry information along c<sub>t</sub> almost unchanged across many steps while
+     the output gate controls what of it is exposed. Either way h<sub>t</sub> after the last timestep
+     is a fixed-size summary of the whole image, and the classifier reads only that vector, not the
+     per-timestep outputs. Note the contrast with the CNN: a convolution shares weights across
+     <em>space</em>, while a recurrent cell shares them across <em>time</em> and must pass evidence
+     from row 1 through 27 updates before it can affect the prediction.</p>
+  <p><strong>Token embedding, positional encoding and attention (Transformer).</strong> The same
+     28 row tokens are used, so the Transformer and the recurrent models see identical input. One
+     <code>nn.Linear(28, 128)</code> projects every token to a common width — the token embedding, or
+     patch-embedding step: attention never sees pixels directly, only these projections. Because
+     self-attention is permutation-invariant — shuffling the rows would permute the output and leave
+     the summary unchanged — position must be supplied explicitly, so a learned parameter of shape
+     (1, 29, 128), one vector per sequence slot, is added to the embedded tokens and trained with
+     the model. A fixed sinusoidal table would also work; the learned version is used because the
+     sequence length is small and constant, leaving nothing to extrapolate to. Each encoder layer
+     then maps the sequence to queries Q, keys K and values V by linear projections. The score
+     between token i and token j is the scaled dot product q<sub>i</sub>·k<sub>j</sub>/√d<sub>head</sub>,
+     and a softmax over j turns row i of the score matrix into weights summing to 1; the layer
+     output at position i is that weighted sum of value vectors. So the output at row i is a mixture
+     of <em>every</em> row, weighted by relevance to row i — a global receptive field after a single
+     layer, where the CNN needs several pooling stages to span the image. Four such attention maps
+     run in parallel over 32 channels each and are concatenated. A learned CLS token is prepended;
+     it carries no pixel content, so everything it holds after the encoder was pulled in from the
+     image tokens by attention, and the classifier reads that one position.</p>
+  <p><strong>Metrics.</strong> Accuracy and macro-F1 as primary metrics, plus parameter count,
+     training time, inference time and the confusion matrix. Macro-F1 averages the per-class F1
+     scores with equal weight, so a model that sacrifices one hard class to gain on easy ones is
+     penalized — which accuracy alone would hide.</p>
+  <p><strong>Strengths and limits.</strong> The linear model is convex in its parameters and trains
+     to a reproducible optimum, but its decision boundary is a hyperplane over raw pixel intensities
+     and cannot represent a statement such as "this region has horizontal texture". The MLP can
+     represent nonlinear combinations of pixels, yet because it still consumes a flat vector it has
+     no notion that two pixels are neighbours. The CNN adds exactly that notion and gets translation
+     tolerance with it, at the cost of a fixed assumption that the useful structure is local. The
+     recurrent models keep one spatial axis intact inside each token and destroy the other, and they
+     must propagate evidence sequentially, which is a weaker spatial prior than convolution but a
+     stronger one than a flat vector. The Transformer assumes the least — any token may attend to
+     any other from the first layer — which is its strength on large datasets and its weakness here,
+     because every relationship convolution supplies for free has to be learned from 54,000
+     images.</p>
+  <p><strong>Self-implemented versus library code.</strong> Self-implemented: all six model
+     definitions, the image-to-sequence conversion, the stratified splitting, the
+     train/validation/test loops, checkpoint selection, early stopping, the metric wrappers, the
+     timing instrumentation and all figures (everything under <code>src/</code> and
+     <code>scripts/</code>). Taken from libraries: <code>torch</code> and <code>torch.nn</code>
+     layers — including <code>nn.Conv2d</code>, <code>nn.LSTM</code>, <code>nn.GRU</code> and
+     <code>nn.TransformerEncoderLayer</code> — the optimizer and autograd;
+     <code>torchvision</code> for the dataset download and the transforms;
+     <code>scikit-learn</code> for <code>f1_score</code> and <code>confusion_matrix</code>;
+     <code>matplotlib</code> for plotting; <code>PyYAML</code> for the configuration files. No
+     pretrained weights are used anywhere, as Section 11.3 requires.</p>
+
+  <h3>Experimental design</h3>
+  <p><strong>Hypothesis.</strong> Performance on Fashion-MNIST is governed less by parameter count
+     than by how much spatial structure the input representation preserves, and the differences
+     between architectures will concentrate on the four upper-body garments that share a silhouette
+     and differ only in local texture — the classes the EDA identified before any model was
+     trained.</p>
+  <p><strong>Changed factor:</strong> the architecture and its input representation.
+     <strong>Fixed factors:</strong> split, seed, preprocessing, batch size, optimizer, learning
+     rate, epoch budget, early-stopping rule, checkpoint rule, hardware, software versions.
+     <strong>Conclusion criterion:</strong> ordering by test macro-F1, read together with the
+     parameter count and with the per-class gap between the upper-body group {Shirt, T-shirt/top,
+     Pullover, Coat} and the remaining six classes. A model is only called better if it wins without
+     a parameter advantage, or wins by more than the per-class spread.</p>
 
   <h2>4. Experimental Setup</h2>
-  <p><!-- TODO --></p>
+  <table>
+    <tr><th>Setting</th><th>Value</th></tr>
+    <tr><td>Optimizer</td><td>Adam</td></tr>
+    <tr><td>Learning rate</td><td>1e-3</td></tr>
+    <tr><td>Batch size</td><td>128</td></tr>
+    <tr><td>Epochs</td><td>15 (maximum budget)</td></tr>
+    <tr><td>Scheduler</td><td>none</td></tr>
+    <tr><td>Regularization</td><td>dropout 0.2 on every model except the linear baseline; weight decay 0</td></tr>
+    <tr><td>Early stopping</td><td>patience 5 epochs on validation macro-F1; triggered only for the CNN, at epoch 14</td></tr>
+    <tr><td>Checkpoint criterion</td><td>best validation macro-F1</td></tr>
+    <tr><td>Sequence representation</td><td>rows — 28 timesteps of 28 pixels, shared by LSTM, GRU and Transformer</td></tr>
+    <tr><td>Seed</td><td>42, applied to <code>random</code>, <code>numpy</code>, <code>torch</code> and <code>torch.cuda</code></td></tr>
+    <tr><td>Hyperparameter selection</td><td>none — every model deliberately uses the same default configuration so the comparison isolates the architecture. No per-model tuning was performed, which is a stated limitation rather than an oversight.</td></tr>
+    <tr><td>Hardware</td><td>NVIDIA GeForce RTX 3050 Laptop GPU (4 GB), Windows 11</td></tr>
+    <tr><td>Software</td><td>Python 3.13.14, torch 2.14.0+cu130, torchvision 0.29.0+cu130, numpy 2.5.3, scikit-learn 1.9.1, CUDA 13.0</td></tr>
+    <tr><td>Mixed precision</td><td>not used</td></tr>
+    <tr><td>DataLoader workers</td><td>0 — relevant to the timing discussion in Section 6</td></tr>
+  </table>
 
   <h2>5. Results</h2>
-  <p><!-- TODO --></p>
+  <p>Held-out official test split, 10,000 images. Every number comes from the checkpoint with the
+     best validation macro-F1, under the identical split and protocol required by handbook
+     Section 12.2.</p>
+  <table>
+    <tr><th>Model</th><th>Params</th><th>Test accuracy</th><th>Test macro-F1</th><th>Best epoch</th><th>Training time</th><th>Inference, model only</th><th>Inference, end to end</th></tr>
+    <tr><td>Linear / softmax</td><td>7,850</td><td>0.8440</td><td>0.8441</td><td>11 / 15</td><td>325.0 s (21.7 s/epoch)</td><td>0.0005 ms/image</td><td>0.2151 ms/image</td></tr>
+    <tr><td>MLP (784-256-10, dropout 0.2)</td><td>203,530</td><td>0.8909</td><td>0.8902</td><td>15 / 15</td><td>301.6 s (20.1 s/epoch)</td><td>0.0016 ms/image</td><td>0.2179 ms/image</td></tr>
+    <tr><td><strong>CNN (32-64 conv-pool)</strong></td><td><strong>50,378</strong></td><td><strong>0.9154</strong></td><td><strong>0.9145</strong></td><td>9 / 14</td><td>216.8 s (15.5 s/epoch)</td><td>0.0097 ms/image</td><td>0.2368 ms/image</td></tr>
+    <tr><td>LSTM (28 row steps, hidden 128)</td><td>82,186</td><td>0.8906</td><td>0.8898</td><td>13 / 15</td><td>168.9 s (11.3 s/epoch)</td><td>0.0086 ms/image</td><td>0.1615 ms/image</td></tr>
+    <tr><td>GRU (28 row steps, hidden 128)</td><td>61,962</td><td>0.9017</td><td>0.9010</td><td>13 / 15</td><td>220.5 s (14.7 s/epoch)</td><td>0.0051 ms/image</td><td>0.1587 ms/image</td></tr>
+    <tr><td>Transformer (28 row tokens, d_model 128, 4 heads, 2 layers)</td><td>274,058</td><td>0.8846</td><td>0.8825</td><td>15 / 15</td><td>250.4 s (16.7 s/epoch)</td><td>0.0152 ms/image</td><td>0.2302 ms/image</td></tr>
+  </table>
+  <p>Ranking by test macro-F1: <strong>CNN 0.9145 &gt; GRU 0.9010 &gt; MLP 0.8902 ≈ LSTM 0.8898
+     &gt; Transformer 0.8825 &gt; Linear 0.8441</strong>. Accuracy and macro-F1 agree to within
+     0.003 for every model, which is what the perfectly balanced class distribution found in the
+     EDA predicts.</p>
+
+  <h3>Training behavior</h3>
+  <p>The linear model reaches its best validation macro-F1 at epoch 11; after that, validation loss
+     drifts upward while training loss keeps falling — mild overfitting, absorbed by the
+     checkpoint-on-best-validation rule. The CNN peaked earliest, at epoch 9, and is the only run
+     where early stopping fired, at epoch 14. Both recurrent models peaked at epoch 13. <strong>The
+     MLP and the Transformer both selected the last epoch in the budget (15 / 15) with validation
+     macro-F1 still rising</strong>, so their figures are lower bounds for those architectures
+     rather than their ceilings. Curves: <code>outputs/&lt;run_name&gt;/curves.png</code>, with the
+     per-epoch numbers behind them in <code>history.json</code>.</p>
+
+  <h3>Per-class F1 on the test split</h3>
+  <p>Sorted by how hard the class is for the linear baseline. The CNN is the best model on all ten
+     classes, so the ranking above is not an artifact of averaging.</p>
+  <table>
+    <tr><th>Class</th><th>Linear</th><th>MLP</th><th>CNN</th><th>LSTM</th><th>GRU</th><th>Transformer</th></tr>
+    <tr><td>Shirt</td><td>0.5999</td><td>0.7138</td><td><strong>0.7399</strong></td><td>0.7024</td><td>0.7220</td><td>0.6636</td></tr>
+    <tr><td>Pullover</td><td>0.7323</td><td>0.8091</td><td><strong>0.8699</strong></td><td>0.8235</td><td>0.8431</td><td>0.8129</td></tr>
+    <tr><td>Coat</td><td>0.7442</td><td>0.8236</td><td><strong>0.8737</strong></td><td>0.8229</td><td>0.8419</td><td>0.8094</td></tr>
+    <tr><td>T-shirt/top</td><td>0.8073</td><td>0.8430</td><td><strong>0.8629</strong></td><td>0.8326</td><td>0.8503</td><td>0.8343</td></tr>
+    <tr><td>Dress</td><td>0.8492</td><td>0.8870</td><td><strong>0.9094</strong></td><td>0.8905</td><td>0.9004</td><td>0.8777</td></tr>
+    <tr><td>Sneaker</td><td>0.9238</td><td>0.9509</td><td><strong>0.9652</strong></td><td>0.9439</td><td>0.9575</td><td>0.9491</td></tr>
+    <tr><td>Sandal</td><td>0.9314</td><td>0.9641</td><td><strong>0.9832</strong></td><td>0.9619</td><td>0.9759</td><td>0.9670</td></tr>
+    <tr><td>Bag</td><td>0.9355</td><td>0.9716</td><td><strong>0.9798</strong></td><td>0.9790</td><td>0.9755</td><td>0.9692</td></tr>
+    <tr><td>Ankle boot</td><td>0.9499</td><td>0.9594</td><td><strong>0.9728</strong></td><td>0.9599</td><td>0.9630</td><td>0.9630</td></tr>
+    <tr><td>Trouser</td><td>0.9672</td><td>0.9800</td><td><strong>0.9885</strong></td><td>0.9814</td><td>0.9804</td><td>0.9784</td></tr>
+  </table>
+
+  <h3>Where the differences live</h3>
+  <p>Splitting the ten classes into the four upper-body garments that share a silhouette (Shirt,
+     Pullover, Coat, T-shirt/top) and the other six, which all have a distinctive global shape,
+     makes the pattern explicit.</p>
+  <table>
+    <tr><th>Model</th><th>Mean F1, upper-body 4</th><th>Mean F1, other 6</th><th>Gap</th></tr>
+    <tr><td>Linear / softmax</td><td>0.7209</td><td>0.9261</td><td>0.2052</td></tr>
+    <tr><td>MLP</td><td>0.7974</td><td>0.9522</td><td>0.1548</td></tr>
+    <tr><td><strong>CNN</strong></td><td><strong>0.8366</strong></td><td><strong>0.9664</strong></td><td><strong>0.1298</strong></td></tr>
+    <tr><td>LSTM</td><td>0.7954</td><td>0.9528</td><td>0.1574</td></tr>
+    <tr><td>GRU</td><td>0.8143</td><td>0.9588</td><td>0.1444</td></tr>
+    <tr><td>Transformer</td><td>0.7801</td><td>0.9507</td><td>0.1707</td></tr>
+  </table>
+  <p>The other six classes are effectively saturated: every model except the linear baseline is
+     above 0.94 on them and the spread across models is only 0.016. The upper-body spread is 0.057,
+     3.5× wider. <strong>The entire ranking is decided inside those four classes.</strong></p>
+
+  <h3>Qualitative results</h3>
+  <p>Each run directory holds the confusion matrix (<code>confusion_matrix_test.png</code>) and
+     grids of correctly and incorrectly classified test images
+     (<code>examples_correct_test.png</code>, <code>examples_incorrect_test.png</code>). The
+     incorrect grids show the pattern the numbers imply: misclassified items are overwhelmingly
+     upper-body garments predicted as a different upper-body garment, while the footwear and bag
+     categories are almost never confused with anything outside their own group. The difficult but
+     correct cases are mostly long-sleeved shirts, which sit right at the Shirt / Pullover
+     boundary.</p>
 
   <h2>6. Comparison and Discussion</h2>
-  <p><!-- TODO --></p>
+  <ul>
+    <li><strong>Inductive bias beats raw capacity, and that is the main finding.</strong> The CNN
+        wins with <strong>50,378 parameters — 4.0× fewer than the MLP and 5.4× fewer than the
+        Transformer</strong> — for +0.024 macro-F1 over the MLP. Convolution supplies two priors for
+        free that every other model has to learn from 54,000 images: neighbouring pixels are
+        related, and a feature means the same thing wherever it appears. At this dataset size that
+        is worth more than parameters. The parameter ranking and the accuracy ranking are almost
+        reversed.</li>
+    <li><strong>Representation ordering predicts the result.</strong> Flattening destroys both
+        spatial axes (linear, MLP); reading rows destroys one and keeps the other intact inside each
+        token (LSTM, GRU, Transformer); convolution keeps both (CNN). The macro-F1 ordering follows
+        that almost exactly, and the GRU beats the MLP — 0.9010 against 0.8902 — with
+        <strong>3.3× fewer parameters</strong> (61,962 against 203,530), which is the clean form of
+        the argument: the gain comes from the representation, not from capacity.</li>
+    <li><strong>GRU beats LSTM: +0.011 macro-F1 with 75% of the parameters.</strong> Over a 28-step
+        sequence the separate cell state of the LSTM has no long-range dependency to protect, so its
+        third gate only adds parameters to overfit with. On this task the simpler cell is the better
+        one. This is the optional Section 11.2 comparison.</li>
+    <li><strong>The Transformer is the weakest non-linear model despite having the most
+        parameters.</strong> It assumes the least — self-attention treats the 28 rows as an
+        unordered set and must learn adjacency through the learned positional encoding — and its
+        upper-body gap (0.1707) is the widest of any non-linear model. Its error profile shows the
+        same thing in detail: 113 Shirt-as-Pullover confusions against 75 for the CNN, and 98
+        Coat-as-Pullover against 45. The gap between CNN and Transformer is not spread across the
+        dataset; it is almost entirely these local-texture classes. This is the expected ordering at
+        this scale and is not evidence against attention architectures in general.</li>
+    <li><strong>The epoch budget, not the architecture, limits two of the models.</strong> The MLP
+        and the Transformer both picked epoch 15 of 15 with validation macro-F1 still rising. The
+        Transformer is the one most penalised by a short fixed schedule, since attention models
+        trained from scratch typically need the longest one. <strong>A conclusion of the form "CNN
+        beats Transformer on Fashion-MNIST" is therefore not supported by this table</strong>; what
+        is supported is "CNN beats Transformer under an equal and short epoch budget".</li>
+    <li><strong>The two inference columns answer different questions.</strong> The model-only column
+        times the forward pass with batches already on the GPU, and it is monotone in computation as
+        it should be: linear 0.0005 &lt; MLP 0.0016 &lt; GRU 0.0051 &lt; LSTM 0.0086 &lt; CNN 0.0097
+        &lt; Transformer 0.0152 ms/image. The end-to-end column adds the data loader and collapses
+        to 0.16–0.24 ms/image for every model, because with <code>num_workers: 0</code> loading
+        costs <strong>15× to 400×</strong> the forward pass. Deployment throughput at this scale is
+        a property of the data pipeline, not of the architecture; only the model-only column
+        compares models. The M1 Draft page reported a single loader-bound figure, which made the CNN
+        look faster than a single linear layer; that measurement has been replaced.</li>
+    <li><strong>The training-time column is not a model property either.</strong> It is loader-bound
+        for the same reason and is not even monotone in model cost — the LSTM run averaged
+        11.3 s/epoch against 21.7 for the linear model. Run-to-run machine noise exceeds the real
+        difference: during the MLP run the EDA notebook was executing on the same machine, visibly
+        shortening its epochs 5–7 in <code>history.json</code>. Models must not be ranked by this
+        column.</li>
+    <li><strong>What still cannot be concluded.</strong> Each model ran once at a single seed, so no
+        variance estimate exists and differences of a few thousandths are not interpretable — the
+        MLP-versus-LSTM gap of 0.0004 is well inside that range and those two should be read as
+        tied. No model received hyperparameter tuning, and no parameter-matched or compute-matched
+        comparison was run, so this table compares six specific configurations rather than six
+        architecture families.</li>
+  </ul>
 
   <h2>7. Error Analysis</h2>
-  <p><!-- TODO --></p>
+  <p>Total test errors fall from 1,560 for the linear baseline to 846 for the CNN. The error
+     <em>structure</em>, however, barely changes: it is concentrated in one group of classes for
+     every model. Percentages are shares of that model total.</p>
+  <table>
+    <tr><th>Error group</th><th>Linear</th><th>MLP</th><th>CNN</th><th>LSTM</th><th>GRU</th><th>Transformer</th></tr>
+    <tr><td>Total errors</td><td>1,560</td><td>1,091</td><td><strong>846</strong></td><td>1,094</td><td>983</td><td>1,154</td></tr>
+    <tr><td>Shirt → T-shirt/top</td><td>134 (8.6%)</td><td>106 (9.7%)</td><td>146 (17.3%)</td><td>161 (14.7%)</td><td>137 (13.9%)</td><td>146 (12.7%)</td></tr>
+    <tr><td>T-shirt/top → Shirt</td><td>109 (7.0%)</td><td>105 (9.6%)</td><td>44 (5.2%)</td><td>79 (7.2%)</td><td>82 (8.3%)</td><td>77 (6.7%)</td></tr>
+    <tr><td>Pullover ↔ Coat</td><td>223 (14.3%)</td><td>165 (15.1%)</td><td>94 (11.1%)</td><td>161 (14.7%)</td><td>140 (14.2%)</td><td>177 (15.3%)</td></tr>
+    <tr><td>Shirt → Pullover / Coat</td><td>211 (13.5%)</td><td>143 (13.1%)</td><td>150 (17.7%)</td><td>150 (13.7%)</td><td>137 (13.9%)</td><td>213 (18.5%)</td></tr>
+    <tr><td><strong>All confusions inside {T-shirt/top, Pullover, Coat, Shirt}</strong></td><td>935 (59.9%)</td><td>674 (61.8%)</td><td>547 (<strong>64.7%</strong>)</td><td>691 (63.2%)</td><td>620 (63.1%)</td><td>722 (62.6%)</td></tr>
+    <tr><td>Clothing ↔ footwear / bag (cross-group)</td><td>121 (7.8%)</td><td>53 (4.9%)</td><td>34 (4.0%)</td><td>38 (3.5%)</td><td>49 (5.0%)</td><td>58 (5.0%)</td></tr>
+  </table>
+  <p><strong>The better the model, the larger the share of its errors that falls inside the
+     upper-body group</strong> — 59.9% for the linear baseline rising to 64.7% for the CNN — while
+     cross-group errors drop from 7.8% to 4.0%. Architectures fix the easy structure first and leave
+     the same residue behind.</p>
+  <p><strong>One confusion resists every architecture.</strong> Shirt predicted as T-shirt/top stays
+     in a band of 106–161 images across all six models while total errors nearly halve; the CNN
+     makes 146 of them, <em>more in absolute terms than the linear baseline makes</em>. Shirt is the
+     worst class for every model, from F1 0.5999 to 0.7399, and even the best model leaves it 0.23
+     F1 below its own average. The distinguishing evidence between a short-sleeved shirt and a
+     T-shirt is a collar or a button placket a few pixels wide, which at 28×28 grayscale is often
+     simply not present in the image. This is label ambiguity in the dataset, not a capacity limit,
+     and scaling a model up is unlikely to remove it.</p>
+  <p><strong>Hypothesized causes, by group.</strong> Shirt and T-shirt/top overlap in both
+     directions, which marks a genuinely shared class boundary rather than a bias toward one label.
+     Pullover and Coat are both long-sleeved and closed-fronted at this resolution, where a coat
+     opening is often only a faint vertical line — the CNN halves this group, from 223 to 94, which
+     is the clearest single demonstration that local texture is what convolution adds. Long-sleeved
+     shirts fall inside the pullover and coat silhouette, and notably the Transformer is
+     <em>worst</em> of all six on that group (213, 18.5% of its errors), consistent with having no
+     local prior.</p>
+  <p><strong>Improvement ideas.</strong> (i) Train the MLP and the Transformer past 15 epochs, since
+     neither converged. (ii) Give the Transformer a patch representation instead of rows —
+     <code>src/data/sequence.py</code> already supports 7×7 patches, which would hand it a weak
+     locality prior at no architectural cost. (iii) Test a two-stage classifier, coarse group first
+     and then within-group, and report it as an optional extension rather than a core result.
+     (iv) Report multiple seeds, since several gaps here are small enough to need a variance
+     estimate.</p>
 
   <h2>8. Limitations and Conclusion</h2>
-  <p><!-- TODO --></p>
+  <p><strong>Data limitations.</strong> Fashion-MNIST is 28×28, grayscale, centred and
+     background-free, and roughly half of every image is exactly black. Conclusions about inductive
+     bias drawn here do not transfer unchanged to natural images, where scale, pose, lighting and
+     background all vary — in particular, the ordering CNN above Transformer is characteristic of
+     small low-resolution datasets and routinely reverses at scale. The dataset is also a curated
+     research benchmark, so its class balance is not representative of a real catalogue.</p>
+  <p><strong>Method limitations.</strong> One configuration per architecture, chosen as a plain
+     default rather than tuned, and no parameter-matched or compute-matched comparison. The five
+     models differ by 35× in parameter count, so the table compares these six runs and not the
+     architecture families in general.</p>
+  <p><strong>Experimental limitations.</strong> One seed per model and therefore no variance
+     estimate; an epoch budget that the MLP and the Transformer had not saturated; training-time
+     figures that measure the data loader more than the model; and a single dataset, with no
+     robustness, augmentation or interpretability ablation.</p>
+  <p><strong>Conclusion.</strong> Across all five mandatory architectures under one split and one
+     protocol, test macro-F1 ranges from 0.8441 to 0.9145, and the ordering is governed by how much
+     spatial structure each input representation preserves rather than by parameter count: the CNN
+     is best with 4× fewer parameters than the MLP and 5.4× fewer than the Transformer, and the GRU
+     beats the MLP with 3.3× fewer. The differences are concentrated, by a factor of 3.5, in the
+     four classes the EDA had already identified as sharing a silhouette and differing in local
+     texture — which is the concrete form the inductive-bias argument takes on this dataset. The
+     residual errors are dominated by one confusion, Shirt against T-shirt/top, that no architecture
+     here reduces, indicating a limit of the data rather than of the models.</p>
+  <p><strong>Future work.</strong> A loader-independent training-time protocol; multiple seeds
+     reported as mean ± standard deviation; longer schedules for the two unconverged models; a patch
+     representation for the Transformer; a matched-parameter comparison; and an augmentation
+     ablation.</p>
 
-  <h2>Links</h2>
+  <h2 id="links">Links</h2>
   <ul>
-    <li><strong>Source code:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment1" target="_blank">GitHub – assignment1</a></li>
-    <li><strong>Checkpoint(s):</strong> <!-- TODO: link or reproduction instructions --></li>
-    <li><strong>Report / Slides:</strong> <!-- TODO --></li>
-    <li><strong>YouTube presentation:</strong> <!-- TODO --></li>
+    <li><strong>Source code:</strong>
+        <a href="https://github.com/THVKhang/ALearning/tree/main/assignment1" target="_blank">GitHub – assignment1</a>,
+        with installation, dataset preparation, train and evaluate commands in the
+        <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/README.md" target="_blank">README</a>.</li>
+    <li><strong>EDA notebook:</strong>
+        <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/notebooks/eda.ipynb" target="_blank">notebooks/eda.ipynb</a>
+        (committed with its outputs).</li>
+    <li><strong>Checkpoints — reproduction instructions.</strong> Run artifacts are git-ignored, so
+        each reported result is reconstructed from source. Both checkpoints and every figure and
+        metric on this page are regenerated by:
+        <pre>python assignment1\scripts\train.py --model linear
+python assignment1\scripts\train.py --model mlp
+python assignment1\scripts\train.py --model cnn
+python assignment1\scripts\train.py --model lstm
+python assignment1\scripts\train.py --model gru
+python assignment1\scripts\train.py --model transformer
+
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\linear_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\mlp_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\cnn_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\lstm_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\gru_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\transformer_fashion_mnist_seed42</pre>
+        This writes <code>best.pt</code>, <code>history.json</code>, <code>config.json</code> and
+        <code>metrics_test.json</code> into <code>assignment1/outputs/&lt;run_name&gt;/</code>.
+        Every run used seed 42.</li>
+    <li><strong>Reproduction note — revision traceability.</strong> The Linear and MLP rows were
+        produced by the code at tag <code>tags/a1-draft</code> (commit <code>8476977</code>); their
+        accuracy and macro-F1 are unchanged from the M1 Draft submission and only their inference
+        timings were re-measured. The CNN, LSTM, GRU and Transformer rows were produced by a
+        working tree that adds <code>src/models/{cnn,rnn,transformer}.py</code>,
+        <code>src/data/sequence.py</code> and a rewritten inference-timing function, and
+        <strong>that tree is not yet committed</strong>. Handbook Section 4.2 requires every main
+        result to be traceable to a commit or tag, so this page will carry that hash once the tree
+        is committed.</li>
+    <li><strong>Report / slides:</strong> <span class="todo">pending — M2 Final</span></li>
+    <li><strong>YouTube presentation:</strong> <span class="todo">pending — M2 Final</span></li>
   </ul>
 
   <h2>AI Usage Disclosure</h2>
-  <p>See <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/AI_USAGE.md" target="_blank">AI_USAGE.md</a> for details.</p>
+  <p>Generative AI tools were used in this assignment, and their use is disclosed. Claude Code
+     (Claude Sonnet 5, Claude Opus 5) was used by Trần Hoàng Vỹ Khang in two distinct ways. First,
+     to <strong>review</strong> the architecture and cleanliness of the M1 Draft source code,
+     including the MLP and CNN code on the <code>mlp-cnn</code> branch, where it produced findings
+     only and a member made every edit. Second, to <strong>implement</strong> the three models added
+     after the M1 Draft: <code>src/models/cnn.py</code>, <code>src/models/rnn.py</code>,
+     <code>src/models/transformer.py</code>, <code>src/data/sequence.py</code>, the corrected
+     inference-timing function, and the results and analysis sections of this page were drafted by
+     the tool and are pending line-by-line review by the responsible member. The Linear and MLP
+     models, the dataset layer, the training engine, the metrics, the plots and the EDA notebook are
+     member-written. Every result on this page comes from a run executed on the group hardware, and
+     the group is responsible for each number, figure and claim here.</p>
+  <p>The per-tool fields required by Section 5.2 of the handbook — model, member, stage, purpose,
+     affected sections, representative prompt, how the output was verified, responsible member and
+     verification sources — are recorded in
+     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/AI_USAGE.md" target="_blank">AI_USAGE.md</a>.</p>
 </body>
 </html>
