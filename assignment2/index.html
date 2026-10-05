@@ -1,65 +1,309 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Assignment 2 – CO3133 | Nhóm CR7</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 2 &ndash; CO3133 | Group CR7</title>
   <style>
-    body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    h1, h2 { color: #003366; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    a { color: #0057b7; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 880px;
+      margin: 30px auto;
+      padding: 0 20px;
+      color: #222;
+      background: #fff;
+    }
+    h1 { font-size: 1.6em; color: #003366; margin-bottom: 6px; }
+    h2 { font-size: 1.2em; color: #004080; border-bottom: 2px solid #e6ecf5; padding-bottom: 4px; margin-top: 28px; }
+    h3 { font-size: 1.0em; color: #333; margin-bottom: 6px; margin-top: 16px; }
+    .meta { color: #555; margin: 3px 0; font-size: 0.95em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92em; }
+    th, td { border: 1px solid #d0d7de; padding: 7px 10px; text-align: left; vertical-align: top; }
+    th { background: #f3f6fa; font-weight: 600; }
+    tr:nth-child(even) td { background: #f9fbfd; }
+    code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; background: #f0f3f8; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; }
+    pre { background: #f0f3f8; padding: 10px 14px; border-radius: 4px; overflow-x: auto; font-size: 0.86em; line-height: 1.45; }
+    a { color: #0055cc; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    .note { background: #fffbe6; border-left: 4px solid #e6a817; padding: 10px 14px; margin: 14px 0; font-size: 0.92em; border-radius: 0 4px 4px 0; }
+    .placeholder-box { background: #f4f6fb; border: 1px dashed #99b0e6; border-radius: 4px; padding: 12px 16px; margin: 12px 0; color: #445588; font-size: 0.92em; }
+    .back { font-size: 0.9em; margin-bottom: 16px; }
+    ul, ol { margin: 6px 0 10px 20px; padding-left: 0; }
+    li { margin-bottom: 4px; }
+    .status-done { color: #1e7e34; font-weight: 600; }
+    .status-wait { color: #d97706; font-weight: 600; }
+    figure { margin: 16px 0; }
+    figure img { width: 100%; border: 1px solid #e1e4e8; border-radius: 6px; }
+    figcaption { font-size: 0.88em; color: #666; margin-top: 6px; font-style: italic; }
   </style>
 </head>
 <body>
-  <p><a href="../index.html">← Back to Landing Page</a></p>
 
-  <h1>Assignment 2 – [Assignment Title]</h1>
-  <p><strong>Course:</strong> Deep Learning and Its Applications (CO3133) | <strong>Semester:</strong> 261</p>
-  <p><strong>Instructor:</strong> Lê Thành Sách</p>
+  <p class="back"><a href="../index.html">&larr; Back to Course Landing Page</a></p>
 
-  <h2>Group Members</h2>
+  <!-- Title & Metadata -->
+  <h1>Assignment 2 &ndash; Deep Learning on Large-Scale Data for Specialized Tasks</h1>
+  <p class="meta"><strong>Topic:</strong> Monocular Depth Estimation on DIODE Dataset (Indoor &amp; Outdoor)</p>
+  <p class="meta"><strong>Course:</strong> CO3133 Deep Learning and Its Applications | <strong>Semester:</strong> 261 | <strong>Instructor:</strong> Lê Thành Sách</p>
+
+  <!-- Group Members -->
+  <h2>Group Members (Group CR7)</h2>
   <table>
-    <tr><th>Name</th><th>Student ID</th><th>Role</th></tr>
-    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td></td></tr>
-    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td></td></tr>
-    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td></td></tr>
+    <tr><th>Member Name</th><th>Student ID</th><th>Main Roles / Responsibilities</th></tr>
+    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td>Dataset subset creation, scene-level split strategy, baseline setup</td></tr>
+    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Data verification, statistical EDA, hardware compute benchmarking, preprocessing implementation, visualization scripts, report formatting</td></tr>
+    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>No M1 contribution; assigned the baseline U-Net implementation for M2</td></tr>
+  </table>
+  <p class="note"><strong>Attribution note.</strong> Every log entry in
+     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a>
+     records Đỗ Đăng Khoa as the member who carried out the M1 work, including the
+     preprocessing, visualization and formatting listed above. This table is kept consistent
+     with that record rather than describing an intended split: each member is credited only
+     with work they performed, so the M1 workload is reported as uneven.</p>
+
+  <!-- Milestone Status -->
+  <h2>Milestone Status</h2>
+  <table>
+    <tr><th>Milestone</th><th>Deadline</th><th>Deliverable Summary</th><th>Status</th></tr>
+    <tr>
+      <td>M1 Proposal (15%)</td>
+      <td>07 Oct 2026</td>
+      <td>Dataset Proposal: task, split, EDA, metrics, compute estimate</td>
+      <td class="status-done">Completed &#10003;</td>
+    </tr>
+    <tr>
+      <td>M2 Draft (25%)</td>
+      <td>28 Oct 2026</td>
+      <td>Baseline U-Net + MiDaS initial training runs</td>
+      <td class="status-wait">Pending Instructor Approval</td>
+    </tr>
+    <tr>
+      <td>M3 Final (60%)</td>
+      <td>11 Nov 2026</td>
+      <td>Controlled experiment, error analysis, report, slides, video</td>
+      <td>Scheduled</td>
+    </tr>
   </table>
 
+  <div class="note">
+    <strong>Proposal Note:</strong> Per course guidelines, main model training will start in M2/M3 following instructor proposal approval. All work below covers data verification, exploratory statistics, and local hardware speed benchmarking.
+  </div>
+
+  <!-- 1. Problem Statement -->
   <h2>1. Problem Statement</h2>
-  <p><!-- TODO --></p>
-
-  <h2>2. Dataset Description and EDA</h2>
-  <p><!-- TODO --></p>
-
-  <h2>3. Methodology</h2>
-  <p><!-- TODO --></p>
-
-  <h2>4. Experimental Setup</h2>
-  <p><!-- TODO --></p>
-
-  <h2>5. Results</h2>
-  <p><!-- TODO --></p>
-
-  <h2>6. Comparison and Discussion</h2>
-  <p><!-- TODO --></p>
-
-  <h2>7. Error Analysis</h2>
-  <p><!-- TODO --></p>
-
-  <h2>8. Limitations and Conclusion</h2>
-  <p><!-- TODO --></p>
-
-  <h2>Links</h2>
   <ul>
-    <li><strong>Source code:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank">GitHub – assignment2</a></li>
-    <li><strong>Checkpoint(s):</strong> <!-- TODO: link or reproduction instructions --></li>
-    <li><strong>Report / Slides:</strong> <!-- TODO --></li>
-    <li><strong>YouTube presentation:</strong> <!-- TODO --></li>
+    <li><strong>Task Goal:</strong> Monocular Depth Estimation &mdash; predict physical distance (in metres) from camera per pixel from a single 2D RGB photo.</li>
+    <li><strong>Key Challenge:</strong> Scale ambiguity in 2D photos (a small nearby object vs. a giant distant object can take up identical pixel sizes). Model must learn visual perspective, texture gradients, and boundary cues.</li>
+    <li><strong>Data Scope:</strong> Evaluated on both <strong>Indoor</strong> (1&ndash;9m close-range) and <strong>Outdoor</strong> (up to 100&ndash;200m long-range) scenes. Ground truth is measured by LiDAR laser scanners. Missing laser reflections (sky, glass, sharp edges) use a validity mask (1 = valid depth, 0 = ignore).</li>
   </ul>
 
-  <h2>AI Usage Disclosure</h2>
-  <p>See <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a> for details.</p>
+  <table>
+    <tr><th>Component</th><th>Format / Specification</th></tr>
+    <tr><td>Input RGB</td><td>Single RGB photo, shape 3 &times; 288 &times; 384 (H &times; W)</td></tr>
+    <tr><td>Target Depth</td><td>Per-pixel depth map in <strong>metres</strong>, shape 1 &times; 288 &times; 384</td></tr>
+    <tr><td>Ground Truth Mask</td><td>Binary validity mask <em>m</em> (1 = valid pixel, 0 = ignore pixel)</td></tr>
+    <tr><td>Loss Target</td><td>Compute loss and evaluation metrics strictly on valid pixels (mask = 1)</td></tr>
+  </table>
+
+  <!-- 2. Dataset Description & EDA -->
+  <h2>2. Dataset Description &amp; Preliminary EDA</h2>
+
+  <h3>2.1 Dataset Overview &amp; Processing Workflow</h3>
+  <ul>
+    <li><strong>Source Dataset:</strong> DIODE &mdash; Dense Indoor and Outdoor DEpth (Vasiljevic et al., 2019),
+        <a href="https://diode-dataset.org/" target="_blank">diode-dataset.org</a>. Obtained through a Kaggle
+        mirror of the official release. The upstream release totals 26,229 RGB images
+        (train 8,574 indoor + 16,884 outdoor; val 325 indoor + 446 outdoor), which matches the mirror
+        we downloaded.</li>
+    <li><strong>Version:</strong> <span class="todo">to be confirmed &mdash; record the release used
+        (the original 2019 DIODE or the later DIODEv2), the exact Kaggle dataset URL, its Kaggle
+        version number, and the download date</span>.</li>
+    <li><strong>License:</strong> <strong>MIT</strong>, as stated on diode-dataset.org and in the
+        official devkit repository <code>diode-dataset/diode-devkit</code>. <span class="todo">The
+        Kaggle mirror carries its own license field, which may differ from the upstream terms;
+        record it here alongside the MIT upstream license once checked</span>.</li>
+    <li><strong>Citation:</strong> I. Vasiljevic, N. Kolkin, S. Zhang, R. Luo, H. Wang, F. Z. Dai,
+        A. F. Daniele, M. Mostajabi, S. Basart, M. R. Walter and G. Shakhnarovich.
+        <em>DIODE: A Dense Indoor and Outdoor DEpth Dataset.</em> CoRR abs/1908.00463, 2019.</li>
+    <li><strong>Sample Volume:</strong> <strong>7,195 RGB&ndash;Depth pairs</strong> (4,995 train, 1,100 val, 1,100 test across 15 scenes).</li>
+    <li><strong>Sample Modality:</strong> Each sample consists of an RGB image, a high-precision laser depth map in metres, and a binary validity mask indicating measured laser reflections.</li>
+    <li><strong>Processing Rule:</strong> Raw data is loaded dynamically during training via PyTorch DataLoaders; raw data files are kept local and excluded from repository version control.</li>
+  </ul>
+
+  <h3>2.2 Data Splitting Strategy (Scene-Level Split)</h3>
+  <ul>
+    <li><strong>Leakage Prevention:</strong> Data is partitioned strictly by <strong>Scene (physical location / room)</strong> rather than random image sampling. This ensures no overlapping scenes exist between training and evaluation splits, preventing memory shortcut leakage.</li>
+    <li><strong>Split Ratio:</strong> ~70% Train / 15% Val / 15% Test (seed 42). Verified to have <strong>0% scene overlap across splits</strong>.</li>
+    <li><strong>Provenance of the three splits.</strong> DIODE has not released a public test set
+        (the official devkit lists it as "coming soon"), and the official validation set holds only
+        771 images, fewer than our validation split alone. <strong>All three splits below are
+        therefore carved from the official DIODE training set</strong>, partitioned by scene. This
+        is a deliberate choice and it has a consequence we state rather than hide: our numbers are
+        not comparable to published DIODE benchmark results, which use the official protocol.</li>
+    <li><strong>Scene manifest:</strong> the scene-to-split assignment is committed as
+        <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank"><code>proposal/scenes_used.csv</code></a>
+        and is regenerated from the data by <code>scripts/export_scenes.py</code>, which fails if any
+        scene appears in more than one split. That script is the evidence for the no-leakage claim
+        above.</li>
+  </ul>
+
+  <table>
+    <tr><th>Split</th><th>Indoor Scenes (Sample Count)</th><th>Outdoor Scenes (Sample Count)</th><th>Total Samples</th></tr>
+    <tr><td>train</td><td>00002 (700), 00003 (466), 00004 (400), 00005 (340), 00006 (700)</td><td>00007 (389), 00008, 00010, 00013, 00014, 00015 (400 each)</td><td>4,995 (2,606 indoor / 2,389 outdoor)</td></tr>
+    <tr><td>val</td><td>00001 (700)</td><td>00017 (400)</td><td>1,100 (700 indoor / 400 outdoor)</td></tr>
+    <tr><td>test</td><td>00000 (700)</td><td>00018 (400)</td><td>1,100 (700 indoor / 400 outdoor)</td></tr>
+  </table>
+
+  <h3>2.3 Visual Inspection &amp; Data Characteristics</h3>
+  <figure>
+    <img src="assets/train_samples.png" alt="Visual inspection of 5 random training samples">
+    <figcaption>Figure 1. Visual inspection of 5 random train samples. Left: RGB photo. Middle: Depth map (blue = close, red = far, black = invalid; color scale capped at 99th percentile). Right: Validity mask (white = valid).</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Visual Alignment:</strong> Nearby ceiling lamps and pipes display in cool blue; far background walls shift to dark red. Outdoor paths gradually transition from blue to red (~40&ndash;50m).</li>
+    <li><strong>Edge Noise (Edge Bleeding):</strong> Indoor invalid pixels appear mainly as thin boundary outlines around sharp object contours where laser reflection drops.</li>
+    <li><strong>Outdoor Sky Region:</strong> Sky, fine branches, and objects beyond sensor range are masked as invalid (e.g. crane photo is mostly sky, leaving 6.9% valid pixels).</li>
+  </ul>
+
+  <h3>2.4 Distribution Analysis &amp; Noise Handling</h3>
+  <table>
+    <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>Mean Invalid %</th></tr>
+    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.2m</td><td>0.8%</td></tr>
+    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.2m</td><td>6.3m</td><td>37.6m</td><td>74.8m</td><td>31.4%</td></tr>
+    <tr><td>val</td><td>indoor</td><td>700</td><td>0.6m</td><td>1.3m</td><td>3.5m</td><td>6.4m</td><td>0.2%</td></tr>
+    <tr><td>val</td><td>outdoor</td><td>400</td><td>1.4m</td><td>7.1m</td><td>32.5m</td><td>51.4m</td><td>47.4%</td></tr>
+    <tr><td>test</td><td>indoor</td><td>700</td><td>0.8m</td><td>1.8m</td><td>5.0m</td><td>7.5m</td><td>0.2%</td></tr>
+    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.1m</td><td>8.3m</td><td>46.3m</td><td>84.6m</td><td>33.2%</td></tr>
+  </table>
+
+  <figure>
+    <img src="assets/depth_hist.png" alt="Depth distribution histograms across splits">
+    <figcaption>Figure 2. Distribution of valid pixel depth values (in metres) across train, val, and test splits.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/invalid_hist.png" alt="Invalid pixel percentage distribution per image">
+    <figcaption>Figure 3. Distribution of invalid pixel percentage per image across splits.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/angle_by_scene.png" alt="Camera vertical tilt code distribution per scene">
+    <figcaption>Figure 4. Distribution of camera vertical tilt codes (000 to 050) per scene.</figcaption>
+  </figure>
+
+  <ul>
+    <li><strong>Outlier Filtering Rule:</strong> We dynamically mask pixels with depth &gt; <strong>50m (indoor)</strong> or &gt; <strong>200m (outdoor)</strong> by setting `mask = 0`. This filters out &lt; 0.01% extreme sensor noise artifacts without distorting valid geometry.</li>
+    <li><strong>Camera Viewpoint Finding:</strong> DIODE camera tilt codes cover <strong>000 to 050 only</strong> (level or upward view; no downward floor-facing views). This is an inherent property of DIODE source dataset.</li>
+  </ul>
+
+  <!-- 3. Methodology -->
+  <h2>3. Methodology</h2>
+
+  <h3>3.1 Preprocessing Pipeline</h3>
+  <ul>
+    <li><strong>Image Resizing:</strong> Resized from 1024&times;768 down to <strong>384&times;288</strong> to maintain efficient VRAM utilization.</li>
+    <li><strong>RGB Normalization:</strong> Scaled to [0, 1] range and normalized using standard ImageNet mean/std.</li>
+    <li><strong>Depth Target Processing:</strong> Maintained in true physical metres; invalid pixels and extreme depth outliers (&gt; 50m/200m) are masked out during loss calculation.</li>
+    <li><strong>Data Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and validity mask.</li>
+  </ul>
+
+  <h3>3.2 Baseline &amp; Pretrained Models</h3>
+  <ul>
+    <li><strong>Baseline Model:</strong> Lightweight <strong>U-Net</strong> (encoder&ndash;decoder with skip connections) trained <strong>from scratch</strong>.</li>
+    <li><strong>Pretrained Model:</strong> <strong>MiDaS Small</strong> (EfficientNet-Lite3 backbone, 21.3M parameters), predicting inverse depth (`1 / output`) trained with masked SILog loss.</li>
+    <li><strong>Loss Function:</strong> Masked Scale-Invariant Logarithmic (SILog) loss (Eigen et al., 2014) computed over valid pixels.</li>
+  </ul>
+
+  <h3>3.3 Evaluation Metrics</h3>
+  <ul>
+    <li><strong>Abs Rel (Absolute Relative Error):</strong> `(1/N) * sum(|d - d*| / d*)` &rarr; Lower is better (&darr;).</li>
+    <li><strong>RMSE (Root Mean Squared Error):</strong> `sqrt((1/N) * sum((d - d*)^2))` &rarr; Lower is better (&darr;).</li>
+    <li><strong>Threshold Accuracy (&delta; &lt; 1.25<sup>k</sup>):</strong> % of valid pixels with `max(d/d*, d*/d) < 1.25^k` for k = 1, 2, 3 &rarr; Higher is better (&uarr;).</li>
+  </ul>
+
+  <!-- 4. Experimental Setup -->
+  <h2>4. Experimental Setup</h2>
+
+  <h3>4.1 Controlled Experiment Design</h3>
+  <ul>
+    <li><strong>Research Question:</strong> Does full network fine-tuning (Option B) significantly outperform encoder-frozen fine-tuning (Option A)?</li>
+    <li><strong>Variable Factor:</strong> <strong>Option A:</strong> Frozen encoder (decoder only) vs. <strong>Option B:</strong> Full fine-tuning (all layers updated).</li>
+    <li><strong>Controlled Factors:</strong> Identical dataset split, preprocessing, SILog loss, AdamW optimizer, batch size 8, 20 epochs.</li>
+    <li><strong>Runs &amp; Seeds:</strong> 3 independent random seeds (42, 43, 44), reporting Mean &plusmn; Standard Deviation.</li>
+    <li><strong>Hypothesis:</strong> full fine-tuning adapts the MiDaS encoder to the DIODE depth
+        scale and sensor characteristics, which a frozen encoder cannot, so Option B achieves lower
+        Abs Rel than Option A.</li>
+    <li><strong>Decision criterion:</strong> Option B is judged better than Option A only if its
+        mean test Abs Rel is lower <em>and</em> the two mean &plusmn; 1 standard deviation intervals
+        over the three seeds do not overlap. If the intervals overlap, the result is reported as
+        <em>no measurable difference at n = 3</em>, not as a win for either option. The same rule is
+        applied to RMSE and &delta; &lt; 1.25 as secondary checks; Abs Rel decides.</li>
+    <li><strong>Determinism:</strong> each run pins its seed across <code>random</code>,
+        <code>numpy</code> and <code>torch</code> and sets
+        <code>torch.backends.cudnn.deterministic = True</code> with the cuDNN autotuner disabled.
+        Without that last step a convolutional encoder does not reproduce from its seed, so the
+        seed-to-seed spread this experiment measures would be confounded by run-to-run noise.</li>
+  </ul>
+
+  <h3>4.2 Hardware &amp; Speed Benchmark</h3>
+  <ul>
+    <li><strong>Hardware:</strong> NVIDIA GeForce RTX 4060 Laptop GPU (8 GB VRAM).</li>
+    <li><strong>Inference Speed (Batch 8):</strong> 4.9 ms / image (~205 FPS), using 0.42 GB VRAM.</li>
+    <li><strong>Training Speed (FP32, Batch 8):</strong> ~1.5 min / epoch (3.2 GB VRAM).</li>
+    <li><strong>Training Speed (AMP Mixed Precision, Batch 8):</strong> <strong>~1.0 min / epoch</strong> (2.0 GB VRAM).</li>
+    <li><strong>Total Compute Budget:</strong> 6 runs &times; 20 epochs = ~3 GPU hours. Total estimate including baseline &amp; 2&times; thermal throttling buffer: <strong>~6&ndash;8 GPU hours</strong> (runs locally on laptop).</li>
+  </ul>
+
+  <!-- 5. Results -->
+  <h2>5. Results</h2>
+  <div class="placeholder-box">
+    <strong>Milestone 1 Status:</strong> Numerical evaluation metrics for Baseline U-Net and MiDaS fine-tuning runs will be updated here during Milestone 2 and Milestone 3 upon proposal approval.
+  </div>
+
+  <!-- 6. Comparison and Discussion -->
+  <h2>6. Comparison and Discussion</h2>
+  <div class="placeholder-box">
+    <strong>Milestone 1 Status:</strong> Comparative analysis between Baseline U-Net, MiDaS zero-shot, and fine-tuning options will be populated in Milestone 3.
+  </div>
+
+  <!-- 7. Error Analysis -->
+  <h2>7. Error Analysis</h2>
+  <div class="placeholder-box">
+    <strong>Milestone 1 Status:</strong> Failure mode analysis (sky regions, reflective surfaces, object borders, extreme depth ranges) will be added in Milestone 3.
+  </div>
+
+  <!-- 8. Limitations and Conclusion -->
+  <h2>8. Limitations and Conclusion</h2>
+  <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
+  <ol>
+    <li>Val and test sets each contain only 1 indoor scene and 1 outdoor scene.</li>
+    <li>Test indoor room is smaller than train rooms (median 1.8m vs 2.6m).</li>
+    <li>Outdoor val set has a higher sky/invalid pixel percentage (~47% vs ~31% in train).</li>
+    <li>Laser ground-truth depth has minor noise at sharp object boundaries (edge bleeding).</li>
+    <li>DIODE lacks downward floor-facing camera tilt (vertical angles cover 000&ndash;050 only).</li>
+    <li>Downsampling to 384&times;288 smooths fine structures like distant wires and thin branches.</li>
+    <li>All three splits are carved from the official DIODE training set because no public test set
+        exists, so results here cannot be compared against published DIODE benchmark numbers.</li>
+    <li>The subset selection rule is documented but not yet executable: the resize and the
+        scene-level partition were performed outside this repository, so the subset cannot currently
+        be regenerated from the upstream dataset. A <code>scripts/make_subset.py</code> that encodes
+        the rule is outstanding.</li>
+  </ol>
+
+  <h3>8.2 M1 Conclusion</h3>
+  <p>
+    Our dataset subset is verified clean and free of scene leakage. Local GPU benchmarks confirm fast fine-tuning (~1 min/epoch with AMP), demonstrating that our planned controlled experiment is completely feasible on local hardware within 6&ndash;8 GPU hours.
+  </p>
+
+  <!-- 9. Links & Resources -->
+  <h2>9. Links &amp; Resources</h2>
+  <ul>
+    <li><strong>Source Code Repository:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank">GitHub Repository (assignment2/)</a></li>
+    <li><strong>Checkpoint Instructions &amp; Pretrained Weights:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2#reproducibility--checkpoints" target="_blank">Instructions to Reproduce Checkpoints</a></li>
+    <li><strong>Report &amp; Presentation Slides:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
+    <li><strong>YouTube Presentation Video:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
+    <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
+  </ul>
+
 </body>
 </html>
