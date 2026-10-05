@@ -230,3 +230,5 @@ assignment3/outputs/*
 !assignment1/outputs/.gitkeep
 !assignment2/outputs/.gitkeep
 !assignment3/outputs/.gitkeep
+
+docs/

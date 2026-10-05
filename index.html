@@ -92,8 +92,18 @@
 
   <h2>3. AI Usage Disclosure (Landing)</h2>
   <p>Nhóm có sử dụng công cụ AI hỗ trợ (Claude Code – Claude Sonnet 5, Claude Opus 5) trong quá trình thực hiện các bài tập.
-  Ở Assignment 1, công cụ này được dùng để review độ sạch của code trên nhánh <code>mlp-cnn</code> (mô hình MLP và CNN);
+  Ở <strong>Assignment 1</strong>, công cụ này được dùng để review độ sạch của code trên nhánh <code>mlp-cnn</code> (mô hình MLP và CNN);
   nhóm đã tự kiểm tra kết quả review và quyết định chưa gộp nhánh đó.
+  Ở <strong>Assignment 2</strong>, công cụ được dùng theo hai cách khác nhau. Một là <em>hỗ trợ</em>:
+  kiểm tra định dạng mask và dải độ sâu của DIODE, gỡ lỗi <code>torch.hub</code> khi benchmark MiDaS,
+  chỉnh thang màu khi vẽ depth map, tối ưu bộ nhớ cho phần thống kê, và rà soát thiết kế thí nghiệm
+  đối chứng — thành viên tự chạy lại và tự quyết trong mọi trường hợp. Hai là <em>viết code và
+  viết báo cáo</em>: các script <code>make_subset.py</code>, <code>export_scenes.py</code>,
+  <code>kaggle_diagnose.py</code> và một số mục của trang Assignment 2 do AI soạn, và đang chờ thành
+  viên chịu trách nhiệm đọc và duyệt lại từng dòng. Trong quá trình đó AI phát hiện bản dựng dữ liệu
+  đầu tiên nội suy bản đồ độ sâu bằng bilinear làm hỏng nhãn ở biên vùng không hợp lệ; nhóm đã dựng
+  lại toàn bộ subset bằng nearest neighbour và cập nhật lại số liệu. Chi tiết từng mục nằm trong
+  AI_USAGE – Assignment 2.
   Mọi kết quả đều được nhóm tự kiểm tra và chịu trách nhiệm. Chi tiết từng bài xem tại:</p>
   <ul>
     <li><a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/AI_USAGE.md" target="_blank">AI Usage – Assignment 1</a></li>

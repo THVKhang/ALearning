@@ -117,13 +117,17 @@
         mirror of the official release. The upstream release totals 26,229 RGB images
         (train 8,574 indoor + 16,884 outdoor; val 325 indoor + 446 outdoor), which matches the mirror
         we downloaded.</li>
-    <li><strong>Version:</strong> <span class="todo">to be confirmed &mdash; record the release used
-        (the original 2019 DIODE or the later DIODEv2), the exact Kaggle dataset URL, its Kaggle
-        version number, and the download date</span>.</li>
-    <li><strong>License:</strong> <strong>MIT</strong>, as stated on diode-dataset.org and in the
-        official devkit repository <code>diode-dataset/diode-devkit</code>. <span class="todo">The
-        Kaggle mirror carries its own license field, which may differ from the upstream terms;
-        record it here alongside the MIT upstream license once checked</span>.</li>
+    <li><strong>Version:</strong> the original 2019 DIODE release, obtained from the Kaggle mirror
+        <a href="https://www.kaggle.com/datasets/artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset" target="_blank"><code>artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset</code></a>,
+        Kaggle <strong>Version 8</strong> (199.89 GB, last updated two years ago). Not DIODEv2: the
+        mirror holds 26,229 images, exactly the 25,458 training plus 771 validation images of the
+        2019 release, and its data sources contain only <code>train/</code> and <code>val/</code>.</li>
+    <li><strong>License:</strong> <strong>MIT</strong>, and consistent at both levels, which was
+        checked rather than assumed: the upstream release states MIT on diode-dataset.org and in the
+        official devkit repository <code>diode-dataset/diode-devkit</code>, and the Kaggle mirror we
+        downloaded declares MIT in its own License field. The mirror therefore imposes no terms
+        beyond the upstream licence, and redistribution of a derived subset is permitted provided
+        the citation below is kept.</li>
     <li><strong>Citation:</strong> I. Vasiljevic, N. Kolkin, S. Zhang, R. Luo, H. Wang, F. Z. Dai,
         A. F. Daniele, M. Mostajabi, S. Basart, M. R. Walter and G. Shakhnarovich.
         <em>DIODE: A Dense Indoor and Outdoor DEpth Dataset.</em> CoRR abs/1908.00463, 2019.</li>
@@ -142,6 +146,23 @@
         therefore carved from the official DIODE training set</strong>, partitioned by scene. This
         is a deliberate choice and it has a consequence we state rather than hide: our numbers are
         not comparable to published DIODE benchmark results, which use the official protocol.</li>
+    <li><strong>Subset selection rule.</strong> The upstream release holds 26,229 images; the
+        subset takes 7,195 of them under a fixed rule, implemented in
+        <code>scripts/make_subset.py</code> and reproducible from seed 42:
+        <ol>
+          <li>Collect every RGB file under <code>train/&lt;domain&gt;/&lt;scene&gt;/&lt;scan&gt;/</code>
+              that has both a depth map and a validity mask.</li>
+          <li>Shuffle the scene list, then take at most <strong>700 images per indoor scene</strong>
+              until 4,000 are collected, and at most <strong>400 per outdoor scene</strong> until
+              3,000 are collected. The per-scene cap is what spreads the subset over many scenes
+              instead of exhausting one. A scene holding fewer images than the cap contributes all
+              it has, which is why the per-scene counts in the table below are uneven (466, 389,
+              340) rather than all equal to the cap.</li>
+          <li>This selects all 7 indoor scenes and 8 of the 12 outdoor scenes.</li>
+          <li>Reseed, shuffle the selected scenes again, and partition them 70 / 15 / 15
+              <strong>by scene count, not by image count</strong>, giving 5 / 1 / 1 indoor and
+              6 / 1 / 1 outdoor.</li>
+        </ol></li>
     <li><strong>Scene manifest:</strong> the scene-to-split assignment is committed as
         <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank"><code>proposal/scenes_used.csv</code></a>
         and is regenerated from the data by <code>scripts/export_scenes.py</code>, which fails if any
@@ -168,14 +189,19 @@
   </ul>
 
   <h3>2.4 Distribution Analysis &amp; Noise Handling</h3>
+  <p class="note"><strong>These figures come from the rebuilt subset.</strong> An earlier build
+     resized depth with bilinear interpolation, which averaged the zeros that DIODE uses for
+     invalid pixels into neighbouring valid depths. The subset was rebuilt with nearest-neighbour
+     resampling and the table below is the recomputed result. The change confirms the mechanism
+     and is quantified under the table. Figures 2 and 1 are regenerated from the same rebuild.</p>
   <table>
     <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>Mean Invalid %</th></tr>
-    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.2m</td><td>0.8%</td></tr>
-    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.2m</td><td>6.3m</td><td>37.6m</td><td>74.8m</td><td>31.4%</td></tr>
+    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.1m</td><td>0.7%</td></tr>
+    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.4m</td><td>6.5m</td><td>37.9m</td><td>75.4m</td><td>30.3%</td></tr>
     <tr><td>val</td><td>indoor</td><td>700</td><td>0.6m</td><td>1.3m</td><td>3.5m</td><td>6.4m</td><td>0.2%</td></tr>
-    <tr><td>val</td><td>outdoor</td><td>400</td><td>1.4m</td><td>7.1m</td><td>32.5m</td><td>51.4m</td><td>47.4%</td></tr>
+    <tr><td>val</td><td>outdoor</td><td>400</td><td>2.1m</td><td>7.7m</td><td>33.1m</td><td>51.6m</td><td>44.4%</td></tr>
     <tr><td>test</td><td>indoor</td><td>700</td><td>0.8m</td><td>1.8m</td><td>5.0m</td><td>7.5m</td><td>0.2%</td></tr>
-    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.1m</td><td>8.3m</td><td>46.3m</td><td>84.6m</td><td>33.2%</td></tr>
+    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.5m</td><td>8.5m</td><td>46.1m</td><td>84.0m</td><td>31.8%</td></tr>
   </table>
 
   <figure>
@@ -192,7 +218,41 @@
   </figure>
 
   <ul>
-    <li><strong>Outlier Filtering Rule:</strong> We dynamically mask pixels with depth &gt; <strong>50m (indoor)</strong> or &gt; <strong>200m (outdoor)</strong> by setting `mask = 0`. This filters out &lt; 0.01% extreme sensor noise artifacts without distorting valid geometry.</li>
+    <li><strong>What the resampling correction changed.</strong> Comparing the rebuilt figures
+        against the earlier bilinear build isolates the effect, and it behaves exactly as the
+        mechanism predicts:
+        <ul>
+          <li><strong>Indoor is unchanged</strong> (p5, median and p95 identical to the previous
+              digit; p99 20.2 to 20.1 m). Indoor scenes carry 0.2 to 0.8 percent invalid pixels,
+              so there was almost nothing for the interpolation to contaminate.</li>
+          <li><strong>Outdoor depths moved upward</strong>, most at the low end where the
+              contamination concentrates: validation p5 rose 1.4 to 2.1 m and its median 7.1 to
+              7.7 m. Bilinear had been dragging those values down toward the zeros of the sky.</li>
+          <li><strong>The share of invalid pixels fell</strong>: 31.4 to 30.3 percent for outdoor
+              training, 47.4 to 44.4 for validation, 33.2 to 31.8 for test, while indoor barely
+              moved. This is the clearest evidence of the defect. The mask was resampled with
+              nearest in both builds and is therefore byte-identical, so the drop cannot come from
+              the mask. It comes from valid pixels whose depth had been averaged down to exactly
+              zero and were then rejected by the <code>depth &gt; 0</code> test. On the outdoor
+              validation split that was about 1.3 million pixels of ground truth silently
+              discarded, and the loss scaled with the invalid fraction of each split.</li>
+        </ul></li>
+    <li><strong>Depth bounds applied at load time.</strong> Pixels beyond <strong>50 m indoor</strong>
+        or <strong>200 m outdoor</strong> are masked out by setting <code>mask = 0</code>. Measured on
+        the training split, these two bounds do very different things, and the distinction is worth
+        stating rather than hiding behind one number:
+        <ul>
+          <li><strong>The indoor bound removes nothing.</strong> No training image has a single valid
+              pixel above 50 m (0 of 2,606 images, 0.0000% of valid pixels). This matches the 50 m
+              indoor range DIODE documents for its sensor, so the bound is a guard against
+              out-of-range values rather than a filter that acts on this data.</li>
+          <li><strong>The outdoor bound does cut real measurements.</strong> It touches 149 of 2,389
+              training images and 0.0048% of valid pixels. Those are not sensor artifacts: DIODE
+              documents a 300 m outdoor range, and nothing in the subset exceeds it (0 of 2,389
+              images above 300 m). The 200 m bound is therefore a deliberate choice to exclude the
+              sparse long tail, which keeps the loss from being dominated by a handful of distant
+              pixels, not a noise filter.</li>
+        </ul></li>
     <li><strong>Camera Viewpoint Finding:</strong> DIODE camera tilt codes cover <strong>000 to 050 only</strong> (level or upward view; no downward floor-facing views). This is an inherent property of DIODE source dataset.</li>
   </ul>
 
@@ -201,7 +261,20 @@
 
   <h3>3.1 Preprocessing Pipeline</h3>
   <ul>
-    <li><strong>Image Resizing:</strong> Resized from 1024&times;768 down to <strong>384&times;288</strong> to maintain efficient VRAM utilization.</li>
+    <li><strong>Image Resizing:</strong> Resized from 1024&times;768 down to <strong>384&times;288</strong>,
+        about one seventh of the pixels, to keep the subset small enough to hold locally and to fit
+        the training budget in Section 4.2. <strong>The resampling filter differs by array, and the
+        distinction matters:</strong> the RGB image is a feature and is resized bilinearly, then
+        stored as JPEG at quality 90; the depth map and the validity mask are <em>labels</em> and are
+        resampled with <strong>nearest neighbour only</strong>. Depth is stored as float16 and the
+        mask as uint8.</li>
+    <li><strong>Why depth must not be interpolated.</strong> DIODE stores an invalid pixel as 0.
+        Averaging depth across a resize mixes those zeros into neighbouring valid pixels and pulls
+        them downward, producing distances that no surface occupies &mdash; precisely in the
+        edge-bleeding region described in Section 2.3. Because the mask is resampled with nearest,
+        it stays clean and does not mark the affected pixels, so a pixel can read
+        <code>mask = 1</code> while its depth has been contaminated. Outdoor scenes carry 31 to 47
+        percent invalid pixels, so a large share of their boundaries are exposed to this.</li>
     <li><strong>RGB Normalization:</strong> Scaled to [0, 1] range and normalized using standard ImageNet mean/std.</li>
     <li><strong>Depth Target Processing:</strong> Maintained in true physical metres; invalid pixels and extreme depth outliers (&gt; 50m/200m) are masked out during loss calculation.</li>
     <li><strong>Data Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and validity mask.</li>
@@ -284,10 +357,14 @@
     <li>Downsampling to 384&times;288 smooths fine structures like distant wires and thin branches.</li>
     <li>All three splits are carved from the official DIODE training set because no public test set
         exists, so results here cannot be compared against published DIODE benchmark numbers.</li>
-    <li>The subset selection rule is documented but not yet executable: the resize and the
-        scene-level partition were performed outside this repository, so the subset cannot currently
-        be regenerated from the upstream dataset. A <code>scripts/make_subset.py</code> that encodes
-        the rule is outstanding.</li>
+    <li>The outdoor cap of 400 images per scene is tighter than the indoor cap of 700, so the
+        subset is deliberately not proportional to the upstream domain sizes; outdoor scene
+        diversity was preferred over outdoor image count.</li>
+    <li>RGB images are stored as JPEG at quality 90 rather than lossless PNG, a size trade-off that
+        introduces compression artifacts the upstream release does not have.</li>
+    <li>Depth is stored as float16. At the outdoor range this quantises to roughly 0.06 m near
+        100 m and 0.13 m near 200 m, which is below the noise floor of the sensor at those
+        distances but is not exact.</li>
   </ol>
 
   <h3>8.2 M1 Conclusion</h3>

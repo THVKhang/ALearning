@@ -26,6 +26,8 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **6** | M1 Leakage Check | Scene-level data split disjunction verification | `proposal/scenes_used.csv`, `scripts/export_scenes.py`, Report Sec. 2.2 | Set intersection check in Python & CSV lookup | Đỗ Đăng Khoa |
 | **7** | M1 Loss Formulation | SILog loss mathematical formula verification | Report Sec. 3.2 & Sec. 5 | Eigen et al. (2014) NIPS paper cross-reference | Đỗ Đăng Khoa |
 | **8** | M1 Proposal Report | Report formatting & 16-point checklist review | `assignment2/index.html` | Visual check at `http://localhost:8085` & Handbook Sec. 18 | Đỗ Đăng Khoa |
+| **9** | M1 Compliance Audit | Section 18 and 21 gap check; **code and report writing** | `scripts/export_scenes.py`, `proposal/scenes_used.csv`, `assignment2/index.html` | Handbook Sec. 18, 19.6, 20, 21, 22; diode-dataset.org | Trần Hoàng Vỹ Khang |
+| **10** | M1 Subset Reproducibility | Recovered the subset rule; found and corrected bilinear depth resampling | `scripts/make_subset.py`, `scripts/kaggle_diagnose.py`, `notebooks/`, `assignment2/index.html` | Group Kaggle notebook; OpenCV docs; synthetic calibration | Trần Hoàng Vỹ Khang |
 
 ---
 
@@ -181,6 +183,23 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Student Verification & Editing** | **Outstanding.** The license and version still require confirmation by a member against the exact Kaggle mirror page used, since a mirror may carry terms that differ from the upstream MIT license; those two fields are marked as pending on the page rather than filled in. `scripts/export_scenes.py` has not been executed, because the subset is not present on the machine where it was written: a member must run it against the data and confirm it reproduces `proposal/scenes_used.csv` exactly. The AI-authored text and code listed above have not yet been reviewed line by line by the responsible member. |
 | **Responsible Member** | Trần Hoàng Vỹ Khang |
 | **Verification Sources** | diode-dataset.org; `diode-dataset/diode-devkit`; Vasiljevic et al. (2019), CoRR abs/1908.00463; CO3133 Course Handbook Sections 18, 19.6, 20, 21, 22 |
+
+---
+
+### Log Entry 10: Recovering the Subset Rule and Correcting Depth Resampling
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Claude Code CLI; Claude Opus 5 |
+| **Member Who Used It** | Trần Hoàng Vỹ Khang |
+| **Development Stage** | M1 Proposal, subset reproducibility (05 October 2026) |
+| **Purpose / Category** | Code review; **code writing** (authoring, not only review); debugging |
+| **Affected Sections / Files** | `assignment2/scripts/make_subset.py` (new, AI-authored), `assignment2/scripts/kaggle_diagnose.py` (new, AI-authored), `assignment2/notebooks/monocular-depth-estimation.ipynb` (added to the repository by the member, not modified), and in `assignment2/index.html`: the version item in Section 2.1, the subset selection rule in Section 2.2, the resampling items in Section 3.1, the regeneration note in Section 2.4, and items 7 to 9 of Section 8.1 |
+| **Representative Prompt** | *"1,11 làm như nào"*; *"tôi đã bỏ vào notebook"*; *"hãy dựng lại, làm hết"*. The full session transcript is kept locally by the member and is not published. |
+| **AI Contribution** | Read the Kaggle notebook that originally built the subset and recovered the selection rule from it: the per-domain target counts and per-scene caps, the seeded shuffle order, and the 70/15/15 partition taken over scene counts rather than image counts. Verified the rule against the published figures by re-running the sampling and splitting logic on synthetic data, which reproduced 7 of 7 indoor scenes, 8 of 12 outdoor scenes and the 5/1/1 and 6/1/1 split structure with no scene shared between splits. **Found a defect in the notebook**: depth was resized with `cv2.INTER_LINEAR` while the mask beside it used `cv2.INTER_NEAREST`. Since DIODE encodes an invalid pixel as 0, bilinear averaging pulled valid depths near invalid regions downward, and the nearest-resampled mask did not mark the affected pixels, so the contamination was invisible to the validity mask. Wrote `make_subset.py` encoding the corrected rule, and `kaggle_diagnose.py` to verify resampling from the files alone, calibrating its two tests on a synthetic depth map before use. |
+| **Student Verification & Editing** | **Partly outstanding.** The sampling and split logic was checked against the counts already published in Section 2.2 and reproduces them. `make_subset.py` has **not yet been executed against the real dataset**: the subset lives on Kaggle, not on the machine where the script was written, so a member must run it, confirm the output matches `proposal/scenes_used.csv`, and re-run the EDA. The depth figures in Section 2.4 are marked on the page as being regenerated and must not be cited until that rerun completes. The dataset license still requires confirmation against the Kaggle mirror page. The AI-authored code and report items listed above have not yet been reviewed line by line by the responsible member. |
+| **Responsible Member** | Trần Hoàng Vỹ Khang |
+| **Verification Sources** | The group's own Kaggle notebook `dokhoa05/monocular-depth-estimation` (version 4); the Kaggle mirror `artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset` version 8; OpenCV `cv2.resize` interpolation documentation; CO3133 Course Handbook Sections 18 and 22 |
 
 ---
 
