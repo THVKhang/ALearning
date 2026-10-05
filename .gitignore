@@ -224,9 +224,32 @@ assignment1/data/
 assignment2/data/
 assignment3/data/
 
+# Run artifacts. Keep the small metadata that makes a reported number traceable
+# to the run that produced it (handbook Section 4.2); drop weights and generated
+# figures. A figure that a page publishes is copied into assignment*/assets/ and
+# tracked there, so the page never depends on an ignored path.
 assignment1/outputs/*
-assignment2/outputs/*
-assignment3/outputs/*
 !assignment1/outputs/.gitkeep
+!assignment1/outputs/*/
+assignment1/outputs/*/*
+!assignment1/outputs/*/config.json
+!assignment1/outputs/*/history.json
+!assignment1/outputs/*/metrics_test.json
+
+assignment2/outputs/*
 !assignment2/outputs/.gitkeep
+!assignment2/outputs/*/
+assignment2/outputs/*/*
+!assignment2/outputs/*/config.json
+!assignment2/outputs/*/history.json
+!assignment2/outputs/*/metrics_test.json
+!assignment2/outputs/*/midas_small.json
+!assignment2/outputs/*/summary.md
+
+assignment3/outputs/*
 !assignment3/outputs/.gitkeep
+!assignment3/outputs/*/
+assignment3/outputs/*/*
+!assignment3/outputs/*/config.json
+!assignment3/outputs/*/history.json
+!assignment3/outputs/*/metrics_test.json
