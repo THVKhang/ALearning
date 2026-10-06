@@ -1,3 +1,3 @@
 # ALearning
 BTL Deep Learning
-Group CR7
+Group CR7.
