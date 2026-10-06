@@ -1,22 +1,12 @@
-# Self-contained version of export_scenes.py + diagnose_subset.py, for a Kaggle notebook.
-#
-# The subset lives on Kaggle, not on the machine that holds this repository, so the two
-# diagnostics cannot import from src/. Paste this whole file into one notebook cell and run
-# it. It needs nothing but numpy and pillow, both preinstalled on Kaggle.
-#
-# It prints the scene manifest and the resize verdict, and writes scenes_used.csv into
-# /kaggle/working so it can be downloaded and committed to proposal/.
-
 import os
 import csv
 import numpy as np
 from PIL import Image
 from collections import Counter, defaultdict
 
-# Leave ROOT as None to search /kaggle/input for the folder holding train/ val/ test/.
 ROOT = None
 SPLITS = ("train", "val", "test")
-PROBE = 12                      # images per split for the resize probe
+PROBE = 12
 
 
 def find_root(start="/kaggle/input"):
@@ -39,19 +29,12 @@ def list_ids(split_dir):
 
 
 def parse_id(sid):
-    # 00005_00039_indoors_250_050 -> scene, scan, domain, h angle, v angle
     scene, scan, dom, h, v = sid.split("_")
     return scene, int(scan), "indoor" if dom == "indoors" else "outdoor", int(h), int(v)
 
 
 def border_ratio(depth, valid):
-    """Median depth of valid pixels touching an invalid pixel, over the interior median.
-
-    DIODE stores invalid depth as 0, so any averaging filter mixes those zeros into
-    neighbouring valid pixels and drags them down; nearest neighbour copies single pixels
-    and leaves them alone. Calibrated on a synthetic 768x1024 map (2 m object on an 8 m
-    background, invalid band) downsampled to 384x288: nearest 1.000, bilinear 0.116.
-    """
+    """Ratio of depth at border pixels vs interior pixels to check resize mode (nearest vs bilinear)."""
     inv = ~valid
     nb = np.zeros_like(inv)
     nb[1:, :] |= inv[:-1, :]
@@ -73,7 +56,6 @@ for split in SPLITS:
         scene, scan, dom, h, v = parse_id(sid)
         by_scene[(split, scene, dom)].append((scan, h, v))
 
-# ------------------------------------------------- 1. scene manifest and leakage check
 rows = []
 for (split, scene, dom), items in by_scene.items():
     rows.append({"scene": scene, "split": split, "domain": dom, "samples": len(items)})
@@ -105,7 +87,6 @@ for split in SPLITS:
           % (split, len(picked), ind + out, ind, out))
 print("  total %5d  -> written to %s" % (sum(r["samples"] for r in rows), out_csv))
 
-# --------------------------------------------- 2. what the selection rule looks like
 print("\n== per-scene scan coverage ==")
 print("%-6s %-7s %-8s %7s %6s %-14s %s"
       % ("split", "scene", "domain", "images", "scans", "scan ids", "selection looks like"))
@@ -122,7 +103,6 @@ for (split, scene, dom), items in sorted(by_scene.items(),
     print("%-6s %-7s %-8s %7d %6d %-14s %s"
           % (split, scene, dom, len(items), len(scans), rng, verdict))
 
-# ------------------------------------------ 3. how depth and mask were resampled
 print("\n== resize probe ==")
 for split in SPLITS:
     d = os.path.join(root, split)
@@ -152,14 +132,6 @@ for split in SPLITS:
               % (float(np.median(ratios)), len(ratios)))
 
 print("""
-== how to read the resize probe ==
-                                 nearest   bilinear
-  mask distinct values                 2          4
-  depth border / interior ratio    1.000      0.116
-
-mask distinct values == 2 and border ratio near 1.000
-    -> nearest neighbour was used. This is correct; nothing to redo.
-mask has more than 2 values, or the border ratio is well below 1.000
-    -> depth was averaged across invalid regions. That invents distances no surface
-       occupies, right where the proposal describes edge bleeding, and it biases the p95
-       and p99 figures. The subset would need rebuilding with nearest and the EDA re-running.""")
+== Summary ==
+- Mask unique values == 2 & ratio ~ 1.0 => Nearest neighbor used (OK).
+- Mask unique values > 2 or ratio < 0.5 => Bilinear/averaged resize used.""")

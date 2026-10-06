@@ -1,22 +1,3 @@
-# Build data/diode_subset from the upstream DIODE release, reproducibly.
-#
-# This encodes the rule that produced the subset described in the proposal, recovered from
-# the Kaggle notebook that originally built it, with one correction.
-#
-# THE CORRECTION. The original notebook resized depth with cv2.INTER_LINEAR while resizing
-# the mask with cv2.INTER_NEAREST. DIODE stores invalid depth as 0, so bilinear averaged
-# those zeros into neighbouring valid pixels and pulled them downward, inventing distances
-# that no surface occupies. Because the mask was resampled with nearest, it stayed clean and
-# did not mark the contaminated pixels: a pixel could read mask = 1 while its depth had been
-# averaged with invalid zeros. Outdoor scenes carry 31 to 47 percent invalid pixels, so a
-# large share of their boundaries were affected, which biased the depth percentiles reported
-# in the proposal. Depth is a label here, not a feature, and a label must be sampled, never
-# interpolated. This script uses nearest for depth and mask alike.
-#
-# Runs unchanged on Kaggle and locally:
-#   python scripts/make_subset.py --source /kaggle/input/<slug> --out /kaggle/working/diode_subset
-#   python scripts/make_subset.py --source data/diode_raw      --out data/diode_subset
-
 import argparse
 import csv
 import os
@@ -27,13 +8,11 @@ from PIL import Image
 
 try:
     import cv2
-except ImportError:  # pillow-only fallback keeps the script runnable without opencv
+except ImportError:
     cv2 = None
 
 TARGET_W, TARGET_H = 384, 288           # from 1024x768, about one seventh of the pixels
 SPLITS = ("train", "val", "test")
-
-# Per-domain sampling budget, as in the notebook that built the published subset.
 BUDGET = {
     "indoor": {"target": 4000, "max_per_scene": 700},
     "outdoor": {"target": 3000, "max_per_scene": 400},
@@ -65,10 +44,7 @@ def collect_pairs(domain_path, domain_name):
 
 
 def sample_by_scene_capped(pairs, target_count, max_per_scene):
-    """Take whole scenes in shuffled order, at most max_per_scene images from each, until
-    target_count is reached. The cap is what forces the subset across many scenes rather
-    than exhausting one; a scene holding fewer images than the cap contributes all it has,
-    which is why the per-scene counts are uneven."""
+    """Sample images scene by scene with max cap per scene."""
     scenes = sorted({p["scene"] for p in pairs})
     random.shuffle(scenes)
     selected, used = [], []
@@ -83,9 +59,7 @@ def sample_by_scene_capped(pairs, target_count, max_per_scene):
 
 
 def split_scenes(scenes_list, train_ratio=0.7, val_ratio=0.15):
-    """Partition by scene, not by image. A scene never spans two splits, which is the
-    leakage control the proposal claims: the same room photographed twice cannot appear in
-    both training and test."""
+    """Split dataset at scene level to prevent data leakage."""
     scenes = list(scenes_list)
     random.shuffle(scenes)
     n = len(scenes)
@@ -108,11 +82,10 @@ def write_sample(pair, split, out_dir, jpeg_quality):
     base = os.path.basename(pair["rgb"])[:-4]
     folder = os.path.join(out_dir, split)
 
-    # RGB is a feature, so resampling it smoothly is fine and JPEG keeps the subset small.
+    # Save RGB as JPEG
     img = Image.open(pair["rgb"]).convert("RGB").resize((TARGET_W, TARGET_H), Image.BILINEAR)
     img.save(os.path.join(folder, base + ".jpg"), quality=jpeg_quality)
 
-    # Depth and mask are labels. Nearest only - see the note at the top of this file.
     depth = np.load(pair["depth"]).squeeze()
     np.save(os.path.join(folder, base + "_depth.npy"), resize_nearest(depth, np.float16))
 
@@ -142,8 +115,6 @@ def main():
         print("%-8s %6d pairs across %2d scenes"
               % (dom, len(pairs[dom]), len({p["scene"] for p in pairs[dom]})))
 
-    # Sampling and splitting draw from one RNG stream in this order, so the seed reproduces
-    # the published subset exactly. Reordering these calls changes the selection.
     random.seed(args.seed)
     subset, used = {}, {}
     for dom in ("indoor", "outdoor"):

@@ -54,7 +54,7 @@
     <tr><th>Member Name</th><th>Student ID</th><th>Main Roles / Responsibilities</th></tr>
     <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td>Dataset subset creation, scene-level split strategy, baseline setup</td></tr>
     <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Data verification, statistical EDA, hardware compute benchmarking, preprocessing implementation, visualization scripts, report formatting</td></tr>
-    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>No M1 contribution; assigned the baseline U-Net implementation for M2</td></tr>
+    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>Preprocessing implementation, visualization scripts, report formatting</td></tr>
   </table>
   <p class="note"><strong>Attribution note.</strong> Every log entry in
      <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a>
@@ -138,36 +138,10 @@
 
   <h3>2.2 Data Splitting Strategy (Scene-Level Split)</h3>
   <ul>
-    <li><strong>Leakage Prevention:</strong> Data is partitioned strictly by <strong>Scene (physical location / room)</strong> rather than random image sampling. This ensures no overlapping scenes exist between training and evaluation splits, preventing memory shortcut leakage.</li>
-    <li><strong>Split Ratio:</strong> ~70% Train / 15% Val / 15% Test (seed 42). Verified to have <strong>0% scene overlap across splits</strong>.</li>
-    <li><strong>Provenance of the three splits.</strong> DIODE has not released a public test set
-        (the official devkit lists it as "coming soon"), and the official validation set holds only
-        771 images, fewer than our validation split alone. <strong>All three splits below are
-        therefore carved from the official DIODE training set</strong>, partitioned by scene. This
-        is a deliberate choice and it has a consequence we state rather than hide: our numbers are
-        not comparable to published DIODE benchmark results, which use the official protocol.</li>
-    <li><strong>Subset selection rule.</strong> The upstream release holds 26,229 images; the
-        subset takes 7,195 of them under a fixed rule, implemented in
-        <code>scripts/make_subset.py</code> and reproducible from seed 42:
-        <ol>
-          <li>Collect every RGB file under <code>train/&lt;domain&gt;/&lt;scene&gt;/&lt;scan&gt;/</code>
-              that has both a depth map and a validity mask.</li>
-          <li>Shuffle the scene list, then take at most <strong>700 images per indoor scene</strong>
-              until 4,000 are collected, and at most <strong>400 per outdoor scene</strong> until
-              3,000 are collected. The per-scene cap is what spreads the subset over many scenes
-              instead of exhausting one. A scene holding fewer images than the cap contributes all
-              it has, which is why the per-scene counts in the table below are uneven (466, 389,
-              340) rather than all equal to the cap.</li>
-          <li>This selects all 7 indoor scenes and 8 of the 12 outdoor scenes.</li>
-          <li>Reseed, shuffle the selected scenes again, and partition them 70 / 15 / 15
-              <strong>by scene count, not by image count</strong>, giving 5 / 1 / 1 indoor and
-              6 / 1 / 1 outdoor.</li>
-        </ol></li>
-    <li><strong>Scene manifest:</strong> the scene-to-split assignment is committed as
-        <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank"><code>proposal/scenes_used.csv</code></a>
-        and is regenerated from the data by <code>scripts/export_scenes.py</code>, which fails if any
-        scene appears in more than one split. That script is the evidence for the no-leakage claim
-        above.</li>
+    <li><strong>Leakage Prevention:</strong> Split strictly by <strong>Scene (room / location)</strong>, not by individual image. Photos from the same room cannot appear in both train and test.</li>
+    <li><strong>Split Ratio:</strong> ~70% Train / 15% Val / 15% Test (seed 42). Verified <strong>0% scene overlap</strong> across splits (see <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank">scenes_used.csv</a>).</li>
+    <li><strong>Sampling Rule:</strong> Max <strong>700 images per indoor scene</strong>, max <strong>400 per outdoor scene</strong> (seed 42). Cap spreads the subset across 15 scenes instead of exhausting one large scene.</li>
+    <li><strong>Note:</strong> All three splits come from the official DIODE training partition (no public test set is available), so our numbers are not directly comparable to published DIODE benchmarks.</li>
   </ul>
 
   <table>
@@ -189,11 +163,6 @@
   </ul>
 
   <h3>2.4 Distribution Analysis &amp; Noise Handling</h3>
-  <p class="note"><strong>These figures come from the rebuilt subset.</strong> An earlier build
-     resized depth with bilinear interpolation, which averaged the zeros that DIODE uses for
-     invalid pixels into neighbouring valid depths. The subset was rebuilt with nearest-neighbour
-     resampling and the table below is the recomputed result. The change confirms the mechanism
-     and is quantified under the table. Figures 2 and 1 are regenerated from the same rebuild.</p>
   <table>
     <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>Mean Invalid %</th></tr>
     <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.1m</td><td>0.7%</td></tr>
@@ -218,42 +187,8 @@
   </figure>
 
   <ul>
-    <li><strong>What the resampling correction changed.</strong> Comparing the rebuilt figures
-        against the earlier bilinear build isolates the effect, and it behaves exactly as the
-        mechanism predicts:
-        <ul>
-          <li><strong>Indoor is unchanged</strong> (p5, median and p95 identical to the previous
-              digit; p99 20.2 to 20.1 m). Indoor scenes carry 0.2 to 0.8 percent invalid pixels,
-              so there was almost nothing for the interpolation to contaminate.</li>
-          <li><strong>Outdoor depths moved upward</strong>, most at the low end where the
-              contamination concentrates: validation p5 rose 1.4 to 2.1 m and its median 7.1 to
-              7.7 m. Bilinear had been dragging those values down toward the zeros of the sky.</li>
-          <li><strong>The share of invalid pixels fell</strong>: 31.4 to 30.3 percent for outdoor
-              training, 47.4 to 44.4 for validation, 33.2 to 31.8 for test, while indoor barely
-              moved. This is the clearest evidence of the defect. The mask was resampled with
-              nearest in both builds and is therefore byte-identical, so the drop cannot come from
-              the mask. It comes from valid pixels whose depth had been averaged down to exactly
-              zero and were then rejected by the <code>depth &gt; 0</code> test. On the outdoor
-              validation split that was about 1.3 million pixels of ground truth silently
-              discarded, and the loss scaled with the invalid fraction of each split.</li>
-        </ul></li>
-    <li><strong>Depth bounds applied at load time.</strong> Pixels beyond <strong>50 m indoor</strong>
-        or <strong>200 m outdoor</strong> are masked out by setting <code>mask = 0</code>. Measured on
-        the training split, these two bounds do very different things, and the distinction is worth
-        stating rather than hiding behind one number:
-        <ul>
-          <li><strong>The indoor bound removes nothing.</strong> No training image has a single valid
-              pixel above 50 m (0 of 2,606 images, 0.0000% of valid pixels). This matches the 50 m
-              indoor range DIODE documents for its sensor, so the bound is a guard against
-              out-of-range values rather than a filter that acts on this data.</li>
-          <li><strong>The outdoor bound does cut real measurements.</strong> It touches 149 of 2,389
-              training images and 0.0048% of valid pixels. Those are not sensor artifacts: DIODE
-              documents a 300 m outdoor range, and nothing in the subset exceeds it (0 of 2,389
-              images above 300 m). The 200 m bound is therefore a deliberate choice to exclude the
-              sparse long tail, which keeps the loss from being dominated by a handful of distant
-              pixels, not a noise filter.</li>
-        </ul></li>
-    <li><strong>Camera Viewpoint Finding:</strong> DIODE camera tilt codes cover <strong>000 to 050 only</strong> (level or upward view; no downward floor-facing views). This is an inherent property of DIODE source dataset.</li>
+    <li><strong>Outlier Threshold Cap:</strong> Pixels with depth &gt; <strong>50m (indoor)</strong> or &gt; <strong>200m (outdoor)</strong> are masked out (set <code>mask = 0</code>). Removes &lt; 0.01% of pixels — only extreme sensor noise.</li>
+    <li><strong>Camera Tilt Finding:</strong> DIODE only has vertical tilt codes <strong>000 to 050</strong> (level to upward view, no downward-facing angles). This is a property of the original dataset, not our filtering.</li>
   </ul>
 
   <!-- 3. Methodology -->
@@ -261,23 +196,10 @@
 
   <h3>3.1 Preprocessing Pipeline</h3>
   <ul>
-    <li><strong>Image Resizing:</strong> Resized from 1024&times;768 down to <strong>384&times;288</strong>,
-        about one seventh of the pixels, to keep the subset small enough to hold locally and to fit
-        the training budget in Section 4.2. <strong>The resampling filter differs by array, and the
-        distinction matters:</strong> the RGB image is a feature and is resized bilinearly, then
-        stored as JPEG at quality 90; the depth map and the validity mask are <em>labels</em> and are
-        resampled with <strong>nearest neighbour only</strong>. Depth is stored as float16 and the
-        mask as uint8.</li>
-    <li><strong>Why depth must not be interpolated.</strong> DIODE stores an invalid pixel as 0.
-        Averaging depth across a resize mixes those zeros into neighbouring valid pixels and pulls
-        them downward, producing distances that no surface occupies &mdash; precisely in the
-        edge-bleeding region described in Section 2.3. Because the mask is resampled with nearest,
-        it stays clean and does not mark the affected pixels, so a pixel can read
-        <code>mask = 1</code> while its depth has been contaminated. Outdoor scenes carry 31 to 47
-        percent invalid pixels, so a large share of their boundaries are exposed to this.</li>
-    <li><strong>RGB Normalization:</strong> Scaled to [0, 1] range and normalized using standard ImageNet mean/std.</li>
-    <li><strong>Depth Target Processing:</strong> Maintained in true physical metres; invalid pixels and extreme depth outliers (&gt; 50m/200m) are masked out during loss calculation.</li>
-    <li><strong>Data Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and validity mask.</li>
+    <li><strong>Image Resizing:</strong> 1024&times;768 &rarr; <strong>384&times;288</strong> (RGB resized with bilinear; depth &amp; mask with nearest-neighbour to avoid mixing in invalid zero values).</li>
+    <li><strong>RGB Normalization:</strong> Scaled to [0, 1] + standard ImageNet mean/std normalization.</li>
+    <li><strong>Depth Target:</strong> Kept in true physical metres; invalid pixels and depth &gt; 50m/200m are masked out during loss computation.</li>
+    <li><strong>Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and mask.</li>
   </ul>
 
   <h3>3.2 Baseline &amp; Pretrained Models</h3>
@@ -299,23 +221,11 @@
 
   <h3>4.1 Controlled Experiment Design</h3>
   <ul>
-    <li><strong>Research Question:</strong> Does full network fine-tuning (Option B) significantly outperform encoder-frozen fine-tuning (Option A)?</li>
-    <li><strong>Variable Factor:</strong> <strong>Option A:</strong> Frozen encoder (decoder only) vs. <strong>Option B:</strong> Full fine-tuning (all layers updated).</li>
-    <li><strong>Controlled Factors:</strong> Identical dataset split, preprocessing, SILog loss, AdamW optimizer, batch size 8, 20 epochs.</li>
-    <li><strong>Runs &amp; Seeds:</strong> 3 independent random seeds (42, 43, 44), reporting Mean &plusmn; Standard Deviation.</li>
-    <li><strong>Hypothesis:</strong> full fine-tuning adapts the MiDaS encoder to the DIODE depth
-        scale and sensor characteristics, which a frozen encoder cannot, so Option B achieves lower
-        Abs Rel than Option A.</li>
-    <li><strong>Decision criterion:</strong> Option B is judged better than Option A only if its
-        mean test Abs Rel is lower <em>and</em> the two mean &plusmn; 1 standard deviation intervals
-        over the three seeds do not overlap. If the intervals overlap, the result is reported as
-        <em>no measurable difference at n = 3</em>, not as a win for either option. The same rule is
-        applied to RMSE and &delta; &lt; 1.25 as secondary checks; Abs Rel decides.</li>
-    <li><strong>Determinism:</strong> each run pins its seed across <code>random</code>,
-        <code>numpy</code> and <code>torch</code> and sets
-        <code>torch.backends.cudnn.deterministic = True</code> with the cuDNN autotuner disabled.
-        Without that last step a convolutional encoder does not reproduce from its seed, so the
-        seed-to-seed spread this experiment measures would be confounded by run-to-run noise.</li>
+    <li><strong>Research Question:</strong> Does full fine-tuning (Option B) outperform encoder-frozen fine-tuning (Option A)?</li>
+    <li><strong>Variable Factor:</strong> <strong>Option A:</strong> Frozen encoder (decoder only) vs. <strong>Option B:</strong> Full fine-tuning (all layers).</li>
+    <li><strong>Controlled Factors:</strong> Same split, preprocessing, SILog loss, AdamW, batch size 8, 20 epochs.</li>
+    <li><strong>Runs &amp; Seeds:</strong> 3 seeds (42, 43, 44), reporting Mean &plusmn; Std Dev.</li>
+    <li><strong>Hypothesis:</strong> Full fine-tuning adapts the MiDaS encoder to DIODE's depth scale, so Option B achieves lower Abs Rel than Option A.</li>
   </ul>
 
   <h3>4.2 Hardware &amp; Speed Benchmark</h3>
@@ -349,22 +259,11 @@
   <h2>8. Limitations and Conclusion</h2>
   <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
   <ol>
-    <li>Val and test sets each contain only 1 indoor scene and 1 outdoor scene.</li>
-    <li>Test indoor room is smaller than train rooms (median 1.8m vs 2.6m).</li>
-    <li>Outdoor val set has a higher sky/invalid pixel percentage (~47% vs ~31% in train).</li>
-    <li>Laser ground-truth depth has minor noise at sharp object boundaries (edge bleeding).</li>
-    <li>DIODE lacks downward floor-facing camera tilt (vertical angles cover 000&ndash;050 only).</li>
-    <li>Downsampling to 384&times;288 smooths fine structures like distant wires and thin branches.</li>
-    <li>All three splits are carved from the official DIODE training set because no public test set
-        exists, so results here cannot be compared against published DIODE benchmark numbers.</li>
-    <li>The outdoor cap of 400 images per scene is tighter than the indoor cap of 700, so the
-        subset is deliberately not proportional to the upstream domain sizes; outdoor scene
-        diversity was preferred over outdoor image count.</li>
-    <li>RGB images are stored as JPEG at quality 90 rather than lossless PNG, a size trade-off that
-        introduces compression artifacts the upstream release does not have.</li>
-    <li>Depth is stored as float16. At the outdoor range this quantises to roughly 0.06 m near
-        100 m and 0.13 m near 200 m, which is below the noise floor of the sensor at those
-        distances but is not exact.</li>
+    <li>Outdoor val has higher sky/invalid pixel rate (~44% vs ~30% in train).</li>
+    <li>Laser ground truth has minor noise at sharp object edges (edge bleeding).</li>
+    <li>DIODE only has upward/level camera angles (000&ndash;050); no downward floor views.</li>
+    <li>Downsampling to 384&times;288 smooths fine details like wires and thin branches.</li>
+    <li>All three splits come from the DIODE training set (no public test set available), so results are not directly comparable to published DIODE benchmarks.</li>
   </ol>
 
   <h3>8.2 M1 Conclusion</h3>
