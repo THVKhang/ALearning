@@ -10,9 +10,11 @@ data:
   augment: false
 
 model:
-  name: linear             # linear | mlp
+  name: linear             # linear | mlp | cnn
   hidden_sizes: [256]      # MLP only
-  dropout: 0.2             # MLP only
+  channels: [32, 64]       # CNN only: output channels of convolution blocks
+  classifier_hidden: 128   # CNN only: hidden units after feature-map flattening
+  dropout: 0.2             # MLP/CNN regularization
 
 train:
   epochs: 15
