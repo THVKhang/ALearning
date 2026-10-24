@@ -203,6 +203,23 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 
 ---
 
+### Log Entry 11: M2 Loss Functions and Depth Metrics Engine
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Dương Đăng Khoa |
+| **Development Stage** | M2 Draft (24 October 2026) |
+| **Purpose / Category** | Implementation review, edge-case validation, and test suite design |
+| **Affected Sections / Files** | `assignment2/src/engine/__init__.py`, `assignment2/src/engine/loss.py`, `assignment2/src/engine/metrics.py`, `assignment2/scripts/test_loss_metrics.py` |
+| **Representative Prompt** | *"Check giúp mình logic cài đặt MaskedSILogLoss: khi batch gặp toàn bộ mask 0 thì return pred.sum() * 0.0 đã đủ để giữ computational graph cho backward pass chưa, và gợi ý thêm test case kiểm tra tính chất scale-invariance khi lambda=1.0."* |
+| **AI Contribution** | Reviewed PyTorch autograd graph preservation for empty masks; verified SILog loss scale-invariance properties; assisted in formulating edge-case assertion checks (NaNs, Infs, zero-division). |
+| **Student Verification & Editing** | Implemented `MaskedSILogLoss`, `compute_depth_metrics`, and `DepthMetricTracker`; authored and ran `scripts/test_loss_metrics.py` verifying gradient flow and metric accuracy across 4 test suites. |
+| **Responsible Member** | Dương Đăng Khoa |
+| **Verification Sources** | Eigen et al. (NeurIPS 2014); PyTorch Autograd documentation; CO3133 Course Handbook Section 20.1. |
+
+
+
 ## Future Milestone Disclosure Logs (M2 Draft & M3 Final)
 
 *Logs for Milestone 2 (Baseline & Pretrained Training) and Milestone 3 (Controlled Experiment & Error Analysis) will be recorded here as development progresses.*
