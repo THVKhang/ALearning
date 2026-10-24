@@ -218,6 +218,21 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Responsible Member** | Dương Đăng Khoa |
 | **Verification Sources** | Eigen et al. (NeurIPS 2014); PyTorch Autograd documentation; CO3133 Course Handbook Section 20.1. |
 
+---
+### Log Entry 12: Baseline U-Net Architecture and Training Pipeline
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Dương Đăng Khoa |
+| **Development Stage** | M2 Draft (24 October 2026) |
+| **Purpose / Category** | Architecture design review, training pipeline implementation, and end-to-end verification |
+| **Affected Sections / Files** | `assignment2/src/models/__init__.py`, `assignment2/src/models/unet.py`, `assignment2/src/engine/trainer.py`, `assignment2/configs/baseline_unet.yaml`, `assignment2/scripts/train.py`, `assignment2/scripts/test_unet.py`, `assignment2/scripts/test_pipeline_synthetic.py` |
+| **Representative Prompt** | *"Rà soát giúp mình kiến trúc U-Net 4 tầng với skip-connections cho bài toán Depth (288x384) và pipeline huấn luyện trong `trainer.py`: kiểm tra cơ chế GradScaler AMP fp16, tiêu chí lưu best checkpoint theo Abs Rel và thiết kế script test giả lập end-to-end."* |
+| **AI Contribution** | Reviewed U-Net encoder-decoder channel sizing (32 to 512) and positive depth output activation; assisted in configuring PyTorch AMP GradScaler and metric tracking integration; provided synthetic end-to-end pipeline verification test. |
+| **Student Verification & Editing** | Self-implemented UNet, Trainer, YAML configuration, and training CLI script; executed `test_unet.py` (7.76M params verified) and `test_pipeline_synthetic.py` confirming loss convergence, history CSV logging, and checkpoint serialization. |
+| **Responsible Member** | Dương Đăng Khoa |
+| **Verification Sources** | Ronneberger et al. (MICCAI 2015); PyTorch AMP documentation; CO3133 Course Handbook Section 20. |
 
 
 ## Future Milestone Disclosure Logs (M2 Draft & M3 Final)
