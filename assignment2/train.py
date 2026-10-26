@@ -23,11 +23,17 @@ from src.utils.common import count_params, env_info, load_config, save_json, set
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
+    ap.add_argument("--seed", type=int, default=None, help="override random seed")
     ap.add_argument("--smoke", action="store_true", help="2 epochs x 5 batches, to check the pipeline")
     ap.add_argument("--name", default=None, help="override output folder name")
     args = ap.parse_args()
 
     cfg = load_config(args.config)
+    if args.seed is not None:
+        cfg["seed"] = args.seed
+        if args.name is None and args.seed != 42:
+            cfg["name"] = f"{cfg['name']}_seed{args.seed}"
+            cfg["out_dir"] = os.path.join(os.path.dirname(cfg["out_dir"]), cfg["name"])
     if args.name:
         cfg["name"] = args.name
         cfg["out_dir"] = os.path.join(os.path.dirname(cfg["out_dir"]), args.name)

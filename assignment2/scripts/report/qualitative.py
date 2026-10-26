@@ -22,7 +22,10 @@ from src.models import build_model
 
 MODELS = [("U-Net baseline", "baseline_unet", "unet", False),
           ("MiDaS zero-shot", "midas_zeroshot", "midas_small", False),
-          ("MiDaS full FT", "midas_full", "midas_small", False)]
+          ("MiDaS full FT", "midas_full", "midas_small", False),
+          ("MiDaS frozen", "midas_frozen", "midas_small", True)]
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def load(run, model_name, freeze):
@@ -30,7 +33,7 @@ def load(run, model_name, freeze):
     ckpt = os.path.join(ROOT, "outputs", run, "best.pth")
     if run != "midas_zeroshot":
         model.load_state_dict(torch.load(ckpt, map_location="cpu", weights_only=False)["model"])
-    return model.cuda().eval(), kind
+    return model.to(DEVICE).eval(), kind
 
 
 def pick(ds, n_per_domain):
@@ -59,7 +62,7 @@ def main():
 
         panels = [("RGB", rgb, None), ("Ground truth", np.where(valid, gt, np.nan), None)]
         for label, model, kind in models:
-            out = model(s["rgb"][None].cuda()).float()[0, 0].cpu()
+            out = model(s["rgb"][None].to(DEVICE)).float()[0, 0].cpu()
             pred = out if kind == "metric" else align_disparity(out, gt, mask, max_d)[0]
             m = depth_metrics(pred, gt, mask, max_d)
             panels.append((label, pred.numpy(), f"AbsRel {m['abs_rel']:.3f}"))

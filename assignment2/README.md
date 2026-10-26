@@ -31,9 +31,11 @@ DIODE subset (7,195 RGB–depth pairs, 384×288, split by scene). Not in git. Bu
 data/diode_subset/{train,val,test}/<id>.jpg, <id>_depth.npy, <id>_depth_mask.npy
 ```
 
-## Run (from `assignment2/`)
+## Run (from `assignment2/` or repo root)
 ```bash
 python tests/test_metrics.py                               # metric + alignment sanity checks
+python tests/test_models.py                                # U-Net + MiDaS_small shape/grad checks
+python tests/test_pipeline.py                              # synthetic end-to-end Trainer check
 
 python evaluate.py --config configs/midas_zeroshot.yaml    # MiDaS zero-shot on val
 python train.py    --config configs/baseline_unet.yaml     # U-Net from scratch (~1 h budget)
@@ -41,7 +43,16 @@ python train.py    --config configs/midas_full.yaml        # MiDaS full fine-tun
 python train.py    --config configs/midas_frozen.yaml      # MiDaS frozen encoder
 python evaluate.py --config configs/baseline_unet.yaml     # uses outputs/<name>/best.pth
 python evaluate.py --config configs/midas_full.yaml --split test
+python evaluate.py --config configs/midas_frozen.yaml --split test
 
+# Multi-seed controlled experiment (M3 Final: seeds 42, 43, 44)
+python train.py    --config configs/midas_full.yaml --seed 43
+python train.py    --config configs/midas_frozen.yaml --seed 43
+
+# Diagnostic & report scripts
+python scripts/report/erode_check.py                       # boundary-mask erosion (0, 1, 2 px)
+python scripts/report/outdoor_check.py                     # per-scene outdoor correlation check
+python scripts/report/edge_and_alignment_check.py          # edge vs. flat + median vs. LS alignment
 python scripts/report/make_report.py                       # results/tables.md, loss curves, error plot
 python scripts/report/qualitative.py                       # results/qualitative.png
 ```

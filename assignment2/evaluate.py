@@ -42,14 +42,17 @@ def default_ckpt(cfg):
 def time_per_image(model, dataset, device, amp, n=100):
     loader = DataLoader(Subset(dataset, range(min(n, len(dataset)))), batch_size=1)
     xs = [b["rgb"].to(device) for b in loader]
-    with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
+    is_cuda = str(device).startswith("cuda")
+    with torch.autocast("cuda", dtype=torch.float16, enabled=amp and is_cuda):
         for x in xs[:10]:
             model(x)
-        torch.cuda.synchronize()
+        if is_cuda:
+            torch.cuda.synchronize()
         t0 = time.perf_counter()
         for x in xs:
             model(x)
-        torch.cuda.synchronize()
+        if is_cuda:
+            torch.cuda.synchronize()
     return (time.perf_counter() - t0) / len(xs) * 1000
 
 
@@ -58,12 +61,13 @@ def evaluate(model, output_type, loader, device, amp):
     trackers = {"aligned": MetricTracker()}
     if output_type == "metric":
         trackers["raw"] = MetricTracker()
+    is_cuda = str(device).startswith("cuda")
     for batch in loader:
         rgb = batch["rgb"].to(device, non_blocking=True)
         gt = batch["depth"].to(device, non_blocking=True)
         mask = batch["mask"].to(device, non_blocking=True)
         dom = batch["domain"]
-        with torch.autocast("cuda", dtype=torch.float16, enabled=amp):
+        with torch.autocast("cuda", dtype=torch.float16, enabled=amp and is_cuda):
             out = model(rgb)
         out = out.float()
         if output_type == "metric":
@@ -76,14 +80,25 @@ def evaluate(model, output_type, loader, device, amp):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", required=True)
+    ap.add_argument("--seed", type=int, default=None, help="override random seed")
+    ap.add_argument("--name", default=None, help="override run folder name")
     ap.add_argument("--ckpt", default=None)
     ap.add_argument("--split", default="val", choices=["val", "test"])
     args = ap.parse_args()
 
     cfg = load_config(args.config)
+    if args.seed is not None:
+        cfg["seed"] = args.seed
+        if args.name is None and args.seed != 42 and cfg["name"] != "midas_zeroshot":
+            cfg["name"] = f"{cfg['name']}_seed{args.seed}"
+            cfg["out_dir"] = os.path.join(os.path.dirname(cfg["out_dir"]), cfg["name"])
+    if args.name:
+        cfg["name"] = args.name
+        cfg["out_dir"] = os.path.join(os.path.dirname(cfg["out_dir"]), args.name)
     set_seed(cfg["seed"], cfg["deterministic"])
-    device = "cuda"
-    amp = cfg["train"]["amp"]
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    is_cuda = device == "cuda"
+    amp = cfg["train"]["amp"] and is_cuda
     ckpt = args.ckpt or default_ckpt(cfg)
     if cfg["name"] != "midas_zeroshot" and ckpt is None:
         sys.exit(f"no checkpoint for {cfg['name']}, train it first")
@@ -92,10 +107,12 @@ def main():
     loader = get_dataloaders(cfg["data"]["root"], cfg["eval"]["batch_size"], cfg["data"]["num_workers"],
                              splits=(args.split,))[args.split]
 
-    torch.cuda.synchronize()
+    if is_cuda:
+        torch.cuda.synchronize()
     t0 = time.perf_counter()
     res = evaluate(model, output_type, loader, device, amp)
-    torch.cuda.synchronize()
+    if is_cuda:
+        torch.cuda.synchronize()
     res["eval_time_s"] = time.perf_counter() - t0
     res["infer_ms_per_image"] = time_per_image(model, loader.dataset, device, amp)
     res.update({"name": cfg["name"], "split": args.split, "checkpoint": ckpt, "output_type": output_type,

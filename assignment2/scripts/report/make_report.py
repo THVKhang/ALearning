@@ -48,18 +48,39 @@ def html_table(header, rows):
     return f"<table>\n<tr>{h}</tr>\n{body}\n</table>"
 
 
+def load_multi_seed(run, name, seeds=(42, 43, 44)):
+    """Load artifact across available seed directories (<run>, <run>_seed43, <run>_seed44)."""
+    items = []
+    for s in seeds:
+        folder = run if s == 42 else f"{run}_seed{s}"
+        item = load(folder, name)
+        if item is not None:
+            items.append(item)
+    return items
+
+
 def results_table(split):
     header = ["Model"] + [f"{d} {m}" for d in DOMS for m in ("AbsRel↓", "RMSE↓", "δ1↑")]
     rows = []
     for label, run, kind in ROWS:
-        ev = load(run, f"eval_{split}.json")
-        if ev is None or kind not in ev:
+        evs = [ev for ev in load_multi_seed(run, f"eval_{split}.json") if kind in ev]
+        if not evs:
             rows.append([label] + ["in progress"] * 9)
             continue
-        r = [label]
+        r = [label if len(evs) == 1 else f"{label} ({len(evs)} seeds)"]
         for d in DOMS:
-            m = ev[kind][d]
-            r += [f"{m['abs_rel']:.3f}", f"{m['rmse']:.2f}", f"{100 * m['delta1']:.1f}%"]
+            abs_rels = [e[kind][d]["abs_rel"] for e in evs]
+            rmses = [e[kind][d]["rmse"] for e in evs]
+            d1s = [100 * e[kind][d]["delta1"] for e in evs]
+            if len(evs) == 1:
+                r += [f"{abs_rels[0]:.3f}", f"{rmses[0]:.2f}", f"{d1s[0]:.1f}%"]
+            else:
+                import statistics
+                r += [
+                    f"{statistics.mean(abs_rels):.3f}±{statistics.stdev(abs_rels):.3f}",
+                    f"{statistics.mean(rmses):.2f}±{statistics.stdev(rmses):.2f}",
+                    f"{statistics.mean(d1s):.1f}±{statistics.stdev(d1s):.1f}%",
+                ]
         rows.append(r)
     return header, rows
 
@@ -155,6 +176,11 @@ def main():
     h, r = results_table("val")
     md += ["## Results (val)", md_table(h, r)]
     html += [html_table(h, r)]
+
+    if any(load(run, "eval_test.json") is not None for _, run, _ in ROWS):
+        ht, rt = results_table("test")
+        md += ["## Results (test)", md_table(ht, rt)]
+        html += [html_table(ht, rt)]
 
     h, r, env = cost_table()
     md += ["## Compute cost", md_table(h, r)]

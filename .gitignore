@@ -241,7 +241,12 @@ assignment2/outputs/*
 !assignment2/outputs/*/
 assignment2/outputs/*/*
 !assignment2/outputs/*/config.json
+!assignment2/outputs/*/config.yaml
 !assignment2/outputs/*/history.json
+!assignment2/outputs/*/history.csv
+!assignment2/outputs/*/train_summary.json
+!assignment2/outputs/*/eval_val.json
+!assignment2/outputs/*/eval_test.json
 !assignment2/outputs/*/metrics_test.json
 !assignment2/outputs/*/midas_small.json
 !assignment2/outputs/*/summary.md

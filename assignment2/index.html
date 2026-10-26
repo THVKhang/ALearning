@@ -52,11 +52,19 @@
   <h2>Group Members (Group CR7)</h2>
   <table>
     <tr><th>Member Name</th><th>Student ID</th><th>Main Roles / Responsibilities</th></tr>
-    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td>Dataset subset creation, scene-level split strategy, baseline setup</td></tr>
-    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Data verification, statistical EDA, hardware compute benchmarking, preprocessing implementation, visualization scripts, report formatting</td></tr>
-    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>Preprocessing implementation, visualization scripts, report formatting</td></tr>
+    <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td><strong>Data &amp; Reproducibility (Lead)</strong> &ndash; dataset subset creation, scene-level split strategy, data pipeline, seeds and configs, repository and checkpoints</td></tr>
+    <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td><strong>Experiments &amp; Analysis, Delivery</strong> &ndash; data verification, statistical EDA, compute benchmarking, visualization, error analysis, assignment page, slides and video</td></tr>
+    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td><strong>Modeling &amp; Methods</strong> &ndash; U-Net baseline and MiDaS fine-tuning, methodology write-up, pipeline diagram, design of the controlled experiment and ablation</td></tr>
   </table>
-
+  <p class="note"><strong>Attribution note.</strong> The roles above are the group's fixed
+     division of responsibility for the whole course project, identical on the
+     <a href="https://github.com/THVKhang/ALearning" target="_blank">landing page</a> and on all three
+     assignment pages, and recorded in
+     <a href="https://github.com/THVKhang/ALearning/blob/main/ROLES.md" target="_blank"><code>ROLES.md</code></a>.
+     They state who owns each part, not a claim about how the workload happened to fall in a single
+     milestone. For per-item authorship of the M1 work, including the AI-assisted items,
+     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a>
+     remains the authoritative record and names the member who carried out each entry.</p>
 
   <!-- Milestone Status -->
   <h2>Milestone Status</h2>
@@ -349,6 +357,25 @@
     <li><strong>YouTube Presentation Video:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
     <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
   </ul>
+
+  <!-- 10. AI Usage Disclosure -->
+  <h2>10. AI Usage Disclosure</h2>
+  <p>Generative AI tools (Claude Code / Antigravity AI Assistant) were used in this assignment
+     strictly for <strong>code review, architecture control, mathematical/compliance verification and
+     debugging diagnostics</strong>, not for direct code modification. In M1 Proposal, the tool
+     reviewed the DIODE data-loading pipeline, validity mask handling, scene-level split disjunction,
+     and handbook Section 18/21 compliance, and diagnosed that bilinear depth resizing in the initial
+     subset notebook contaminated valid pixels bordering zero-encoded invalid regions &mdash; leading
+     the group to rebuild the subset with <code>cv2.INTER_NEAREST</code>. In M2 Draft, the tool
+     reviewed the U-Net and MiDaS architectures and evaluation pipeline: verifying log-depth
+     <code>exp(clamp(&middot;))</code> output activation, scale-and-shift-invariant (SSI) loss,
+     per-image least-squares disparity alignment, BatchNorm running-stat freezing in the frozen-encoder
+     controlled experiment, valid-range clamping in metric calculation, and the 0.6&nbsp;m FARO S350
+     scanner lower bound. All source code, model implementations, training runs, diagnostic scripts
+     and report analyses were written, executed and verified line by line by the group members on
+     group hardware. Full per-entry logs (satisfying all nine mandatory fields of handbook
+     Section 5.2) are recorded in
+     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank"><code>AI_USAGE.md</code></a>.</p>
 
 </body>
 </html>

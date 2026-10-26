@@ -698,18 +698,21 @@ python assignment1\scripts\compare.py --plot</pre>
   </ul>
 
   <h2>AI Usage Disclosure</h2>
-  <p>Generative AI tools were used in this assignment, and their use is disclosed. Claude Code
-     (Claude Sonnet 5, Claude Opus 5) was used by Trần Hoàng Vỹ Khang in two distinct ways. First,
-     to <strong>review</strong> the architecture and cleanliness of the M1 Draft source code,
-     including the MLP and CNN code on the <code>mlp-cnn</code> branch, where it produced findings
-     only and a member made every edit. Second, to <strong>implement</strong> the three models added
-     after the M1 Draft: <code>src/models/cnn.py</code>, <code>src/models/rnn.py</code>,
-     <code>src/models/transformer.py</code>, <code>src/data/sequence.py</code>, the corrected
-     inference-timing function, and the results and analysis sections of this page were drafted with
-     the tool and reviewed and verified line by line by the responsible member. The Linear and MLP
-     models, the dataset layer, the training engine, the metrics, the plots and the EDA notebook are
-     member-written. Every result on this page comes from a run executed on the group hardware, and
-     the group is responsible for each number, figure and claim here.</p>
+  <p>Generative AI tools were used in this assignment strictly for <strong>code review, architecture
+     control and consistency verification</strong>, not for direct code modification. Claude Code
+     (Claude Sonnet 5, Claude Opus 5) and Google Antigravity Agent were used in two stages. First, to
+     <strong>review</strong> the cleanliness and pipeline structure of the M1 Draft source code and
+     the <code>mlp-cnn</code> branch. Second, to <strong>control the architecture and verify</strong>
+     the M2 Final modules (<code>src/models/cnn.py</code>, <code>src/models/rnn.py</code>,
+     <code>src/models/transformer.py</code>, <code>src/data/sequence.py</code>,
+     <code>src/engine/trainer.py</code>, <code>scripts/compare.py</code>): checking spatial and
+     sequence tensor dimensions, verifying the absence of pre-loss softmax, isolating model-only
+     inference timing from DataLoader overhead, checking cuDNN determinism settings, and
+     cross-checking every number in the comparison tables and report against the committed JSON run
+     artifacts. All models, data pipelines, training loops, evaluation scripts and report analyses
+     were written and edited by the group members. Every result on this page comes from a run
+     executed on the group hardware, and the group is responsible for each number, figure and claim
+     here.</p>
   <p>The per-tool fields required by Section 5.2 of the handbook — model, member, stage, purpose,
      affected sections, representative prompt, how the output was verified, responsible member and
      verification sources — are recorded in

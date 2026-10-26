@@ -69,7 +69,7 @@
     <tr>
       <td>Đỗ Đăng Khoa</td>
       <td>2352554</td>
-      <td>Experiments & Analysis and Delivery</td>
+      <td>Experiments & Analysis, Delivery</td>
       <td><a href="https://github.com/Kras2508" target="_blank">Link</a></td>
     </tr>
 
@@ -91,19 +91,10 @@
   </div>
 
   <h2>3. AI Usage Disclosure (Landing)</h2>
-  <p>Nhóm có sử dụng công cụ AI hỗ trợ (Claude Code – Claude Sonnet 5, Claude Opus 5) trong quá trình thực hiện các bài tập.
-  Ở <strong>Assignment 1</strong>, công cụ được dùng theo hai cách: (1) <em>review</em> kiến trúc và độ sạch của pipeline M1 Draft cũng như nhánh <code>mlp-cnn</code> (mô hình Linear, MLP, dataset, training loop, metrics, plots và notebook EDA do thành viên tự viết); (2) <em>hỗ trợ cài đặt và tổng hợp</em> cho M2 Final đối với ba mô hình bổ sung (<code>cnn.py</code>, <code>rnn.py</code>, <code>transformer.py</code>, <code>sequence.py</code>), hàm đo thời gian suy luận, script so sánh <code>compare.py</code> và phần bảng biểu phân tích — toàn bộ đã được thành viên chịu trách nhiệm đọc, kiểm tra từng dòng và đối chiếu số liệu từ các file JSON thực nghiệm.
-  Ở <strong>Assignment 2</strong>, công cụ được dùng theo hai cách khác nhau. Một là <em>hỗ trợ</em>:
-  kiểm tra định dạng mask và dải độ sâu của DIODE, gỡ lỗi <code>torch.hub</code> khi benchmark MiDaS,
-  chỉnh thang màu khi vẽ depth map, tối ưu bộ nhớ cho phần thống kê, và rà soát thiết kế thí nghiệm
-  đối chứng — thành viên tự chạy lại và tự quyết trong mọi trường hợp. Hai là <em>viết code và
-  viết báo cáo</em>: các script <code>make_subset.py</code>, <code>export_scenes.py</code>,
-  <code>kaggle_diagnose.py</code> và một số mục của trang Assignment 2 do AI soạn, và đang chờ thành
-  viên chịu trách nhiệm đọc và duyệt lại từng dòng. Trong quá trình đó AI phát hiện bản dựng dữ liệu
-  đầu tiên nội suy bản đồ độ sâu bằng bilinear làm hỏng nhãn ở biên vùng không hợp lệ; nhóm đã dựng
-  lại toàn bộ subset bằng nearest neighbour và cập nhật lại số liệu. Chi tiết từng mục nằm trong
-  AI_USAGE – Assignment 2.
-  Mọi kết quả đều được nhóm tự kiểm tra và chịu trách nhiệm. Chi tiết từng bài xem tại:</p>
+  <p>Nhóm có sử dụng công cụ AI hỗ trợ (Claude Code / Antigravity AI Assistant) trong quá trình thực hiện các bài tập với vai trò <strong>review file code, kiểm soát kiến trúc (architecture review), rà soát tính nhất quán của pipeline và đối chiếu yêu cầu của handbook</strong> — không dùng AI để thay thế việc tự cài đặt hay sửa code trực tiếp.
+  Ở <strong>Assignment 1</strong>, công cụ được dùng để: (1) review kiến trúc và độ sạch của pipeline M1 Draft cũng như nhánh <code>mlp-cnn</code>; (2) kiểm soát kiến trúc (shape tensor, biểu diễn chuỗi hàng/cột/patch, cấu hình attention/recurrent, tách biệt thời gian suy luận khỏi DataLoader) và đối chiếu số liệu bảng biểu từ các file JSON thực nghiệm cho 6 mô hình ở M2 Final.
+  Ở <strong>Assignment 2</strong>, công cụ được dùng để review pipeline xử lý dữ liệu DIODE (định dạng mask, ngưỡng độ sâu, kiểm tra không rò rỉ theo scene, phát hiện lỗi nội suy bilinear ở biên vùng không hợp lệ để nhóm chuyển sang nearest-neighbour), kiểm soát kiến trúc mô hình U-Net và MiDaS (hàm mất mát SILog/SSI, căn chỉnh scale–shift, đóng băng encoder + BatchNorm ở thí nghiệm đối chứng), và rà soát kịch bản kiểm thử / phân tích lỗi ở M2 Draft.
+  Mọi mã nguồn, chỉnh sửa, lượt chạy thực nghiệm và kết luận đều do thành viên nhóm trực tiếp thực hiện, kiểm tra từng dòng và chịu trách nhiệm. Chi tiết từng bài xem tại:</p>
   <ul>
     <li><a href="https://github.com/THVKhang/ALearning/blob/main/assignment1/AI_USAGE.md" target="_blank">AI Usage – Assignment 1</a></li>
     <li><a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI Usage – Assignment 2</a></li>

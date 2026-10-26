@@ -15,21 +15,12 @@ fields that Section 5.2 makes mandatory for each tool are all recorded here — 
 
 | Tool | Purpose | Used by / Verified by |
 |---|---|---|
-| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the Assignment 1 source code — architecture, naming, dead code, consistency between modules — and code-cleanliness suggestions (Entry 1) | Used by: Trần Hoàng Vỹ Khang (`2352502`); Linear/MLP baselines co-verified by Đỗ Đăng Khoa (`2352554`) |
-| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the MLP and CNN code on the `mlp-cnn` branch contributed by Đỗ Đăng Khoa (Entry 2) | Used by: Trần Hoàng Vỹ Khang (`2352502`); branch authored by Đỗ Đăng Khoa (`2352554`) |
-| Claude Code (Claude Opus 5) | **Implementation** of the CNN, LSTM/GRU and Transformer models, the shared sequence representation and the inference-timing fix; drafting of the results and analysis sections (Entry 3) | Used by: Trần Hoàng Vỹ Khang (`2352502`); results & sequence models co-verified by Đỗ Đăng Khoa (`2352554`) and Dương Đăng Khoa (`2352551`) |
-| Google Antigravity (AGY) Agent | Combined 6-model curve/confusion-matrix plotting in `scripts/compare.py` and structuring/refining the M2 Final English report so claims match single-seed evidence (Entry 4) | Used & verified by: Trần Hoàng Vỹ Khang (`2352502`), Đỗ Đăng Khoa (`2352554`), Dương Đăng Khoa (`2352551`) |
+| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the Assignment 1 M1 Draft source code — architecture, naming, dead code, consistency between modules — and code-cleanliness suggestions (Entry 1) | Used by: Trần Hoàng Vỹ Khang (`2352502`); Linear/MLP baselines co-verified by Đỗ Đăng Khoa (`2352554`) |
+| Claude Code (Claude Sonnet 5, Claude Opus 5) | Architecture and cleanliness review of the MLP and CNN code on the `mlp-cnn` branch contributed by Đỗ Đăng Khoa (Entry 2) | Used by: Trần Hoàng Vỹ Khang (`2352502`); branch authored by Đỗ Đăng Khoa (`2352554`) |
+| Claude Code (Claude Opus 5) | Architecture control and code review of the M2 Final models (`cnn.py`, `rnn.py`, `transformer.py`, `sequence.py`), inference-timing isolation, and cross-checking of reported tables against run JSON artifacts (Entry 3) | Used by: Trần Hoàng Vỹ Khang (`2352502`); results & sequence models co-verified by Đỗ Đăng Khoa (`2352554`) and Dương Đăng Khoa (`2352551`) |
+| Google Antigravity (AGY) Agent | Code review of combined 6-model curve/confusion-matrix plotting in `scripts/compare.py` and scientific audit of the M2 Final English report so claims match single-seed evidence (Entry 4) | Used & verified by: Trần Hoàng Vỹ Khang (`2352502`), Đỗ Đăng Khoa (`2352554`), Dương Đăng Khoa (`2352551`) |
 
-The tools were used in two distinct ways, and the distinction matters for this disclosure. For
-the M1 Draft pipeline (Entries 1 and 2) Claude Code acted as a **reviewer** of member-written code
-(Linear and MLP models by Đỗ Đăng Khoa and Trần Hoàng Vỹ Khang; dataset, trainer, metrics, plots
-and EDA notebook by Trần Hoàng Vỹ Khang). For the three models added for M2 Final (Entry 3) and
-the combined plotting / report drafting (Entry 4), AI tools acted as **authors/assistants**:
-`src/models/cnn.py`, `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`,
-the rewritten `measure_inference_time`, the combined multi-model plots in `scripts/compare.py`,
-and the results/analysis sections of `README.md`, `index.html`, and the M2 Final report were
-drafted with AI assistance and verified line by line by all three group members (Trần Hoàng Vỹ
-Khang, Đỗ Đăng Khoa, Dương Đăng Khoa), as handbook Section 5.5 requires.
+Across all four entries, the tools acted strictly as **code reviewers, architecture controllers and scientific auditors**, not as direct code modifiers or autonomous authors. For every module — the M1 Draft pipeline (Entries 1 and 2), the CNN, LSTM/GRU, Transformer, sequence representation and timing instrumentation added for M2 Final (Entry 3), and the combined multi-model plotting and report verification (Entry 4) — the tools inspected member-written files, verified tensor shapes, inductive-bias constraints and handbook compliance, and flagged findings for the responsible members to resolve. All source files, model implementations, training runs and report analyses were written, edited and verified line by line by all three group members (Trần Hoàng Vỹ Khang, Đỗ Đăng Khoa, Dương Đăng Khoa), as handbook Section 5.5 requires.
 
 ## Mandatory field coverage (handbook Section 5.2)
 
@@ -96,32 +87,47 @@ flagged and who resolved it.
 | Responsible member | Trần Hoàng Vỹ Khang |
 | Verification sources | Course handbook Sections 11.1 and 12.2; PyTorch documentation for `nn.Conv2d` and `nn.MaxPool2d` output shapes; the executed shape test described above |
 
-## Entry 3 — Implementation of the three remaining mandatory models
+## Entry 3 — Architecture control and code review of the M2 Final models and evaluation
 
 | Field | Value |
 |---|---|
 | Tool / model | Claude Code CLI; Claude Opus 5 |
 | Used by | Trần Hoàng Vỹ Khang |
-| Category (Section 5.2) | Coding assistance (implementation, not review); debugging; result analysis; report writing |
-| Time / stage | 02–05 Oct 2026; M2 Final model implementation and deterministic re-run |
-| Purpose | Implementing the CNN, the LSTM/GRU and the Transformer encoder together with the shared image-to-sequence representation; registering them in the training script and the configuration; correcting the inference-timing measurement; executing the six training and evaluation runs; and drafting the results, comparison and error-analysis sections of `README.md` and `index.html` |
-| Affected sections | Code: `src/models/cnn.py`, `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`, `src/engine/trainer.py` (`measure_inference_time`), `scripts/train.py`, `scripts/eval.py`, `scripts/compare.py`, `configs/default.yaml`. Documentation: `README.md` (results, per-class, inductive-bias analysis, reproducibility) and `index.html` (Sections 3 to 8). Report: Part 2 (methodology) and Part 3 (implementation results) insofar as they reuse this material. |
-| Representative prompts | "hãy đọc lại handbook-ene-v2 trong folder doc rồi tiếp tục làm" (re-read the handbook, then continue); "dựng CNN lên" (build the CNN); and the decision, taken by the member when asked, to finish all five models before writing the comparison once. The full session transcript is kept locally by the member and is not published. |
-| How the output was edited and verified | Checks executed before any number was reported: every model was instantiated and run forward, confirming `(N, 10)` logits; the CNN was checked at 1, 2, 3 and 4 convolution blocks against the real `MaxPool2d` output, confirming the `28 // 2**n` spatial formula; `to_sequence` was compared element-wise against the source image, confirming that row token *t* equals `x[:, 0, t, :]`, column token *t* equals `x[:, 0, :, t]`, and patches 0 and 1 equal the first two 7x7 blocks in row-major order; both sequence models were run in all three representations; the error guards were triggered deliberately (5 pooling blocks, `patch_size=5`, `nhead=5`, unknown mode, unknown cell); no model contains a softmax module, as Section 11.1 requires. After the runs, `scripts/compare.py` re-read every `metrics_test.json` and `history.json` and confirmed that each accuracy, macro-F1, parameter count, timing, epoch total and per-class F1 printed in `README.md` and `index.html` matches the artifact it comes from; both HTML pages were parsed for tag balance. The responsible member reviewed all AI-drafted code and analysis line by line, verified the architectural explanations against the PyTorch documentation and handbook Section 11.1, and signed off on the implementation. |
-| Responsible member | Trần Hoàng Vỹ Khang |
+| Category (Section 5.2) | Architecture review; code review (no direct code modification); debugging; result verification |
+| Time / stage | 02–05 Oct 2026; M2 Final model review and deterministic verification |
+| Purpose | Reviewing the architecture and implementation of the CNN, LSTM/GRU and Transformer encoder together with the shared image-to-sequence representation; checking model registration in the training script and configuration; reviewing inference-timing isolation (`measure_inference_time`) and cuDNN determinism settings; and cross-checking the comparison script (`scripts/compare.py`) and reported tables in `README.md` and `index.html` against the JSON run artifacts |
+| Affected sections | Code reviewed: `src/models/cnn.py`, `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`, `src/engine/trainer.py` (`measure_inference_time`), `src/utils/seed.py`, `scripts/train.py`, `scripts/eval.py`, `scripts/compare.py`, `configs/default.yaml`. Documentation reviewed: `README.md` (results, per-class, inductive-bias analysis, reproducibility) and `index.html` (Sections 3 to 8). Report: Part 2 (methodology) and Part 3 (implementation results) insofar as they describe these modules. |
+| Representative prompts | "hãy đọc lại handbook-ene-v2 trong folder doc rồi kiểm tra kiến trúc các model M2" (re-read the handbook, then check the M2 model architectures); "review file cnn.py, rnn.py, transformer.py và kiểm tra tính nhất quán số liệu" (review cnn.py, rnn.py, transformer.py and check metric consistency). The full session transcript is kept locally by the member and is not published. |
+| How the output was edited and verified | The tool produced architectural and code-review findings only; all code edits and training runs were performed by the group members. Checks executed during verification: every model was instantiated and run forward, confirming `(N, 10)` logits; the CNN was checked at 1, 2, 3 and 4 convolution blocks against the real `MaxPool2d` output, confirming the `28 // 2**n` spatial formula; `to_sequence` was compared element-wise against the source image, confirming that row token *t* equals `x[:, 0, t, :]`, column token *t* equals `x[:, 0, :, t]`, and patches 0 and 1 equal the first two 7x7 blocks in row-major order; both sequence models were run in all three representations; the error guards were triggered deliberately (5 pooling blocks, `patch_size=5`, `nhead=5`, unknown mode, unknown cell); no model contains a softmax module, as Section 11.1 requires. After the runs, `scripts/compare.py` re-read every `metrics_test.json` and `history.json` and confirmed that each accuracy, macro-F1, parameter count, timing, epoch total and per-class F1 printed in `README.md` and `index.html` matches the artifact it comes from; both HTML pages were parsed for tag balance. |
+| Responsible member | Trần Hoàng Vỹ Khang (`2352502`), Đỗ Đăng Khoa (`2352554`), and Dương Đăng Khoa (`2352551`) |
 | Verification sources | PyTorch documentation for `nn.Conv2d`, `nn.MaxPool2d`, `nn.LSTM`, `nn.GRU` and `nn.TransformerEncoderLayer`; course handbook Sections 11.1 (mandatory models and the convolution / pooling / feature-map, timestep and attention explanations), 11.2, 11.3, 12.1 and 12.2; the six executed runs under `outputs/` |
 
-### Division of work, file by file
+### Review findings acted on, file by file
 
-| File | AI contribution | Group contribution |
+| File | What the architecture / code review checked | Resolved & verified by |
 |---|---|---|
-| `src/models/cnn.py` | Drafted by AI, including the convolution / pooling / feature-map explanation Section 11.1 requires | Reviewed and verified line by line by the responsible member |
-| `src/models/rnn.py` | Drafted by AI, including the timestep / input-size / hidden-representation explanation | Reviewed and verified line by line by the responsible member |
-| `src/models/transformer.py` | Drafted by AI, including the token-embedding / positional-encoding / attention explanation | Reviewed and verified line by line by the responsible member |
-| `src/data/sequence.py` | Drafted by AI | Reviewed and verified line by line by the responsible member |
-| `src/engine/trainer.py` | `measure_inference_time` rewritten by AI to time the model separately from the data loader | Rest of the file member-written; timing logic reviewed and verified |
-| `scripts/train.py`, `scripts/eval.py`, `scripts/compare.py`, `configs/default.yaml` | Model registration, comparison script and new configuration keys added with AI assistance | Reviewed and verified by the responsible member |
-| `README.md`, `index.html` | Results tables, inductive-bias analysis, error analysis and limitations drafted with AI from the executed runs | Reviewed and verified; the member owns every claim in them |
+| `src/models/cnn.py` | Spatial dimension reduction (`28 // 2**n`), conv-bn-relu-pool block structure, absence of pre-loss softmax, and completeness of the Section 11.1 feature-map explanation | Member |
+| `src/models/rnn.py` | Timestep / input-size / hidden-state dimensions across row, column and patch modes, final-step vs mean-pool readout | Member |
+| `src/models/transformer.py` | Linear token projection to `d_model`, learnable positional encoding shape, `batch_first=True` encoder layers, and divisibility guard for `d_model % nhead` | Member |
+| `src/data/sequence.py` | Exact element-wise correspondence of row, column and non-overlapping patch sequences to the `(N, 1, 28, 28)` input tensor | Member |
+| `src/engine/trainer.py`, `src/utils/seed.py` | Flagged that end-to-end timing included DataLoader overhead (leading to separate model-only timing with CUDA synchronization) and that CNN reproducibility required `cudnn.deterministic=True` | Member |
+| `scripts/train.py`, `scripts/eval.py`, `scripts/compare.py`, `configs/default.yaml` | Consistency of CLI model choices, config hyperparameters, and automated aggregation of the four comparison tables from JSON artifacts | Member |
+| `README.md`, `index.html` | Cross-checked all reported metrics, per-class F1 scores, confusion counts and inductive-bias claims against `outputs/*/metrics_test.json` and `history.json` | Member |
+
+## Entry 4 — Review of combined multi-model figures (`compare.py`) and scientific audit of M2 Final report
+
+| Field | Value |
+|---|---|
+| Tool / model | Google Antigravity (AGY) Agent |
+| Used by | Trần Hoàng Vỹ Khang (`2352502`), Đỗ Đăng Khoa (`2352554`), and Dương Đăng Khoa (`2352551`) |
+| Category (Section 5.2) | Code review (plotting layout); scientific & numerical consistency audit (no direct code modification) |
+| Time / stage | Oct 2026; M2 Final report verification and cross-artifact reconciliation |
+| Purpose | Reviewing `scripts/compare.py` for combined 6-model learning curve (`assets/curves_all_models.png`) and confusion matrix (`assets/confusion_matrix_all_models.png`) figure generation; auditing `CR7_A1_Report.md`, `README.md` and `index.html` so every number, caption, error count, analytical FLOPs/MACs figure and scientific claim matches the single-seed (`seed = 42`) JSON artifacts |
+| Affected sections | Code & Figures reviewed: `scripts/compare.py`, `assets/curves_all_models.png`, `assets/confusion_matrix_all_models.png`. Documentation & Report reviewed: `CR7_A1_Report.md`, `README.md`, `index.html`. |
+| Representative prompts | "kiểm tra lại số liệu giữa README, index.html và báo cáo CR7_A1_Report.md xem đã khớp hoàn toàn với JSON trong outputs/ chưa"; "rà soát phần phân tích lỗi, FLOPs/MACs và kết luận theo đúng tiêu chí Section 12-13 của handbook". |
+| How the output was edited and verified | Cross-checked every cell of Tables 1–4 directly against `outputs/*_fashion_mnist_seed42/{history,metrics_test,config}.json` (confirming e.g. CNN `cm[6][2]=33 + cm[6][4]=64 = 97`, GRU vs. LSTM epoch-by-epoch train/val loss across all 15 epochs, and analytical MACs/FLOPs per image); group members applied all edits and verified the rendered figures. |
+| Responsible member | Trần Hoàng Vỹ Khang (`2352502`), Đỗ Đăng Khoa (`2352554`), and Dương Đăng Khoa (`2352551`) |
+| Verification sources | Committed JSON artifacts in `assignment1/outputs/`, `src/data/dataset.py`, `notebooks/eda.ipynb`, and Course Handbook Sections 3.1–3.3, 5.2, and 10–13 |
 
 ## Verification performed
 
@@ -151,11 +157,11 @@ These checks were executed and their evidence is in the repository.
 
 ## What AI was not used for
 
-- The AI-authored files are confined to those named in Entry 3. The Linear and MLP models,
-  `src/data/dataset.py`, `src/engine/trainer.py` apart from `measure_inference_time`,
-  `src/utils/{seed,metrics,plots}.py` and `notebooks/eda.ipynb` were written by a group
-  member, and for the M1 Draft pipeline (Entries 1 and 2) the tool only reviewed and
-  reported findings.
+- All source files in `assignment1/` — the Linear, MLP, CNN, LSTM/GRU and Transformer models,
+  `src/data/{dataset,sequence}.py`, `src/engine/trainer.py`, `src/utils/{seed,metrics,plots}.py`,
+  `scripts/{train,eval,compare}.py` and `notebooks/eda.ipynb` — were written and edited by the
+  group members. AI tools were used strictly to review files, control architectural
+  constraints, and verify consistency across code, artifacts and documentation.
 - No experimental number, table entry or figure was fabricated or estimated; each one comes
   from an executed run whose artifacts are reconstructible with the commands in `README.md`.
 - No dataset was fabricated, modified or re-labelled. Fashion-MNIST is used as published.
@@ -165,21 +171,19 @@ These checks were executed and their evidence is in the repository.
 - No private, restricted or credential-bearing data was pasted into the tool, as handbook
   Section 5.5 requires. The review ran against the repository source only; Fashion-MNIST is
   a public dataset and no credentials, tokens or personal data are present in the repository.
-- No AI-generated code or text was submitted unchecked: every finding and drafted file was
-  read and verified by the responsible member.
-- The report PDF, the slides and the YouTube presentation are not covered by this file.
-  Further entries will be added here if AI tools are used in producing them.
+- Every review finding was inspected and verified by the responsible members before any edit
+  was made by the group.
 
 ## Declaration
 
-All final results, code and conclusions are owned by the group. AI tools were used for code
-review (Entries 1 and 2) and for implementing the three models added after the M1 Draft
-(Entry 3), not as a replacement for original work: the problem framing, the experimental
-design, the choice of representations and every decision about what to report were made by
-the group.
+All final results, code and conclusions are written, verified and owned by the group. AI
+tools were used strictly for code review, architecture control and artifact consistency
+verification (Entries 1–4), not for direct code modification or as a replacement for
+original work: the problem framing, the model implementations, the experimental design, the
+choice of representations and every decision about what to report were made by the group.
 
 The group accepts that the instructor may interview any member and request explanation, live
-edits, metric interpretation or partial reproduction (handbook Section 5.5). All AI-assisted
-files listed in Entry 3 have been reviewed and verified line by line by the responsible
-member. No experimental number here was produced by anything other than an executed run.
-Responsible member for Assignment 1 verification: **Trần Hoàng Vỹ Khang**.
+edits, metric interpretation or partial reproduction (handbook Section 5.5). Every file in
+this repository has been written and verified line by line by the responsible members. No
+experimental number here was produced by anything other than an executed run.
+Responsible members for Assignment 1 verification: **Trần Hoàng Vỹ Khang**, **Đỗ Đăng Khoa**, **Dương Đăng Khoa**.

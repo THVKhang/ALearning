@@ -29,7 +29,8 @@ def load_config(path):
     """Read an experiment yaml on top of configs/base.yaml."""
     with open(os.path.join(ROOT, "configs", "base.yaml")) as f:
         cfg = yaml.safe_load(f)
-    with open(path if os.path.isabs(path) else os.path.join(ROOT, path)) as f:
+    resolved = path if os.path.exists(path) else os.path.join(ROOT, path)
+    with open(resolved) as f:
         exp = yaml.safe_load(f)
     for k, v in exp.items():
         if isinstance(v, dict) and isinstance(cfg.get(k), dict):

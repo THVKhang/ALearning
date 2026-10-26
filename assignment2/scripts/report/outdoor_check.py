@@ -16,7 +16,8 @@ from src.engine.metrics import depth_metrics, valid_mask
 from src.models.midas import MiDaSSmall
 
 ROOT = os.path.join(ROOT_DIR, "data/diode_subset")
-m = MiDaSSmall().cuda().eval()
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+m = MiDaSSmall().to(DEVICE).eval()
 
 
 def ranks(x):
@@ -42,7 +43,7 @@ for split in ["train", "val", "test"]:
             s = ds[i]
             gt, mask = s["depth"][0], s["mask"][0]
             with torch.no_grad():
-                p = m(s["rgb"][None].cuda())[0, 0].float().cpu()
+                p = m(s["rgb"][None].to(DEVICE))[0, 0].float().cpu()
             v = valid_mask(gt, mask, 200.0)
             if v.sum() < 500:
                 continue
