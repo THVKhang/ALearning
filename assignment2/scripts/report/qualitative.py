@@ -47,7 +47,8 @@ def main():
     models = [(label, *load(run, name, fr)) for label, run, name, fr in MODELS]
 
     cols = 2 + len(models)
-    fig, axes = plt.subplots(len(idx), cols, figsize=(3 * cols, 2.4 * len(idx)))
+    fig, axes = plt.subplots(len(idx), cols + 1, figsize=(3 * cols + 0.4, 2.4 * len(idx)),
+                             gridspec_kw={"width_ratios": [1] * cols + [0.05]})
     mean, std = torch.tensor(IMAGENET_MEAN).view(3, 1, 1), torch.tensor(IMAGENET_STD).view(3, 1, 1)
     for r, i in enumerate(idx):
         s = ds[i]
@@ -78,7 +79,7 @@ def main():
                 ax.set_ylabel(f"{s['domain']}\n{s['id'][:11]}", fontsize=7)
             ax.set_xticks([])
             ax.set_yticks([])
-        fig.colorbar(im, ax=axes[r, -1], fraction=0.046, label="m")
+        fig.colorbar(im, cax=axes[r, -1], label="m")
 
     fig.tight_layout()
     path = os.path.join(ROOT, "results", "qualitative.png")
