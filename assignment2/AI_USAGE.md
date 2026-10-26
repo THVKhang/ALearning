@@ -27,7 +27,17 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **7** | M1 Loss Formulation | SILog loss mathematical formula verification | Report Sec. 3.2 & Sec. 5 | Eigen et al. (2014) NIPS paper cross-reference | Đỗ Đăng Khoa |
 | **8** | M1 Proposal Report | Report formatting & 16-point checklist review | `assignment2/index.html` | Visual check at `http://localhost:8085` & Handbook Sec. 18 | Đỗ Đăng Khoa |
 | **9** | M1 Compliance Audit | Section 18 and 21 gap check; **code and report writing** | `scripts/export_scenes.py`, `proposal/scenes_used.csv`, `assignment2/index.html` | Handbook Sec. 18, 19.6, 20, 21, 22; diode-dataset.org | Trần Hoàng Vỹ Khang |
-| **10** | M1 Subset Reproducibility | Recovered the subset rule; found and corrected bilinear depth resampling | `scripts/make_subset.py`, `scripts/kaggle_diagnose.py`, `notebooks/`, `assignment2/index.html` | Group Kaggle notebook; OpenCV docs; synthetic calibration | Trần Hoàng Vỹ Khang |
+| **10** | M1 Subset Reproducibility | Recovered the subset rule; found and corrected bilinear depth resampling | `scripts/data/make_subset.py`, `scripts/data/kaggle_diagnose.py`, `notebooks/`, `assignment2/index.html` | Group Kaggle notebook; OpenCV docs; synthetic calibration | Trần Hoàng Vỹ Khang |
+
+---
+
+## M2 Draft Disclosure Summary
+
+| # | Task / Stage | Purpose / Category | Affected Files | Verification Method | Member Responsible |
+|---|---|---|---|---|---|
+| **11** | M2 Loss & Metrics | Implementation review, edge-case tests | `src/engine/loss.py`, `src/engine/metrics.py`, `tests/test_metrics.py` | Unit tests; Eigen et al. (2014) | Dương Đăng Khoa |
+| **12** | M2 Baseline U-Net | Architecture review, training pipeline, end-to-end test | `src/models/unet.py`, `src/engine/trainer.py`, `train.py`, `tests/test_models.py`, `tests/test_pipeline.py` | Synthetic pipeline test; Ronneberger et al. (2015) | Dương Đăng Khoa |
+| **13** | M2 Review & Experiments | Code review of 11–12, bug fixes, **code writing** (alignment, MiDaS, evaluation, reports), folder reorganisation | see entry 13 | Unit tests; repeat-run check; runs on RTX 4060 | Đỗ Đăng Khoa |
 
 ---
 
@@ -211,7 +221,7 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Member Who Used It** | Dương Đăng Khoa |
 | **Development Stage** | M2 Draft (24 October 2026) |
 | **Purpose / Category** | Implementation review, edge-case validation, and test suite design |
-| **Affected Sections / Files** | `assignment2/src/engine/__init__.py`, `assignment2/src/engine/loss.py`, `assignment2/src/engine/metrics.py`, `assignment2/scripts/test_loss_metrics.py` |
+| **Affected Sections / Files** | `assignment2/src/engine/loss.py`, `assignment2/src/engine/metrics.py`, `assignment2/tests/test_metrics.py` (originally `scripts/test_loss_metrics.py`; files later revised and moved, see entry 13) |
 | **Representative Prompt** | *"Check giúp mình logic cài đặt MaskedSILogLoss: khi batch gặp toàn bộ mask 0 thì return pred.sum() * 0.0 đã đủ để giữ computational graph cho backward pass chưa, và gợi ý thêm test case kiểm tra tính chất scale-invariance khi lambda=1.0."* |
 | **AI Contribution** | Reviewed PyTorch autograd graph preservation for empty masks; verified SILog loss scale-invariance properties; assisted in formulating edge-case assertion checks (NaNs, Infs, zero-division). |
 | **Student Verification & Editing** | Implemented `MaskedSILogLoss`, `compute_depth_metrics`, and `DepthMetricTracker`; authored and ran `scripts/test_loss_metrics.py` verifying gradient flow and metric accuracy across 4 test suites. |
@@ -227,7 +237,7 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Member Who Used It** | Dương Đăng Khoa |
 | **Development Stage** | M2 Draft (24 October 2026) |
 | **Purpose / Category** | Architecture design review, training pipeline implementation, and end-to-end verification |
-| **Affected Sections / Files** | `assignment2/src/models/__init__.py`, `assignment2/src/models/unet.py`, `assignment2/src/engine/trainer.py`, `assignment2/configs/baseline_unet.yaml`, `assignment2/scripts/train.py`, `assignment2/scripts/test_unet.py`, `assignment2/scripts/test_pipeline_synthetic.py` |
+| **Affected Sections / Files** | `assignment2/src/models/unet.py`, `assignment2/src/engine/trainer.py`, `assignment2/configs/baseline_unet.yaml`, `assignment2/train.py`, `assignment2/tests/test_models.py`, `assignment2/tests/test_pipeline.py` (originally under `scripts/`; files later revised and moved, see entry 13) |
 | **Representative Prompt** | *"Rà soát giúp mình kiến trúc U-Net 4 tầng với skip-connections cho bài toán Depth (288x384) và pipeline huấn luyện trong `trainer.py`: kiểm tra cơ chế GradScaler AMP fp16, tiêu chí lưu best checkpoint theo Abs Rel và thiết kế script test giả lập end-to-end."* |
 | **AI Contribution** | Reviewed U-Net encoder-decoder channel sizing (32 to 512) and positive depth output activation; assisted in configuring PyTorch AMP GradScaler and metric tracking integration; provided synthetic end-to-end pipeline verification test. |
 | **Student Verification & Editing** | Self-implemented UNet, Trainer, YAML configuration, and training CLI script; executed `test_unet.py` (7.76M params verified) and `test_pipeline_synthetic.py` confirming loss convergence, history CSV logging, and checkpoint serialization. |
@@ -246,7 +256,7 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Affected Sections / Files** | `src/engine/{metrics,align,loss,trainer}.py`, `src/models/{unet,midas,__init__}.py`, `src/utils/common.py`, `src/data/dataset.py`, `configs/*.yaml`, `train.py`, `evaluate.py`, `run_all.sh`, `tests/`, `scripts/report/`, `README.md`, `index.html` Sec. 4–8. Files moved: data scripts to `scripts/data/`, tests to `tests/`, `train.py` to the assignment root. |
 | **Representative Prompt** | *"Đọc kĩ src code, check đủ 15 bước M2 chưa, bạn tôi có thể làm sai; sửa lỗi, viết phần thiếu, tổ chức lại folder."* |
 | **AI Contribution** | Found: metric dropped pixels with pred ≤ 0 (flattered bad models); U-Net ReLU output blocked gradients; no VRAM log, no shared config, no alignment, no MiDaS training. Wrote shared config + full seeding, per-image scale/shift alignment, SSI loss for MiDaS, frozen-encoder option, evaluate/report scripts. Diagnosed outdoor zero-shot Abs Rel > 1 as sub-0.6 m scanner noise and proposed the 0.6 m lower bound (FARO S350 minimum range). |
-| **Student Verification & Editing** | Ran `tests/test_metrics.py` (GT as prediction gives Abs Rel = RMSE = 0, δ1 = 100%; alignment recovers inverted/scaled/shifted GT); ran the same smoke config twice and got identical histories; visually checked RGB / GT / MiDaS outdoor samples before accepting the 0.6 m bound; all reported numbers come from runs on the group RTX 4060. |
+| **Student Verification & Editing** | Tests (`tests/test_metrics.py`: GT as prediction gives Abs Rel = RMSE = 0 and δ1 = 100%; alignment recovers inverted/scaled/shifted GT), the repeat-run check (same smoke config twice, identical history) and all training/evaluation runs were executed inside the AI-assisted session on the group RTX 4060, and the reported numbers come from those runs. **Pending:** line-by-line read of the new files and a re-run of `bash run_all.sh` by the responsible member before submission. The 0.6 m lower bound was chosen after looking at the RGB / GT / MiDaS outdoor samples and the near-zero GT statistics; its source (scanner minimum range) should be re-checked against the DIODE paper. |
 | **Responsible Member** | Đỗ Đăng Khoa |
 | **Verification Sources** | Ranftl et al. (TPAMI 2020, MiDaS SSI loss and alignment); Eigen et al. (2014); DIODE paper (sensor range); PyTorch reproducibility docs. |
 
