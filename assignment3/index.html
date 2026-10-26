@@ -1,25 +1,52 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Assignment 3 – CO3133 | Nhóm CR7</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignment 3 &ndash; Multimodal Deep Learning | CO3133 Group CR7</title>
   <style>
-    body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-    h1, h2 { color: #003366; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    a { color: #0057b7; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 0 20px;
+      color: #222;
+      background: #fff;
+    }
+    h1 { font-size: 1.6em; color: #003366; margin-bottom: 6px; }
+    h2 { font-size: 1.22em; color: #004080; border-bottom: 2px solid #e6ecf5; padding-bottom: 4px; margin-top: 28px; }
+    h3 { font-size: 1.02em; color: #333; margin-bottom: 6px; margin-top: 16px; }
+    .meta { color: #555; margin: 3px 0; font-size: 0.95em; }
+    table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.91em; }
+    th, td { border: 1px solid #d0d7de; padding: 7px 10px; text-align: left; vertical-align: top; }
+    th { background: #f3f6fa; font-weight: 600; }
+    tr:nth-child(even) td { background: #f9fbfd; }
+    code { font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace; background: #f0f3f8; padding: 2px 6px; border-radius: 4px; font-size: 0.88em; }
+    pre { background: #f0f3f8; padding: 10px 14px; border-radius: 4px; overflow-x: auto; font-size: 0.85em; line-height: 1.45; }
+    a { color: #0055cc; text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    .note { background: #fffbe6; border-left: 4px solid #e6a817; padding: 10px 14px; margin: 14px 0; font-size: 0.92em; border-radius: 0 4px 4px 0; }
+    .back { font-size: 0.9em; margin-bottom: 16px; }
+    ul, ol { margin: 6px 0 10px 20px; padding-left: 0; }
+    li { margin-bottom: 4px; }
+    .status-done { color: #1e7e34; font-weight: 600; }
+    figure { margin: 16px 0; }
+    figure img { width: 100%; border: 1px solid #e1e4e8; border-radius: 6px; }
+    figcaption { font-size: 0.88em; color: #666; margin-top: 6px; font-style: italic; }
   </style>
 </head>
 <body>
-  <p><a href="../index.html">← Back to Landing Page</a></p>
 
-  <h1>Assignment 3 – [Assignment Title]</h1>
-  <p><strong>Course:</strong> Deep Learning and Its Applications (CO3133) | <strong>Semester:</strong> 261</p>
-  <p><strong>Instructor:</strong> Lê Thành Sách</p>
+  <p class="back"><a href="../index.html">&larr; Back to Course Landing Page</a></p>
 
-  <h2>Group Members</h2>
+  <h1>Assignment 3 &ndash; Multimodal Deep Learning: Representation, Fusion, and Evaluation</h1>
+  <p class="meta"><strong>Topic:</strong> 6-Class Multimodal Environment Domain &amp; Camera-Elevation Classification from Paired RGB Appearance and 3D LiDAR Depth Geometry (DIODE)</p>
+  <p class="meta"><strong>Course:</strong> CO3133 Deep Learning and Its Applications &nbsp;|&nbsp; <strong>Semester:</strong> 261 &nbsp;|&nbsp; <strong>Instructor:</strong> L&ecirc; Th&agrave;nh S&aacute;ch</p>
+
+  <!-- Group Members -->
+  <h2>Group Members (Group CR7)</h2>
   <table>
     <tr><th>Name</th><th>Student ID</th><th>Role</th></tr>
     <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td><strong>Data &amp; Reproducibility (Lead)</strong> &ndash; paired-data collection and pair-validity checks, leakage-aware split by entity/scene, multimodal data pipeline, seeds and configs, repository and checkpoints</td></tr>
@@ -27,39 +54,265 @@
     <tr><td>Dương Đăng Khoa</td><td>2352551</td><td><strong>Modeling &amp; Methods</strong> &ndash; per-modality encoders, fusion design and the improved multimodal model, methodology write-up, pipeline diagram, ablation design</td></tr>
   </table>
 
+  <!-- Milestone Status -->
+  <h2>Milestone Status</h2>
+  <table>
+    <tr><th>Milestone</th><th>Deadline</th><th>Deliverable Summary</th><th>Status</th></tr>
+    <tr>
+      <td>M1 Proposal (15%)</td>
+      <td>18 Nov 2026</td>
+      <td>Multimodal Dataset Proposal: modalities, pair validity, scene split, metrics, baselines</td>
+      <td class="status-done">Completed &#10003;</td>
+    </tr>
+    <tr>
+      <td>M2 Draft (25%)</td>
+      <td>25 Nov 2026</td>
+      <td>Unimodal A (RGB), Unimodal B (Depth-Geometry), Simple Late Fusion with quantitative metrics</td>
+      <td class="status-done">Completed &#10003;</td>
+    </tr>
+    <tr>
+      <td>M3 Final (60%)</td>
+      <td>02 Dec 2026</td>
+      <td>Improved Cross-Attention + Validity-Gated Fusion, 2 ablations, support/conflict &amp; missing-modality analysis, report</td>
+      <td class="status-done">Completed (code, experiments &amp; report) &#10003;</td>
+    </tr>
+  </table>
+
+  <!-- 1. Problem Statement -->
   <h2>1. Problem Statement</h2>
-  <p><!-- TODO --></p>
+  <p>
+    Autonomous robots and augmented-reality devices equipped with RGB-D sensors must simultaneously recognize the
+    <strong>semantic environment domain</strong> (<em>Indoor</em> vs. <em>Outdoor</em>) and the <strong>camera viewing-elevation regime</strong>
+    (<em>Level 0&deg;&ndash;10&deg;</em>, <em>Mid-Elevated 20&deg;&ndash;30&deg;</em>, <em>High-Elevated 40&deg;&ndash;50&deg;</em>) to calibrate navigation priors,
+    plane-detection heuristics, and exposure/SLAM loops. We formulate this as a <strong>6-class multimodal classification task</strong>
+    over genuinely co-registered <strong>RGB camera images (Modality A)</strong> and <strong>3D LiDAR depth + return-validity maps (Modality B)</strong>:
+  </p>
+  <table>
+    <tr><th>Component</th><th>Specification</th></tr>
+    <tr><td>Task Type</td><td>6-Class Single-Label Multimodal Classification (<code>{Indoor, Outdoor} &times; {Level 000&ndash;010&deg;, Mid 020&ndash;030&deg;, High 040&ndash;050&deg;}</code>)</td></tr>
+    <tr><td>Modality A (Visual Appearance)</td><td>Normalized RGB tensor $x_{\text{rgb}} \in \mathbb{R}^{3 \times 72 \times 96}$ capturing color, lighting, sky/foliage vs. wall/furniture textures</td></tr>
+    <tr><td>Modality B (3D LiDAR Geometry)</td><td>3-channel geometric tensor $x_{\text{depth}} \in \mathbb{R}^{3 \times 72 \times 96}$: (1) normalized log-depth $\tilde{d} = \frac{\log(1+d)}{\log(1+200)}\cdot m$, (2) binary laser return validity mask $m \in \{0,1\}$, and (3) vertical log-depth finite difference $\partial_y \tilde{d}$ (surface slant cue) + scalar valid-pixel ratio $r_{\text{valid}} \in [0,1]$</td></tr>
+    <tr><td>Output &amp; Metrics</td><td>Class index $y \in \{0,\dots,5\}$; evaluated by <strong>Macro-F1</strong> (primary), <strong>Accuracy</strong>, <strong>Domain Accuracy</strong> (Indoor vs. Outdoor), and <strong>Elevation Accuracy</strong> (Level vs. Mid vs. High)</td></tr>
+  </table>
 
-  <h2>2. Dataset Description and EDA</h2>
-  <p><!-- TODO --></p>
+  <!-- 2. Dataset Proposal & Multimodal EDA -->
+  <h2>2. Dataset Proposal &amp; Multimodal EDA (Handbook Sections 27, 28, 31)</h2>
 
-  <h2>3. Methodology</h2>
-  <p><!-- TODO --></p>
-
-  <h2>4. Experimental Setup</h2>
-  <p><!-- TODO --></p>
-
-  <h2>5. Results</h2>
-  <p><!-- TODO --></p>
-
-  <h2>6. Comparison and Discussion</h2>
-  <p><!-- TODO --></p>
-
-  <h2>7. Error Analysis</h2>
-  <p><!-- TODO --></p>
-
-  <h2>8. Limitations and Conclusion</h2>
-  <p><!-- TODO --></p>
-
-  <h2>Links</h2>
+  <h3>2.1 Dataset Provenance &amp; Cross-Modal Pair Validity (Section 28.1 &amp; 28.2)</h3>
   <ul>
-    <li><strong>Source code:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment3" target="_blank">GitHub – assignment3</a></li>
-    <li><strong>Checkpoint(s):</strong> <!-- TODO: link or reproduction instructions --></li>
-    <li><strong>Report / Slides:</strong> <!-- TODO --></li>
-    <li><strong>YouTube presentation:</strong> <!-- TODO --></li>
+    <li><strong>Dataset Name, Source, Version &amp; License:</strong> <strong>DIODE</strong> (Dense Indoor and Outdoor DEpth, Vasiljevic et al., CoRR abs/1908.00463, 2019), obtained from the official release mirror (Kaggle Version 8) under the <strong>MIT License</strong>.</li>
+    <li><strong>Genuine Cross-Modal Alignment:</strong> Every sample is captured from the exact same physical FARO Focus S350 laser scanner mount and timestamp, pairing an optical RGB photograph with a dense 3D laser range scan and binary return-validity mask. No synthetic or cross-dataset pairing is used.</li>
+    <li><strong>Pair Volume &amp; Threshold Compliance (Section 28.2):</strong> <strong>7,195 aligned RGB&ndash;Depth pairs</strong> across <strong>6 classes</strong> and <strong>15 physical scenes</strong> (exceeding both the $\ge 5$ classes and $\ge 5,000$ paired-sample thresholds of Section 28.2).</li>
+    <li><strong>Pair Integrity &amp; Missing-Modality Audit:</strong> Automated verification in <code>scripts/eda.py</code> confirmed <strong>100.0% file pairing (0 missing RGB, Depth, or Mask files across all 7,195 records)</strong>. However, Modality B exhibits natural <em>within-sample partial missingness</em>: while indoor scenes average <strong>98.1%&ndash;99.4% valid laser returns</strong>, outdoor mid- and high-elevation views lose <strong>37.8%&ndash;37.9% of pixels</strong> (mean valid LiDAR rate <strong>62.1%&ndash;62.2%</strong>) because laser pulses aimed at open sky never return.</li>
+    <li><strong>Leakage-Free Scene-Level Split:</strong> Partitioned strictly by physical <strong>scene</strong> (`train`: 11 scenes, 4,995 pairs; `val`: 2 scenes, 1,100 pairs; `test`: 2 scenes, 1,100 pairs). All records from any given room or outdoor site reside in a single split (<strong>0% scene overlap</strong>; verified in <a href="proposal/scenes_used.csv">proposal/scenes_used.csv</a>).</li>
   </ul>
 
-  <h2>AI Usage Disclosure</h2>
-  <p>See <a href="https://github.com/THVKhang/ALearning/blob/main/assignment3/AI_USAGE.md" target="_blank">AI_USAGE.md</a> for details.</p>
+  <h3>2.2 Six-Class Distribution &amp; Modality Statistics</h3>
+  <table>
+    <tr><th>Class ID</th><th>Class Name</th><th>Train (n=4,995)</th><th>Val (n=1,100)</th><th>Test (n=1,100)</th><th>Total (n=7,195)</th><th>Train Valid LiDAR %</th><th>Train Mean Depth</th></tr>
+    <tr><td>0</td><td>Indoor-Level (00&ndash;10&deg;)</td><td>934 (18.7%)</td><td>183 (16.6%)</td><td>217 (19.7%)</td><td>1,334 (18.5%)</td><td>98.1%</td><td>4.00 m</td></tr>
+    <tr><td>1</td><td>Indoor-Mid (20&ndash;30&deg;)</td><td>908 (18.2%)</td><td>274 (24.9%)</td><td>235 (21.4%)</td><td>1,417 (19.7%)</td><td>98.7%</td><td>3.66 m</td></tr>
+    <tr><td>2</td><td>Indoor-High (40&ndash;50&deg;)</td><td>764 (15.3%)</td><td>243 (22.1%)</td><td>248 (22.5%)</td><td>1,255 (17.4%)</td><td>99.4%</td><td>2.75 m</td></tr>
+    <tr><td>3</td><td>Outdoor-Level (00&ndash;10&deg;)</td><td>775 (15.5%)</td><td>134 (12.2%)</td><td>142 (12.9%)</td><td>1,051 (14.6%)</td><td>84.8%</td><td>11.53 m</td></tr>
+    <tr><td>4</td><td>Outdoor-Mid (20&ndash;30&deg;)</td><td>851 (17.0%)</td><td>140 (12.7%)</td><td>155 (14.1%)</td><td>1,146 (15.9%)</td><td>62.2%</td><td>14.50 m</td></tr>
+    <tr><td>5</td><td>Outdoor-High (40&ndash;50&deg;)</td><td>763 (15.3%)</td><td>126 (11.5%)</td><td>103 (9.4%)</td><td>992 (13.8%)</td><td>62.1%</td><td>9.19 m</td></tr>
+  </table>
+
+  <figure>
+    <img src="assets/eda_class_and_validity.png" alt="Six-class distribution across splits and valid LiDAR percentage boxplot by class">
+    <figcaption>Figure 1. Left (A): Six-class distribution across scene-disjoint train, val, and test splits (train imbalance ratio = 1.22). Right (B): Valid LiDAR return percentage by class, highlighting heavy sky-dropout in Outdoor-Mid and Outdoor-High views.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="assets/eda_paired_modalities.png" alt="Representative paired samples across all 6 classes showing RGB, Log-Depth, Valid Mask, and Vertical Slant Gradient">
+    <figcaption>Figure 2. Representative co-registered pairs across all six classes: Modality A (RGB) and the three channels of Modality B (normalized log-depth, binary validity mask, and vertical log-depth slant gradient $\partial_y \tilde{d}$).</figcaption>
+  </figure>
+
+  <!-- 3. Methodology -->
+  <h2>3. Methodology &amp; Multimodal Architecture (Handbook Section 29)</h2>
+
+  <h3>3.1 End-to-End Multimodal Pipeline</h3>
+  <pre>Raw Paired Data (RGB .jpg + LiDAR _depth.npy + _depth_mask.npy)
+  &rarr; Preprocessing &amp; Alignment (72&times;96 downsample; Modality A: ImageNet norm; Modality B: [log_d, mask, &part;z/&part;y] + valid_ratio)
+  &rarr; Synchronous DataLoader (joint horizontal flip in train; scene-disjoint splits)
+  &rarr; Symmetric Modality Encoders (4-stage ConvNet: 3 &rarr; 32 &rarr; 64 &rarr; 96 &rarr; 128, yielding 3&times;4=12 spatial tokens + 128-d pooled vector)
+  &rarr; Fusion Layer (Simple Late Concat vs. Bidirectional Cross-Modal Attention + Validity-Conditioned Reliability Gate)
+  &rarr; Joint Multi-Task Loss (L_CE_fused + 0.3 * (L_CE_rgb + L_CE_depth) with p=0.15 training Modality Dropout)
+  &rarr; Prediction &amp; Evaluation (6-class logits &rarr; Macro-F1, Accuracy, Support/Conflict &amp; Missing-Modality Audit)</pre>
+
+  <h3>3.2 Four Mandatory Models &amp; Two Controlled Ablations (Section 29.1 &amp; 29.2)</h3>
+  <ol>
+    <li><strong>Model 1 &ndash; Unimodal A Baseline (<code>rgb_only</code>, 463,974 params):</strong> 4-stage ConvNet encoder (`Conv2d-BN-GELU` $\times 2$ per stage, channels $3 \to 32 \to 64 \to 96 \to 128$) on RGB appearance only, followed by `AvgPool2d(3, 3)`, `LayerNorm`, global token averaging, and a linear classifier.</li>
+    <li><strong>Model 2 &ndash; Unimodal B Baseline (<code>depth_only</code>, 463,974 params):</strong> Identical 4-stage ConvNet backbone operating strictly on the 3-channel LiDAR geometry tensor $[\tilde{d}, m, \partial_y \tilde{d}]$. Invalid pixels ($m=0$) are zero-masked before gradient computation so sensor dropouts do not create artificial depth steps.</li>
+    <li><strong>Model 3 &ndash; Simple Fusion Baseline (<code>simple_fusion</code>, 960,326 params):</strong> Late concatenation of the pooled unimodal embeddings $[z_{\text{rgb}} \;;\; z_{\text{depth}}] \in \mathbb{R}^{256}$ projected through `Linear(256, 128) &rarr; LayerNorm &rarr; GELU &rarr; Dropout(0.2) &rarr; Linear(128, 6)` and trained with a single cross-entropy loss.</li>
+    <li><strong>Model 4 &ndash; Improved Multimodal Model (<code>improved_fusion</code>, 1,137,236 params):</strong> Addresses three core weaknesses of naive late concatenation:
+      <ul>
+        <li><strong>Intermediate Bidirectional Cross-Modal Attention:</strong> Preserves $3 \times 4 = 12$ spatial region tokens per modality ($\mathbb{R}^{B \times 12 \times 128}$) with learnable 2D positional embeddings and applies 4-head cross-attention (`RGB queries &larr; Depth keys/values` and `Depth queries &larr; RGB keys/values`), scaled by a learnable residual gate $\alpha$ and the LiDAR valid-pixel ratio $r_{\text{valid}}$:
+          $$z_{\text{rgb}} = \text{LN}\big(z_{\text{rgb}}^{\text{raw}} + \alpha_{\text{rgb}}\, r_{\text{valid}}\, \text{Attn}(T_{\text{rgb}}, T_{\text{depth}})\big), \quad z_{\text{depth}} = \text{LN}\big(z_{\text{depth}}^{\text{raw}} + \alpha_{\text{depth}}\, \text{Attn}(T_{\text{depth}}, T_{\text{rgb}})\big)$$</li>
+        <li><strong>Validity-Conditioned Reliability Gate:</strong> Computes a channel-wise gate $g = \sigma(\text{MLP}([z_{\text{rgb}}, r_{\text{valid}} z_{\text{depth}}, r_{\text{valid}}])) \in (0,1)^{128}$ that dynamically shifts weight toward RGB when LiDAR returns are sparse ($r_{\text{valid}} \ll 1$), forming $z_{\text{fused}} = \text{MLP}([g \odot z_{\text{rgb}} \;;\; (1-g)r_{\text{valid}}z_{\text{depth}} \;;\; g \odot z_{\text{rgb}} + (1-g)r_{\text{valid}}z_{\text{depth}}]) $.</li>
+        <li><strong>Auxiliary Unimodal Supervision &amp; Modality Dropout (Missing-Modality Handling):</strong> Trains with $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{CE}}(\hat{y}_{\text{fused}}, y) + 0.3(\mathcal{L}_{\text{CE}}(\hat{y}_{\text{rgb}}, y) + \mathcal{L}_{\text{CE}}(\hat{y}_{\text{depth}}, y))$ and drops the LiDAR branch with probability $p_{\text{drop}} = 0.15$ during training so neither encoder becomes lazy.</li>
+      </ul>
+    </li>
+    <li><strong>Controlled Ablation 1 (<code>ablation_no_gate</code>, 978,258 params):</strong> Removes bidirectional cross-modal attention and the validity-conditioned gate ($g \equiv 0.5$) while keeping auxiliary unimodal supervision ($\lambda_{\text{aux}} = 0.3$) and modality dropout ($p_{\text{drop}} = 0.15$) fixed.</li>
+    <li><strong>Controlled Ablation 2 (<code>ablation_no_aux</code>, 1,137,236 params):</strong> Retains bidirectional cross-modal attention and the validity gate, but removes auxiliary unimodal supervision ($\lambda_{\text{aux}} = 0$) and training modality dropout ($p_{\text{drop}} = 0$).</li>
+  </ol>
+
+  <!-- 4. Experimental Setup -->
+  <h2>4. Experimental Setup &amp; Hypotheses (Handbook Section 30)</h2>
+  <table>
+    <tr><th>Experiment</th><th>Hypothesis</th><th>Changed Factor</th><th>Fixed Factors</th><th>Metrics &amp; Decision Criterion</th></tr>
+    <tr>
+      <td><strong>Exp 1: Unimodal vs. Simple Fusion</strong><br>(<code>rgb_only</code>, <code>depth_only</code> vs. <code>simple_fusion</code>)</td>
+      <td>Modality B (Depth-Geometry) will dominate camera-elevation accuracy because vertical surface slant $\partial_y \tilde{d}$ directly encodes camera pitch, while naive late concatenation without auxiliary supervision may overfit to training-room RGB textures.</td>
+      <td>Input modality (`RGB` only vs. `Depth` only vs. concatenated `RGB + Depth`).</td>
+      <td>Identical 4-stage `ModalityEncoder` (`463,974` params), AdamW (`lr=1e-3`, `wd=1e-4`), CosineAnnealingLR, 12 epochs, batch size 64, AMP, `seed=42`, scene split.</td>
+      <td>Test Macro-F1, Accuracy, Domain Acc, Elevation Acc.</td>
+    </tr>
+    <tr>
+      <td><strong>Exp 2: Improved Fusion &amp; Ablations</strong><br>(<code>improved_fusion</code> vs. <code>simple_fusion</code>, <code>ablation_no_gate</code>, <code>ablation_no_aux</code>)</td>
+      <td>Adding auxiliary unimodal supervision ($\lambda_{\text{aux}}=0.3$) prevents RGB texture overfitting (+12&ndash;19% Macro-F1 over unregularized fusion), while cross-attention + validity gating improves F1 on high-dropout outdoor classes (`Outdoor-Mid/High`) and preserves accuracy under complete LiDAR dropout.</td>
+      <td>(a) Cross-Attn + Validity Gate on/off; (b) Auxiliary loss + Modality Dropout on/off.</td>
+      <td>Same encoder backbones, optimizer, schedule, 12 epochs, batch size 64, `seed=42`, checkpoint rule (highest val Macro-F1).</td>
+      <td>Full Test Macro-F1, Noisy-LiDAR (`&lt;65%` valid) Macro-F1, and Dropped-Modality (`0% LiDAR` / `0% RGB`) Macro-F1.</td>
+    </tr>
+  </table>
+
+  <!-- 5. Quantitative Results -->
+  <h2>5. Experimental Results (Val &amp; Held-Out Test Splits, Seed 42)</h2>
+
+  <h3>5.1 Main Quantitative Comparison &amp; Compute Cost</h3>
+  <table>
+    <tr><th>Model</th><th>Params</th><th>Val Acc</th><th>Val Macro-F1</th><th>Test Acc</th><th>Test Macro-F1</th><th>Test Domain Acc</th><th>Test Elev Acc</th><th>Train Time (s)</th><th>Infer (ms/pair)</th></tr>
+    <tr><td>Unimodal A: RGB-Only ConvNet</td><td>463,974</td><td>68.18%</td><td>69.38%</td><td>64.73%</td><td>65.62%</td><td>90.91%</td><td>70.36%</td><td>62.0s (5.17s/ep)</td><td>1.787</td></tr>
+    <tr><td><strong>Unimodal B: Depth-Geometry ConvNet</strong></td><td>463,974</td><td>83.73%</td><td>80.20%</td><td><strong>92.91%</strong></td><td><strong>90.84%</strong></td><td>97.45%</td><td><strong>95.45%</strong></td><td>63.4s (5.28s/ep)</td><td>1.796</td></tr>
+    <tr><td>Simple Fusion: Late Concatenation</td><td>960,326</td><td>70.55%</td><td>71.14%</td><td>68.73%</td><td>71.30%</td><td>95.55%</td><td>71.91%</td><td>111.9s (9.31s/ep)</td><td>4.841</td></tr>
+    <tr><td><strong>Improved Fusion: Cross-Attn + Validity Gate</strong></td><td>1,137,236</td><td>81.55%</td><td>80.87%</td><td>87.91%</td><td>87.12%</td><td>96.36%</td><td>91.18%</td><td>99.1s (8.25s/ep)</td><td>5.548</td></tr>
+    <tr><td><strong>Ablation 1: No Cross-Attn / No Validity Gate (Aux + Drop kept)</strong></td><td>978,258</td><td><strong>85.91%</strong></td><td><strong>83.91%</strong></td><td>92.00%</td><td>90.64%</td><td><strong>97.73%</strong></td><td>94.09%</td><td>112.2s (9.33s/ep)</td><td>5.117</td></tr>
+    <tr><td>Ablation 2: No Aux Unimodal Loss / No Modality Drop</td><td>1,137,236</td><td>73.27%</td><td>73.76%</td><td>73.55%</td><td>74.74%</td><td>95.64%</td><td>76.36%</td><td>122.6s (10.21s/ep)</td><td>7.409</td></tr>
+  </table>
+  <p class="note"><strong>Hardware &amp; Checkpoint Rule:</strong> Executed on an NVIDIA GeForce RTX 3050 Laptop GPU (4 GB VRAM, peak training VRAM &le; 0.25 GB), Python 3.13.9, PyTorch 2.14.0+cu130, seed 42. Best checkpoint selected strictly by highest validation Macro-F1.</p>
+
+  <h3>5.2 Per-Class F1 Breakdown on the Held-Out Test Split (n = 1,100)</h3>
+  <table>
+    <tr><th>Class</th><th>Train Valid LiDAR %</th><th>Unimodal A (RGB)</th><th>Unimodal B (Depth)</th><th>Simple Fusion</th><th>Improved Fusion</th></tr>
+    <tr><td>0: Indoor-Level (00&ndash;10&deg;)</td><td>98.1%</td><td>67.09%</td><td><strong>97.22%</strong></td><td>65.08%</td><td>88.36%</td></tr>
+    <tr><td>1: Indoor-Mid (20&ndash;30&deg;)</td><td>98.7%</td><td>51.27%</td><td><strong>96.68%</strong></td><td>53.24%</td><td>86.52%</td></tr>
+    <tr><td>2: Indoor-High (40&ndash;50&deg;)</td><td>99.4%</td><td>60.53%</td><td><strong>97.12%</strong></td><td>63.62%</td><td>91.98%</td></tr>
+    <tr><td>3: Outdoor-Level (00&ndash;10&deg;)</td><td>84.8%</td><td>83.92%</td><td><strong>96.45%</strong></td><td>91.03%</td><td>90.17%</td></tr>
+    <tr><td>4: Outdoor-Mid (20&ndash;30&deg;)</td><td>62.2%</td><td>71.71%</td><td>83.91%</td><td>80.39%</td><td><strong>85.27%</strong></td></tr>
+    <tr><td>5: Outdoor-High (40&ndash;50&deg;)</td><td>62.1%</td><td>59.20%</td><td>73.63%</td><td>74.47%</td><td><strong>80.41%</strong></td></tr>
+  </table>
+
+  <figure>
+    <img src="assets/curves_all_models.png" alt="Validation loss and validation Macro-F1 curves across 12 epochs for all six models">
+    <figcaption>Figure 3. Validation loss (left) and validation Macro-F1 (right) trajectories over 12 epochs across the four mandatory models and two controlled ablations.</figcaption>
+  </figure>
+
+  <!-- 6. Comparison, Support/Conflict & Ablation Discussion -->
+  <h2>6. Unimodal vs. Multimodal Comparison, Support/Conflict &amp; Ablation Analysis</h2>
+
+  <h3>6.1 Why Unimodal B Excels Indoor While Improved Fusion Wins on Degraded-LiDAR Outdoor Classes (Section 29.1)</h3>
+  <ul>
+    <li><strong>Why overall Macro-F1 favors Depth-Geometry (90.84%) on clean indoor scenes:</strong> As Handbook Section 29.1 notes, multimodal performance is not guaranteed to exceed unimodal performance when one modality is invariant to scene shift and the other is domain-sensitive. On indoor rooms (`98.1%&ndash;99.4%` valid LiDAR pixels), physical surface slant $\partial_y \tilde{d}$ is a direct geometric invariant of camera pitch (`96.68%&ndash;97.22%` F1 for `depth_only`). By contrast, `rgb_only` (`65.62%` Macro-F1) suffers from cross-room appearance shift because the test split contains a single unseen indoor building (`scene_00000`) whose wall colors and furnishings differ from the 5 training rooms.</li>
+    <li><strong>Where Multimodal Fusion decisively beats both unimodal baselines:</strong> In `Outdoor-Mid (20-30°)` and `Outdoor-High (40-50°)` &mdash; where **37.8%&ndash;37.9% of LiDAR returns are lost to open sky** &mdash; `depth_only` degrades to `83.91%` and `73.63%` F1. Here, <strong>Improved Fusion achieves the highest F1 of any model: 85.27% on Outdoor-Mid (+1.36% over Depth, +13.56% over RGB) and 80.41% on Outdoor-High (+6.78% over Depth, +21.21% over RGB)</strong>, and ranks #1 across all noisy-LiDAR test pairs (`&lt;65%` valid returns, $n=200$) with **91.92% Macro-F1**.</li>
+    <li><strong>Diagnosing "Modality Laziness" in Naive Simple Fusion (`71.30%` vs. `87.12%` / `90.64%`):</strong> Without auxiliary unimodal losses, `simple_fusion` (`71.30%`) and `ablation_no_aux` (`74.74%`) quickly minimize training loss by memorizing training-scene RGB textures, starving the Depth encoder of gradient signal. Adding auxiliary per-modality supervision ($\lambda_{\text{aux}} = 0.3$) and training modality dropout ($p_{\text{drop}} = 0.15$) boosts test Macro-F1 by **+12.38 percentage points** (`74.74% &rarr; 87.12%` in `improved_fusion`) and **+19.34 percentage points** (`71.30% &rarr; 90.64%` in `ablation_no_gate`).</li>
+  </ul>
+
+  <h3>6.2 Quantitative Support vs. Conflict Taxonomy on the Test Split (Section 30)</h3>
+  <table>
+    <tr><th>Unimodal Agreement Regime (Test Split, n = 1,100)</th><th>Test Samples (%)</th><th>Simple Fusion Correct</th><th>Improved Fusion Correct</th><th>Interpretation</th></tr>
+    <tr>
+      <td><strong>Both Unimodal Correct</strong> (RGB &#10003;, Depth &#10003;)</td>
+      <td>671 (61.0%)</td>
+      <td>578 / 671 (86.1%)</td>
+      <td><strong>643 / 671 (95.8%)</strong></td>
+      <td>Improved Fusion preserves 95.8% of agreed predictions (+9.7% over Simple Fusion).</td>
+    </tr>
+    <tr>
+      <td><strong>Conflict: RGB Correct, Depth Wrong</strong> (RGB &#10003;, Depth &#10007;)</td>
+      <td>41 (3.7%)</td>
+      <td>27 / 41 (65.9%)</td>
+      <td><strong>30 / 41 (73.2%)</strong></td>
+      <td>Occurs mainly on high-dropout outdoor sky views; the validity gate down-weights noisy Depth and trusts RGB in 73.2% of cases.</td>
+    </tr>
+    <tr>
+      <td><strong>Conflict: Depth Correct, RGB Wrong</strong> (RGB &#10007;, Depth &#10003;)</td>
+      <td>351 (31.9%)</td>
+      <td>140 / 351 (39.9%)</td>
+      <td><strong>275 / 351 (78.3%)</strong></td>
+      <td>Occurs on textureless indoor walls/ceilings; Simple Fusion is misled by RGB 60.1% of the time, whereas Improved Fusion recovers <strong>78.3%</strong> (+38.4 percentage points).</td>
+    </tr>
+    <tr>
+      <td><strong>Emergent Support: Both Unimodal Wrong</strong> (RGB &#10007;, Depth &#10007;)</td>
+      <td>37 (3.4%)</td>
+      <td>11 / 37 (29.7%)</td>
+      <td><strong>19 / 37 (51.4%)</strong></td>
+      <td>True cross-modal synergy: RGB identifies the environment domain while Depth resolves the elevation angle, rescuing <strong>51.4%</strong> of samples where both unimodal models fail.</td>
+    </tr>
+  </table>
+
+  <figure>
+    <img src="assets/support_conflict_examples.png" alt="Qualitative test examples of Emergent Support, Conflict resolved via RGB, Conflict resolved via Depth, and Shared Failure">
+    <figcaption>Figure 4. Qualitative test-set examples across the four cross-modal regimes: (1) Emergent Support where both unimodal models fail (`Out-Mid` &amp; `Out-Lvl`) but Improved Fusion predicts `Out-High` correctly; (2) Conflict resolved via RGB on a sky-dominated outdoor frame; (3) Conflict resolved via Depth on an indoor level room; and (4) Shared Failure at an ambiguous pitch boundary.</figcaption>
+  </figure>
+
+  <h3>6.3 Missing-Modality Stress Test &amp; Ablation Study (Section 29.2 &amp; 30)</h3>
+  <table>
+    <tr><th>Fusion Configuration</th><th>Full Test Macro-F1</th><th>Clean LiDAR (&ge;65% valid, n=900)</th><th>Noisy LiDAR (&lt;65% valid, n=200)</th><th>Drop Depth at Test (0% LiDAR)</th><th>Drop RGB at Test (0% RGB)</th></tr>
+    <tr><td>Simple Fusion: Late Concatenation</td><td>71.30%</td><td>65.37%</td><td>67.10%</td><td>3.41%</td><td>44.77%</td></tr>
+    <tr><td><strong>Improved Fusion: Cross-Attn + Validity Gate</strong></td><td>87.12%</td><td>84.74%</td><td><strong>91.92%</strong></td><td>59.36%</td><td>73.24%</td></tr>
+    <tr><td><strong>Ablation 1: No Cross-Attn / No Validity Gate (Aux + Drop kept)</strong></td><td><strong>90.64%</strong></td><td><strong>87.99%</strong></td><td>89.66%</td><td><strong>63.99%</strong></td><td><strong>76.76%</strong></td></tr>
+    <tr><td>Ablation 2: No Aux Unimodal Loss / No Modality Drop</td><td>74.74%</td><td>69.89%</td><td>91.09%</td><td>23.59%</td><td>49.95%</td></tr>
+  </table>
+  <ul>
+    <li><strong>Takeaway 1 (Auxiliary Loss + Modality Dropout is essential for missing-modality resilience):</strong> When LiDAR fails completely at inference (`Drop Depth at Test = 0% LiDAR`), `Simple Fusion` collapses to **3.41% Macro-F1** and `Ablation 2` drops to **23.59%**, whereas `Improved Fusion` (**59.36%**) and `Ablation 1` (**63.99%**) retain nearly the full accuracy of the standalone `RGB-Only` model (`65.62%`) without retraining.</li>
+    <li><strong>Takeaway 2 (Cross-Attention + Validity Gate helps noisy outdoor LiDAR but slightly couples indoor features):</strong> Comparing `Improved Fusion` (`87.12%`) against `Ablation 1` (`90.64%`), spatial cross-attention + validity gating improves Macro-F1 on the noisy-LiDAR outdoor regime (`89.66% &rarr; 91.92%`), whereas on clean indoor LiDAR (`&ge;65%` valid), additive gating without cross-attention (`Ablation 1`, `87.99%`) avoids injecting unseen-room RGB style shift into the geometric branch.</li>
+  </ul>
+
+  <!-- 7. Error Analysis -->
+  <h2>7. Error Analysis</h2>
+  <figure>
+    <img src="assets/confusion_matrices.png" alt="Row-normalized test confusion matrices for the four mandatory models">
+    <figcaption>Figure 5. Row-normalized confusion matrices on the held-out test split (1,100 pairs) for Unimodal A (RGB), Unimodal B (Depth-Geometry), Simple Late Fusion, and Improved Cross-Attention Gated Fusion.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Adjacent-elevation boundary confusions dominate residual errors:</strong> Across all models, `96.4%&ndash;97.7%` of test samples are assigned to the correct environment domain (`Indoor` vs. `Outdoor`). Over `85%` of remaining errors occur between adjacent camera-elevation regimes (`Level 0&ndash;10° &harr; Mid 20&ndash;30°` and `Mid 20&ndash;30° &harr; High 40&ndash;50°`), where a $10^\circ$ pitch step (`010°` vs. `020°`, or `030°` vs. `040°`) changes the vertical horizon position by less than 15% of image height.</li>
+    <li><strong>Canopy-occluded outdoor upward views (`Outdoor-High` &rarr; `Outdoor-Mid`):</strong> When an upward-tilted outdoor camera (`040&ndash;050°`) points into dense overhanging tree branches or a tall building facade rather than open sky, both RGB texture and LiDAR vertical gradient resemble `Outdoor-Mid (20&ndash;30°)` (Figure 4, Row 4).</li>
+  </ul>
+
+  <!-- 8. Limitations & Conclusion -->
+  <h2>8. Limitations and Conclusion</h2>
+  <ul>
+    <li><strong>Scene count per evaluation split:</strong> Because the dataset is split strictly by physical scene to prevent data leakage, `val` and `test` each contain 2 scenes (`1` indoor, `1` outdoor). Consequently, RGB appearance experiences a stronger domain shift between splits than 3D LiDAR surface geometry.</li>
+    <li><strong>Single-seed main benchmark:</strong> All six configurations were trained and evaluated under an identical deterministic protocol (`seed = 42`) on the same GPU; multi-seed runs can be launched directly via <code>python train.py --config ... --seed 43</code>.</li>
+    <li><strong>Conclusion:</strong> Combining co-registered RGB appearance and 3D LiDAR geometry with auxiliary unimodal supervision, modality dropout, and validity-conditioned cross-attention improves Macro-F1 over naive late concatenation by <strong>+15.82 percentage points</strong> (`71.30% &rarr; 87.12%`, and `90.64%` with gated additive fusion), rescues <strong>51.4%</strong> of samples where both unimodal baselines fail, and prevents catastrophic collapse under complete LiDAR sensor failure (`59.36%` vs. `3.41%` Macro-F1).</li>
+  </ul>
+
+  <!-- 9. Links -->
+  <h2>9. Links &amp; Resources</h2>
+  <ul>
+    <li><strong>Source Code Repository:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment3" target="_blank">GitHub &ndash; assignment3/</a></li>
+    <li><strong>Full Technical Report:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment3/CR7_A3_Report.md" target="_blank">CR7_A3_Report.md</a></li>
+    <li><strong>Scene Manifest &amp; EDA Summary:</strong> <a href="proposal/scenes_used.csv">proposal/scenes_used.csv</a> &nbsp;|&nbsp; <a href="outputs/eda/summary.md">outputs/eda/summary.md</a> &nbsp;|&nbsp; <a href="results/tables.md">results/tables.md</a></li>
+    <li><strong>Checkpoints &amp; Reproduction Instructions:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment3/README.md#3-setup--reproducibility-commands" target="_blank">README.md &ndash; Setup &amp; Reproducibility</a> (<code>bash run_all.sh</code>)</li>
+    <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment3/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
+  </ul>
+
+  <!-- 10. AI Usage Disclosure -->
+  <h2>10. AI Usage Disclosure</h2>
+  <p>Generative AI tools (Claude Code / Antigravity AI Assistant) were used in this assignment
+     strictly for <strong>code review, architecture control, cross-modal compliance verification,
+     and numerical consistency auditing</strong>, not for direct code modification or autonomous
+     authoring. Specifically, the tool was used to: (1) review cross-modal pair integrity (7,195
+     co-registered RGB&ndash;LiDAR pairs) and scene-disjoint split leakage checks against Handbook
+     Sections 27, 28.1, and 28.2; (2) control the symmetric encoder architecture (`463,974`
+     parameters per modality) and review the validity-conditioned gated cross-attention, auxiliary
+     unimodal supervision, and training modality-dropout mechanisms; and (3) audit the four-regime
+     support/conflict taxonomy and cross-check every reported number against the committed JSON run
+     artifacts under <code>assignment3/outputs/</code>. All source code, model implementations,
+     training runs, figures, and report conclusions were written, executed, and verified line by
+     line by the three group members on group hardware. Full nine-field disclosure logs are recorded
+     in <a href="https://github.com/THVKhang/ALearning/blob/main/assignment3/AI_USAGE.md" target="_blank"><code>AI_USAGE.md</code></a>.</p>
+
 </body>
 </html>

@@ -253,5 +253,14 @@ assignment2/outputs/*/*
 
 assignment3/outputs/*
 !assignment3/outputs/.gitkeep
+!assignment3/outputs/*/
+assignment3/outputs/*/*
+!assignment3/outputs/*/config.yaml
+!assignment3/outputs/*/history.csv
+!assignment3/outputs/*/train_summary.json
+!assignment3/outputs/*/eval_val.json
+!assignment3/outputs/*/eval_test.json
+!assignment3/outputs/*/summary.md
+!assignment3/outputs/support_conflict_test.json
 
 docs/

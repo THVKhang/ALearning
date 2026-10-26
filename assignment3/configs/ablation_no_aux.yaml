@@ -1,0 +1,8 @@
+# Controlled ablation 2: remove auxiliary unimodal supervision and modality dropout (keep gated cross-attention fixed)
+name: ablation_no_aux
+model: improved_fusion
+use_cross_attn: true
+use_validity_gate: true
+train:
+  aux_weight: 0.0
+  modality_dropout: 0.0

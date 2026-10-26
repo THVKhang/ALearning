@@ -1,0 +1,95 @@
+{
+  "accuracy": 0.8154545454545454,
+  "macro_f1": 0.8086899266468056,
+  "domain_accuracy": 0.9627272727272728,
+  "elevation_accuracy": 0.8463636363636363,
+  "per_class_f1": {
+    "Indoor-Level (00-10\u00b0)": 0.8760806916426513,
+    "Indoor-Mid (20-30\u00b0)": 0.8206106870229007,
+    "Indoor-High (40-50\u00b0)": 0.8442622950819673,
+    "Outdoor-Level (00-10\u00b0)": 0.8108108108108109,
+    "Outdoor-Mid (20-30\u00b0)": 0.7621776504297995,
+    "Outdoor-High (40-50\u00b0)": 0.7381974248927039
+  },
+  "confusion_matrix": [
+    [
+      152,
+      14,
+      0,
+      15,
+      2,
+      0
+    ],
+    [
+      12,
+      215,
+      39,
+      0,
+      6,
+      2
+    ],
+    [
+      0,
+      21,
+      206,
+      0,
+      3,
+      13
+    ],
+    [
+      0,
+      0,
+      0,
+      105,
+      25,
+      4
+    ],
+    [
+      0,
+      0,
+      0,
+      5,
+      133,
+      2
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      40,
+      86
+    ]
+  ],
+  "n_samples": 1100,
+  "by_validity_regime": {
+    "clean_lidar_ge_65pct_valid": 0.6339151111710123,
+    "noisy_lidar_lt_65pct_valid": 0.6464137138095801,
+    "n_clean": 770,
+    "n_noisy": 330
+  },
+  "gate_rgb_weight_clean": 0.456686916599026,
+  "gate_rgb_weight_noisy": 0.41642622514204547,
+  "eval_time_s": 1.201,
+  "infer_ms_per_sample": 5.4164,
+  "checkpoint_epoch": 11,
+  "name": "improved_fusion",
+  "split": "val",
+  "params": 1137236,
+  "params_M": 1.1372,
+  "missing_modality_stress": {
+    "full_multimodal_macro_f1": 0.8086899266468056,
+    "drop_depth_at_test_macro_f1": 0.677311413892565,
+    "drop_rgb_at_test_macro_f1": 0.6654626086004954,
+    "drop_depth_at_test_acc": 0.6681818181818182,
+    "drop_rgb_at_test_acc": 0.7463636363636363
+  },
+  "env": {
+    "python": "3.13.14",
+    "torch": "2.14.0+cu130",
+    "numpy": "2.5.3",
+    "cuda": "13.0",
+    "cudnn": 92400,
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU"
+  }
+}

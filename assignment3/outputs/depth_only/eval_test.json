@@ -1,0 +1,86 @@
+{
+  "accuracy": 0.9290909090909091,
+  "macro_f1": 0.9083657919014155,
+  "domain_accuracy": 0.9745454545454545,
+  "elevation_accuracy": 0.9545454545454546,
+  "per_class_f1": {
+    "Indoor-Level (00-10\u00b0)": 0.9722222222222222,
+    "Indoor-Mid (20-30\u00b0)": 0.966804979253112,
+    "Indoor-High (40-50\u00b0)": 0.9711934156378601,
+    "Outdoor-Level (00-10\u00b0)": 0.9645390070921985,
+    "Outdoor-Mid (20-30\u00b0)": 0.8391167192429022,
+    "Outdoor-High (40-50\u00b0)": 0.736318407960199
+  },
+  "confusion_matrix": [
+    [
+      210,
+      7,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      233,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      236,
+      0,
+      0,
+      12
+    ],
+    [
+      5,
+      0,
+      0,
+      136,
+      0,
+      1
+    ],
+    [
+      0,
+      7,
+      0,
+      4,
+      133,
+      11
+    ],
+    [
+      0,
+      0,
+      2,
+      0,
+      27,
+      74
+    ]
+  ],
+  "n_samples": 1100,
+  "by_validity_regime": {
+    "clean_lidar_ge_65pct_valid": 0.881539807276516,
+    "noisy_lidar_lt_65pct_valid": 0.8038550860636752,
+    "n_clean": 950,
+    "n_noisy": 150
+  },
+  "eval_time_s": 0.902,
+  "infer_ms_per_sample": 1.7959,
+  "checkpoint_epoch": 11,
+  "name": "depth_only",
+  "split": "test",
+  "params": 463974,
+  "params_M": 0.464,
+  "env": {
+    "python": "3.13.14",
+    "torch": "2.14.0+cu130",
+    "numpy": "2.5.3",
+    "cuda": "13.0",
+    "cudnn": 92400,
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU"
+  }
+}

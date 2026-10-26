@@ -227,10 +227,12 @@ Problem & data (pair validity, EDA, leakage-aware split) 15% (Khang) · pipeline
 Analysis (support/conflict, ablation, limitations) 15% (Đỗ Khoa) · Reproducibility/report/presentation
 10% (cả ba).
 
-### 4.6 Việc cần làm ngay cho A3
+### 4.6 Trạng thái hoàn thành A3
 
-- [ ] Chọn task + hai modality, kiểm tra ngưỡng §28.2 **trước** khi viết proposal — **cả ba quyết**
-- [ ] Điền cột Role đang để trống trong `assignment3/index.html` theo bảng ở mục 0 — **Đỗ Khoa**
+- [x] Chọn task + hai modality (6-Class Multimodal Environment & Viewing-Geometry Classification trên 7,195 cặp RGB + 3D LiDAR Depth của DIODE, đạt ngưỡng §28.2: 6 lớp ≥ 5 lớp, 7,195 cặp ≥ 5,000 cặp, 0% scene overlap) — **cả ba**
+- [x] Điền cột Role trong `assignment3/index.html` theo bảng ở mục 0 — **Đỗ Khoa**
+- [x] Cài đặt đủ 4 mô hình bắt buộc (`rgb_only`, `depth_only`, `simple_fusion`, `improved_fusion`) + 2 ablation (`ablation_no_gate`, `ablation_no_aux`) + đánh giá missing-modality — **Dương Khoa & Đỗ Khoa**
+- [x] Phân tích định lượng, định tính, trường hợp bổ trợ / xung đột giữa hai modality, error analysis, compute cost, trang web `assignment3/index.html`, `README.md`, `AI_USAGE.md`, và `CR7_A3_Report.md` — **cả ba**
 
 ---
 

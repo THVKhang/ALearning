@@ -1,0 +1,21 @@
+{
+  "best_epoch": 11,
+  "best_val_macro_f1": 0.7376182681803224,
+  "epochs_run": 12,
+  "train_time_s": 122.64936089515686,
+  "epoch_time_s": 10.206877410411835,
+  "peak_vram_gb": 0.7852659225463867,
+  "name": "ablation_no_aux",
+  "params": 1137236,
+  "trainable_params": 1137236,
+  "params_M": 1.137236,
+  "trainable_params_M": 1.137236,
+  "env": {
+    "python": "3.13.14",
+    "torch": "2.14.0+cu130",
+    "numpy": "2.5.3",
+    "cuda": "13.0",
+    "cudnn": 92400,
+    "gpu": "NVIDIA GeForce RTX 3050 Laptop GPU"
+  }
+}

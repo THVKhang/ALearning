@@ -1,0 +1,25 @@
+seed: 42
+deterministic: true
+output_root: outputs
+data:
+  root: C:\Users\Admin\Documents\GitHub\ALearning\assignment2\data\diode_subset
+  img_size:
+  - 72
+  - 96
+  batch_size: 64
+  num_workers: 0
+  augment: true
+train:
+  epochs: 12
+  lr: 0.001
+  weight_decay: 0.0001
+  amp: true
+  aux_weight: 0.3
+  modality_dropout: 0.15
+eval:
+  batch_size: 64
+name: ablation_no_gate
+model: improved_fusion
+use_cross_attn: false
+use_validity_gate: false
+out_dir: C:\Users\Admin\Documents\GitHub\ALearning\assignment3\outputs\ablation_no_gate

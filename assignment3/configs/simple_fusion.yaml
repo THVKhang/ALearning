@@ -1,0 +1,5 @@
+name: simple_fusion
+model: simple_fusion
+train:
+  aux_weight: 0.0
+  modality_dropout: 0.0

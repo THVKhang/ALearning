@@ -1,0 +1,16 @@
+split,scene_id,domain,n_scans,n_paired_samples,level_samples,mid_elev_samples,high_elev_samples,mean_valid_lidar_pct
+train,00002,indoor,11,700,277,266,157,99.0
+train,00003,indoor,7,466,136,141,189,98.7
+train,00004,indoor,5,400,203,161,36,98.1
+train,00005,indoor,3,340,86,121,133,96.9
+train,00006,indoor,40,700,232,219,249,99.5
+train,00007,outdoor,3,389,135,157,97,61.5
+train,00008,outdoor,3,400,115,119,166,62.6
+train,00010,outdoor,11,400,136,146,118,59.0
+train,00013,outdoor,11,400,130,138,132,80.1
+train,00014,outdoor,12,400,129,146,125,81.9
+train,00015,outdoor,13,400,130,145,125,71.7
+val,00001,indoor,6,700,183,274,243,94.4
+val,00017,outdoor,11,400,134,140,126,55.3
+test,00000,indoor,8,700,217,235,248,99.1
+test,00018,outdoor,10,400,142,155,103,67.9

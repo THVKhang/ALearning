@@ -1,0 +1,40 @@
+{
+  "Both Unimodal Correct (RGB \u2713, Depth \u2713)": {
+    "count": 671,
+    "share_pct": 61.0,
+    "simple_fusion_correct": 578,
+    "simple_fusion_rate_pct": 86.14,
+    "improved_fusion_correct": 643,
+    "improved_fusion_rate_pct": 95.83
+  },
+  "Conflict: RGB Correct, Depth Wrong (RGB \u2713, Depth \u2717)": {
+    "count": 41,
+    "share_pct": 3.73,
+    "simple_fusion_correct": 27,
+    "simple_fusion_rate_pct": 65.85,
+    "improved_fusion_correct": 30,
+    "improved_fusion_rate_pct": 73.17
+  },
+  "Conflict: Depth Correct, RGB Wrong (RGB \u2717, Depth \u2713)": {
+    "count": 351,
+    "share_pct": 31.91,
+    "simple_fusion_correct": 140,
+    "simple_fusion_rate_pct": 39.89,
+    "improved_fusion_correct": 275,
+    "improved_fusion_rate_pct": 78.35
+  },
+  "Both Unimodal Wrong \u2014 Emergent Support (RGB \u2717, Depth \u2717)": {
+    "count": 37,
+    "share_pct": 3.36,
+    "simple_fusion_correct": 11,
+    "simple_fusion_rate_pct": 29.73,
+    "improved_fusion_correct": 19,
+    "improved_fusion_rate_pct": 51.35
+  },
+  "example_indices": {
+    "emergent_support": 425,
+    "conflict_rgb_wins": 380,
+    "conflict_depth_wins": 0,
+    "shared_failure": 433
+  }
+}

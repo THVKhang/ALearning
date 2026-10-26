@@ -1,0 +1,7 @@
+name: improved_fusion
+model: improved_fusion
+use_cross_attn: true
+use_validity_gate: true
+train:
+  aux_weight: 0.3
+  modality_dropout: 0.15

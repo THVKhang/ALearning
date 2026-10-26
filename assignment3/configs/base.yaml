@@ -1,0 +1,22 @@
+# Shared base config for Assignment 3: Multimodal Scene & Camera-Elevation Classification on DIODE RGB-Depth
+seed: 42
+deterministic: true
+output_root: outputs
+
+data:
+  root: ../assignment2/data/diode_subset
+  img_size: [72, 96]     # H x W (fast 4x downsample of 288x384, preserves spatial layout & depth gradients)
+  batch_size: 64
+  num_workers: 0
+  augment: true
+
+train:
+  epochs: 12
+  lr: 1.0e-3
+  weight_decay: 1.0e-4
+  amp: true
+  aux_weight: 0.3
+  modality_dropout: 0.15
+
+eval:
+  batch_size: 64
