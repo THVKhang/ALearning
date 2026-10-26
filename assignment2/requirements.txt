@@ -1,0 +1,7 @@
+torch>=2.4
+numpy
+pillow
+matplotlib
+pyyaml
+timm
+opencv-python  # only for scripts/data/make_subset.py

@@ -12,6 +12,8 @@ DEPTH_SUFFIX = "_depth.npy"
 MASK_SUFFIX = "_depth_mask.npy"
 # from train EDA: above this is < 0.01% of valid pixels, treated as noise
 MAX_DEPTH = {"indoor": 50.0, "outdoor": 200.0}
+# DIODE scanner (FARO S350) minimum range is 0.6 m, readings below are noise
+MIN_DEPTH = 0.6
 
 
 def list_samples(split_dir):
@@ -56,8 +58,8 @@ class DiodeDepthDataset(Dataset):
         if mask.ndim == 3:
             mask = mask[..., 0]
 
-        # bad pixels (mask 0, nan, depth <= 0, too far) -> depth 0
-        valid = (mask > 0) & np.isfinite(depth) & (depth > 0)
+        # bad pixels (mask 0, nan, closer than scanner range, too far) -> depth 0
+        valid = (mask > 0) & np.isfinite(depth) & (depth >= MIN_DEPTH)
         if self.max_depth:
             valid &= depth <= self.max_depth[domain_of(sid)]
         depth = np.where(valid, depth, 0.0).astype(np.float32)
@@ -76,14 +78,23 @@ class DiodeDepthDataset(Dataset):
         return {"rgb": rgb, "depth": depth, "mask": mask, "id": sid, "domain": domain_of(sid)}
 
 
-def get_dataloaders(root, batch_size=8, num_workers=2, augment=False, seed=42):
+def _seed_worker(worker_id):
+    s = torch.initial_seed() % 2 ** 32
+    np.random.seed(s)
+
+
+def get_dataloaders(root, batch_size=8, num_workers=2, augment=False, seed=42, splits=SPLITS):
     """Make train/val/test loaders (split by scene was done on Kaggle)."""
     gen = torch.Generator().manual_seed(seed)
     loaders = {}
-    for split in SPLITS:
-        ds = DiodeDepthDataset(root, split, hflip=augment and split == "train")
+    for split in splits:
+        train = split == "train"
+        ds = DiodeDepthDataset(root, split, hflip=augment and train)
+        # each worker holds its own copy of torch (~0.5 GB RAM), keep eval loaders small
+        nw = num_workers if train else min(num_workers, 2)
         loaders[split] = DataLoader(
-            ds, batch_size=batch_size, shuffle=split == "train", num_workers=num_workers,
-            pin_memory=torch.cuda.is_available(), generator=gen if split == "train" else None,
+            ds, batch_size=batch_size, shuffle=train, num_workers=nw,
+            pin_memory=torch.cuda.is_available(), generator=gen if train else None,
+            worker_init_fn=_seed_worker, persistent_workers=train and nw > 0,
         )
     return loaders

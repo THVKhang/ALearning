@@ -1,157 +1,103 @@
+"""Sanity checks for metrics, alignment and losses. Run: python tests/test_metrics.py (or pytest)."""
 
-"""Unit tests for loss functions and evaluation metrics."""
-
-import math
 import os
 import sys
-import numpy as np
+
 import torch
 
-# Ensure that src/engine can be imported
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from src.engine.loss import MaskedSILogLoss
-from src.engine.metrics import DepthMetricTracker, compute_depth_metrics
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from src.engine.align import align_batch, align_disparity
+from src.engine.loss import MaskedSILogLoss, ScaleShiftInvariantLoss
+from src.engine.metrics import MetricTracker, depth_metrics
 
 
-def test_silog_loss():
-    print("[1/4] Testing MaskedSILogLoss...")
-    criterion = MaskedSILogLoss(lambda_factor=0.5)
-
-    # 1. Perfect prediction -> Loss = 0
-    pred = torch.tensor([[[[1.0, 2.0], [3.0, 4.0]]]], requires_grad=True)
-    target = torch.tensor([[[[1.0, 2.0], [3.0, 4.0]]]])
-    mask = torch.tensor([[[[1.0, 1.0], [1.0, 1.0]]]])
-    loss = criterion(pred, target, mask)
-    assert torch.isclose(loss, torch.tensor(0.0), atol=1e-6), (
-        f"Error: Expected 0, got {loss.item()}"
-    )
-
-    # 2. Check the backward pass and gradient computation
-    pred = torch.tensor([[[[1.5, 2.0], [3.0, 4.0]]]], requires_grad=True)
-    loss = criterion(pred, target, mask)
-    loss.backward()
-    assert pred.grad is not None, "Error: Gradient was not computed!"
-    assert not torch.isnan(pred.grad).any(), "Error: Gradient contains NaN values!"
-
-    # 3. Check mask filtering: the invalid pixel at (0, 1)
-    # must not affect the loss
-    criterion_no_reg = MaskedSILogLoss(lambda_factor=0.0)
-    pred1 = torch.tensor([[[[2.0, 2.0], [3.0, 4.0]]]])
-    pred2 = torch.tensor([[[[2.0, 999.0], [3.0, 4.0]]]])  # Extremely large error at (0, 1)
-    mask_ignore = torch.tensor([[[[1.0, 0.0], [1.0, 1.0]]]])  # Ignore pixel (0, 1)
-
-    l1 = criterion_no_reg(pred1, target, mask_ignore)
-    l2 = criterion_no_reg(pred2, target, mask_ignore)
-    assert torch.isclose(l1, l2, atol=1e-5), (
-        f"Error: The mask failed to filter out the invalid pixel! {l1} vs {l2}"
-    )
-
-    # 4. Check scale invariance when lambda = 1.0
-    scale_inv_criterion = MaskedSILogLoss(lambda_factor=1.0)
-    pred_scaled = target * 3.5
-    loss_scaled = scale_inv_criterion(pred_scaled, target, mask)
-    assert torch.isclose(loss_scaled, torch.tensor(0.0), atol=1e-5), (
-        "Error: SILog with lambda=1.0 should be zero when predictions "
-        "differ only by a scale factor!"
-    )
-
-    print("  -> MaskedSILogLoss PASSED ALL TESTS!")
+def fake_depth(b=2, h=24, w=32, lo=0.5, hi=40.0, seed=0):
+    g = torch.Generator().manual_seed(seed)
+    depth = lo + (hi - lo) * torch.rand(b, 1, h, w, generator=g)
+    mask = (torch.rand(b, 1, h, w, generator=g) > 0.2).float()
+    return depth * mask, mask
 
 
-def test_metrics_exact_values():
-    print("[2/4] Testing metric calculations against expected values...")
-
-    # Target: [1.0, 2.0, 4.0]
-    # Pred:   [1.2, 2.4, 4.8] (Exactly 1.2 times the target)
-    # Ratio = 1.2 < 1.25 -> delta_1, delta_2, and delta_3 must all equal 1.0 (100%)
-    # Abs Rel = |1.2 - 1.0| / 1.0 = 0.2 (20%)
-    target = np.array([[[1.0, 2.0, 4.0]]], dtype=np.float32)
-    pred = target * 1.2
-    mask = np.ones_like(target)
-
-    m = compute_depth_metrics(pred, target, mask)
-    assert math.isclose(m["abs_rel"], 0.2, abs_tol=1e-4), (
-        f"Error in Abs Rel: {m['abs_rel']}"
-    )
-    assert math.isclose(m["delta_1"], 1.0, abs_tol=1e-4), (
-        f"Error in Delta 1: {m['delta_1']}"
-    )
-    assert math.isclose(m["delta_2"], 1.0, abs_tol=1e-4), (
-        f"Error in Delta 2: {m['delta_2']}"
-    )
-    assert math.isclose(m["delta_3"], 1.0, abs_tol=1e-4), (
-        f"Error in Delta 3: {m['delta_3']}"
-    )
-
-    # Check the case where the ratio = 1.4:
-    # 1.4 > 1.25 -> delta_1 must equal 0.0
-    # 1.4 < 1.5625 -> delta_2 must equal 1.0
-    pred_14 = target * 1.4
-    m2 = compute_depth_metrics(pred_14, target, mask)
-    assert math.isclose(m2["delta_1"], 0.0, abs_tol=1e-4), (
-        "Error: delta_1 should equal 0!"
-    )
-    assert math.isclose(m2["delta_2"], 1.0, abs_tol=1e-4), (
-        "Error: delta_2 should equal 1.0!"
-    )
-
-    print("  -> All metric calculations are EXACTLY CORRECT!")
+def test_gt_as_pred_is_perfect():
+    gt, mask = fake_depth()
+    m = depth_metrics(gt[0], gt[0], mask[0], max_depth=50.0)
+    assert abs(m["abs_rel"]) < 1e-7 and abs(m["rmse"]) < 1e-6 and m["delta1"] == 1.0
 
 
-def test_metric_tracker():
-    print("[3/4] Testing DepthMetricTracker...")
-    tracker = DepthMetricTracker()
-
-    b_pred = torch.tensor([
-        [[[1.0, 2.0], [3.0, 4.0]]],  # Sample 0: indoor, perfect prediction (abs_rel = 0.0)
-        [[[2.0, 4.0], [6.0, 8.0]]],  # Sample 1: outdoor, predictions are twice the target (abs_rel = 1.0)
-    ], dtype=torch.float32)
-
-    b_target = torch.tensor([
-        [[[1.0, 2.0], [3.0, 4.0]]],
-        [[[1.0, 2.0], [3.0, 4.0]]],
-    ], dtype=torch.float32)
-
-    b_mask = torch.ones_like(b_target)
-    domains = ["indoor", "outdoor"]
-
-    tracker.update(b_pred, b_target, b_mask, domains)
-    summary = tracker.summary()
-
-    assert summary["indoor"]["count"] == 1
-    assert summary["outdoor"]["count"] == 1
-    assert summary["overall"]["count"] == 2
-    assert math.isclose(summary["indoor"]["abs_rel"], 0.0, abs_tol=1e-4)
-    assert math.isclose(summary["outdoor"]["abs_rel"], 1.0, abs_tol=1e-4)
-    assert math.isclose(summary["overall"]["abs_rel"], 0.5, abs_tol=1e-4)
-
-    print("  -> DepthMetricTracker PASSED!")
+def test_known_values():
+    gt = torch.tensor([[[1.0, 2.0, 4.0]]])
+    mask = torch.ones_like(gt)
+    m = depth_metrics(gt * 1.2, gt, mask, 50.0)
+    assert abs(m["abs_rel"] - 0.2) < 1e-6 and m["delta1"] == 1.0
+    m = depth_metrics(gt * 1.3, gt, mask, 50.0)
+    assert m["delta1"] == 0.0
+    rmse = (((gt * 0.3) ** 2).mean()).sqrt().item()
+    assert abs(m["rmse"] - rmse) < 1e-6
 
 
-def test_edge_cases():
-    print("[4/4] Testing edge cases (NaNs, Infs, and empty masks)...")
-    pred = np.array([[[float("nan"), 2.0], [0.0, float("inf")]]])
-    target = np.array([[[1.0, 2.0], [3.0, 4.0]]])
-    mask = np.array([[[1, 1], [1, 1]]])
+def test_cap_and_mask():
+    gt = torch.tensor([[[2.0, 60.0, 3.0]]])     # 60 m is beyond the indoor cap
+    mask = torch.tensor([[[1.0, 1.0, 0.0]]])    # last pixel invalid
+    pred = torch.tensor([[[2.0, 999.0, 999.0]]])
+    m = depth_metrics(pred, gt, mask, max_depth=50.0)
+    assert m["abs_rel"] == 0.0
 
-    # Only pixel (0, 1) is valid
-    m = compute_depth_metrics(pred, target, mask)
-    assert m["n_valid_pixels"] == 1, (
-        f"Expected 1 valid pixel, got {m['n_valid_pixels']}"
-    )
 
-    # Mask containing only zeros
-    mask_none = np.zeros_like(mask)
-    m_none = compute_depth_metrics(pred, target, mask_none)
-    assert m_none["n_valid_pixels"] == 0
-    assert math.isnan(m_none["abs_rel"])
+def test_bad_pred_is_penalised_not_dropped():
+    gt = torch.tensor([[[2.0, 2.0]]])
+    mask = torch.ones_like(gt)
+    m = depth_metrics(torch.tensor([[[2.0, -5.0]]]), gt, mask, 50.0)
+    assert m["delta1"] == 0.5 and m["abs_rel"] > 0.4
 
-    print("  -> Edge cases handled SAFELY!")
+
+def test_tracker_domains():
+    gt, mask = fake_depth(b=2)
+    pred = gt.clone()
+    pred[1] = gt[1] * 2
+    t = MetricTracker()
+    t.update(pred, gt, mask, ["indoor", "outdoor"])
+    s = t.summary()
+    assert s["indoor"]["abs_rel"] < 1e-7
+    assert abs(s["outdoor"]["abs_rel"] - 1.0) < 1e-5
+    assert abs(s["overall"]["abs_rel"] - 0.5) < 1e-5
+    assert s["overall"]["n_images"] == 2
+
+
+def test_alignment_recovers_gt():
+    gt, mask = fake_depth(b=2, lo=1.0, hi=30.0)
+    disp = torch.where(mask > 0, 1.0 / gt.clamp(min=1e-3), torch.zeros_like(gt))
+    fake_midas = 123.0 * disp + 0.7           # invert, scale, shift
+    out, (s, t) = align_disparity(fake_midas[0], gt[0], mask[0], max_depth=50.0)
+    v = mask[0] > 0
+    assert (out[v] - gt[0][v]).abs().max() < 1e-3, (out[v] - gt[0][v]).abs().max()
+    m = depth_metrics(align_batch(fake_midas, gt, mask, ["indoor", "outdoor"])[1], gt[1], mask[1], 50.0)
+    assert m["abs_rel"] < 1e-5 and m["delta1"] == 1.0
+
+
+def test_silog():
+    gt, mask = fake_depth()
+    loss = MaskedSILogLoss(0.5)
+    assert loss(gt.clamp(min=1e-3), gt, mask).abs() < 1e-6
+    p = (gt * 1.5).clamp(min=1e-3).requires_grad_()
+    loss(p, gt, mask).backward()
+    assert p.grad is not None and torch.isfinite(p.grad).all()
+    p2 = gt.clone().clamp(min=1e-3)
+    p2[mask == 0] = 1e4                       # invalid pixels must not matter
+    assert loss(p2, gt, mask).abs() < 1e-6
+    assert MaskedSILogLoss(1.0)((gt * 3).clamp(min=1e-3), gt, mask).abs() < 1e-5
+
+
+def test_ssi_loss_is_scale_shift_invariant():
+    gt, mask = fake_depth(lo=1.0, hi=30.0)
+    disp = torch.where(mask > 0, 1.0 / gt.clamp(min=1e-3), torch.zeros_like(gt))
+    loss = ScaleShiftInvariantLoss()
+    assert loss(50.0 * disp + 3.0, gt, mask) < 1e-5
+    assert loss(torch.rand_like(disp), gt, mask) > 0.1
 
 
 if __name__ == "__main__":
-    test_silog_loss()
-    test_metrics_exact_values()
-    test_metric_tracker()
-    test_edge_cases()
-    print("\n>>> CONGRATULATIONS: ALL TESTS PASSED SUCCESSFULLY! <<<")
+    for name, fn in list(globals().items()):
+        if name.startswith("test_"):
+            fn()
+            print("ok ", name)
+    print("all passed")

@@ -6,7 +6,7 @@ from collections import defaultdict
 import numpy as np
 from PIL import Image
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from src.data.dataset import DEPTH_SUFFIX, MASK_SUFFIX, SPLITS, list_samples
 
 

@@ -234,6 +234,22 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Responsible Member** | Dương Đăng Khoa |
 | **Verification Sources** | Ronneberger et al. (MICCAI 2015); PyTorch AMP documentation; CO3133 Course Handbook Section 20. |
 
+---
+### Log Entry 13: M2 Code Review, Fixes, MiDaS Experiments and Folder Reorganisation
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant (Claude model) |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M2 Draft (26 October 2026) |
+| **Purpose / Category** | Code review of entries 11–12, bug fixing, **code writing** for missing M2 steps, result tables/figures |
+| **Affected Sections / Files** | `src/engine/{metrics,align,loss,trainer}.py`, `src/models/{unet,midas,__init__}.py`, `src/utils/common.py`, `src/data/dataset.py`, `configs/*.yaml`, `train.py`, `evaluate.py`, `run_all.sh`, `tests/`, `scripts/report/`, `README.md`, `index.html` Sec. 4–8. Files moved: data scripts to `scripts/data/`, tests to `tests/`, `train.py` to the assignment root. |
+| **Representative Prompt** | *"Đọc kĩ src code, check đủ 15 bước M2 chưa, bạn tôi có thể làm sai; sửa lỗi, viết phần thiếu, tổ chức lại folder."* |
+| **AI Contribution** | Found: metric dropped pixels with pred ≤ 0 (flattered bad models); U-Net ReLU output blocked gradients; no VRAM log, no shared config, no alignment, no MiDaS training. Wrote shared config + full seeding, per-image scale/shift alignment, SSI loss for MiDaS, frozen-encoder option, evaluate/report scripts. Diagnosed outdoor zero-shot Abs Rel > 1 as sub-0.6 m scanner noise and proposed the 0.6 m lower bound (FARO S350 minimum range). |
+| **Student Verification & Editing** | Ran `tests/test_metrics.py` (GT as prediction gives Abs Rel = RMSE = 0, δ1 = 100%; alignment recovers inverted/scaled/shifted GT); ran the same smoke config twice and got identical histories; visually checked RGB / GT / MiDaS outdoor samples before accepting the 0.6 m bound; all reported numbers come from runs on the group RTX 4060. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | Ranftl et al. (TPAMI 2020, MiDaS SSI loss and alignment); Eigen et al. (2014); DIODE paper (sensor range); PyTorch reproducibility docs. |
+
 
 ## Future Milestone Disclosure Logs (M2 Draft & M3 Final)
 

@@ -1,27 +1,8 @@
+name: baseline_unet
+model: unet
 
-experiment_name: "baseline_unet"
-
-# Dữ liệu
-data:
-  root: "data/diode_subset"
-  batch_size: 8
-  num_workers: 2
-  augment: true      
-  seed: 42           
-
-# Mô hình
-model:
-  name: "UNet"
-  in_channels: 3
-  out_channels: 1
-
-# Huấn luyện
-training:
-  epochs: 20
-  lr: 0.0001          
-  weight_decay: 0.0001 
-  lambda_factor: 0.5   
-  amp: true           
-
-# Nơi lưu kết quả
-output_dir: "outputs/baseline_unet"
+train:
+  epochs: 40
+  lr: 3.0e-4
+  time_budget_min: 60
+  silog_lambda: 0.5

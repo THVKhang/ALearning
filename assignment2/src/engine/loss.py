@@ -1,47 +1,42 @@
-from typing import Optional
 import torch
 import torch.nn as nn
 
+MIN_DEPTH = 1e-3
+
+
 class MaskedSILogLoss(nn.Module):
-    """
-    Scale-Invariant Logarithmic (SILog) Loss (Eigen et al., NeurIPS 2014)
-    Chỉ tính toán trên các pixel hợp lệ (mask > 0).
-    """
-    def __init__(self, lambda_factor: float = 0.5, min_depth: float = 1e-3, eps: float = 1e-6):
+    """SILog loss (Eigen et al., 2014) on valid pixels, for the metric-depth U-Net."""
+
+    def __init__(self, lambda_factor=0.5):
         super().__init__()
-        self.lambda_factor = float(lambda_factor)
-        self.min_depth = float(min_depth)
-        self.eps = float(eps)
+        self.lambda_factor = lambda_factor
 
-    def forward(self, pred: torch.Tensor, target: torch.Tensor, mask: Optional[torch.Tensor] = None) -> torch.Tensor:
-        # 1. Kiểm tra kích thước đồng nhất
-        if pred.shape != target.shape:
-            raise ValueError(f"pred shape {pred.shape} != target shape {target.shape}")
-
-        # 2. Tạo boolean mask lọc các pixel hợp lệ:
-        # Pixel phải có mask > 0, độ sâu > min_depth và không bị NaN/Inf
-        if mask is not None:
-            valid = (mask > 0) & (target > self.min_depth) & torch.isfinite(target) & torch.isfinite(pred)
-        else:
-            valid = (target > self.min_depth) & torch.isfinite(target) & torch.isfinite(pred)
-
-        n_valid = valid.sum()
-        if n_valid == 0:
-            # Trả về 0 nhưng vẫn giữ liên kết với pred để không làm gãy đồ thị đạo hàm
+    def forward(self, pred, target, mask):
+        valid = (mask > 0) & (target > MIN_DEPTH) & torch.isfinite(target)
+        if not valid.any():
             return pred.sum() * 0.0
+        # log in fp32, fp16 loses too much precision here
+        d = torch.log(pred[valid].float().clamp(min=MIN_DEPTH)) - torch.log(target[valid].float())
+        return (d ** 2).mean() - self.lambda_factor * d.mean() ** 2
 
-        # 3. Lấy ra các pixel hợp lệ
-        p = pred[valid].clamp(min=self.min_depth)
-        t = target[valid].clamp(min=self.min_depth)
 
-        # 4. Tính sai số trên miền Logarithm
-        diff = torch.log(p) - torch.log(t)
+class ScaleShiftInvariantLoss(nn.Module):
+    """MiDaS-style SSI loss (Ranftl et al., 2020): MiDaS predicts relative inverse depth,
+    so pred and 1/gt are each normalised per image (median, mean abs deviation) and compared with L1."""
 
-        # 5. Áp dụng công thức SILog
-        # Thành phần 1: Trung bình bình phương sai số
-        loss_sq = torch.mean(diff ** 2)
-        # Thành phần 2: Bình phương sai số trung bình
-        loss_sum = (torch.mean(diff)) ** 2
+    def forward(self, pred_disp, target_depth, mask):
+        losses = []
+        for p, t, m in zip(pred_disp, target_depth, mask):
+            valid = (m > 0) & (t > MIN_DEPTH) & torch.isfinite(t)
+            if valid.sum() < 10:
+                continue
+            losses.append((self._norm(p[valid].float()) - self._norm(1.0 / t[valid].float())).abs().mean())
+        if not losses:
+            return pred_disp.sum() * 0.0
+        return torch.stack(losses).mean()
 
-        loss = loss_sq - self.lambda_factor * loss_sum
-        return loss
+    @staticmethod
+    def _norm(x):
+        med = x.median()
+        scale = (x - med).abs().mean().clamp(min=1e-6)
+        return (x - med) / scale

@@ -24,9 +24,8 @@ class UNet(nn.Module):
     Input:  (B, 3, H, W) - RGB Image
     Output: (B, 1, H, W) - Depth map in metres
     """
-    def __init__(self, in_channels: int = 3, out_channels: int = 1, max_depth: float = 200.0):
+    def __init__(self, in_channels: int = 3, out_channels: int = 1):
         super().__init__()
-        self.max_depth = max_depth
 
         # --- ENCODER (Trích xuất đặc trưng không gian) ---
         self.inc = DoubleConv(in_channels, 32)
@@ -51,8 +50,9 @@ class UNet(nn.Module):
         self.conv_up4 = DoubleConv(64, 32)    # 32 (từ up) + 32 (skip) = 64
 
         # --- OUTPUT HEAD ---
-        # Đưa về 1 kênh bản đồ độ sâu
+        # Predict log-depth, start around 5 m
         self.outc = nn.Conv2d(32, out_channels, kernel_size=1)
+        nn.init.constant_(self.outc.bias, 1.6)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # 1. Nhánh Encoder đi xuống
@@ -77,8 +77,6 @@ class UNet(nn.Module):
         d4 = self.up4(d3)
         d4 = self.conv_up4(torch.cat([d4, x1], dim=1))
 
-        # 4. Tầng Output đưa về độ sâu vật lý
-        # Dùng F.relu + 1e-3 để đảm bảo độ sâu luôn là số dương thực tế
-        out = self.outc(d4)
-        depth = F.relu(out) + 1e-3
-        return depth
+        # 4. log-depth -> metres. ReLU here would kill gradients for pixels stuck at 0
+        out = self.outc(d4).float().clamp(-7.0, 6.0)  # ~1 mm .. 400 m
+        return torch.exp(out)

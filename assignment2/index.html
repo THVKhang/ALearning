@@ -71,25 +71,21 @@
       <td>M1 Proposal (15%)</td>
       <td>07 Oct 2026</td>
       <td>Dataset Proposal: task, split, EDA, metrics, compute estimate</td>
-      <td class="status-done">Completed &#10003;</td>
+      <td class="status-done">Approved (no conditions) &#10003;</td>
     </tr>
     <tr>
       <td>M2 Draft (25%)</td>
       <td>28 Oct 2026</td>
-      <td>Baseline U-Net + MiDaS initial training runs</td>
-      <td class="status-wait">Pending Instructor Approval</td>
+      <td>Evaluation tools, baseline U-Net, MiDaS zero-shot / full FT / frozen encoder, first error analysis</td>
+      <td class="status-done">Submitted (1 seed per config)</td>
     </tr>
     <tr>
       <td>M3 Final (60%)</td>
       <td>11 Nov 2026</td>
-      <td>Controlled experiment, error analysis, report, slides, video</td>
-      <td>Scheduled</td>
+      <td>3-seed controlled experiment, full error analysis, report, slides, video</td>
+      <td class="status-wait">In progress</td>
     </tr>
   </table>
-
-  <div class="note">
-    <strong>Proposal Note:</strong> Per course guidelines, main model training will start in M2/M3 following instructor proposal approval. All work below covers data verification, exploratory statistics, and local hardware speed benchmarking.
-  </div>
 
   <!-- 1. Problem Statement -->
   <h2>1. Problem Statement</h2>
@@ -188,6 +184,7 @@
 
   <ul>
     <li><strong>Outlier Threshold Cap:</strong> Pixels with depth &gt; <strong>50m (indoor)</strong> or &gt; <strong>200m (outdoor)</strong> are masked out (set <code>mask = 0</code>). Removes &lt; 0.01% of pixels — only extreme sensor noise.</li>
+    <li><strong>Lower Cap (added in M2):</strong> Pixels with depth &lt; <strong>0.6m</strong> are also masked out. This is the minimum range of the DIODE laser scanner, so these readings are noise (~0.3% of outdoor pixels, mostly on leaves and glass). Found while checking MiDaS zero-shot: a few of these pixels pushed outdoor Abs Rel above 1.</li>
     <li><strong>Camera Tilt Finding:</strong> DIODE only has vertical tilt codes <strong>000 to 050</strong> (level to upward view, no downward-facing angles). This is a property of the original dataset, not our filtering.</li>
   </ul>
 
@@ -198,34 +195,44 @@
   <ul>
     <li><strong>Image Resizing:</strong> 1024&times;768 &rarr; <strong>384&times;288</strong> (RGB resized with bilinear; depth &amp; mask with nearest-neighbour to avoid mixing in invalid zero values).</li>
     <li><strong>RGB Normalization:</strong> Scaled to [0, 1] + standard ImageNet mean/std normalization.</li>
-    <li><strong>Depth Target:</strong> Kept in true physical metres; invalid pixels and depth &gt; 50m/200m are masked out during loss computation.</li>
+    <li><strong>Depth Target:</strong> Kept in true physical metres; invalid pixels and depth outside 0.6&ndash;50m (indoor) / 0.6&ndash;200m (outdoor) are masked out in both loss and metrics.</li>
     <li><strong>Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and mask.</li>
   </ul>
 
   <h3>3.2 Baseline &amp; Pretrained Models</h3>
   <ul>
-    <li><strong>Baseline Model:</strong> Lightweight <strong>U-Net</strong> (encoder&ndash;decoder with skip connections) trained <strong>from scratch</strong>.</li>
-    <li><strong>Pretrained Model:</strong> <strong>MiDaS Small</strong> (EfficientNet-Lite3 backbone, 21.3M parameters), predicting inverse depth (`1 / output`) trained with masked SILog loss.</li>
-    <li><strong>Loss Function:</strong> Masked Scale-Invariant Logarithmic (SILog) loss (Eigen et al., 2014) computed over valid pixels.</li>
+    <li><strong>Baseline Model:</strong> Small <strong>U-Net</strong> (4 levels, 32&rarr;512 channels, 7.76M params) trained <strong>from scratch</strong>. Predicts log-depth, output = exp(&middot;) in metres. Loss: masked <strong>SILog</strong> (Eigen et al., 2014, &lambda; = 0.5).</li>
+    <li><strong>Pretrained Model:</strong> <strong>MiDaS_small</strong> (EfficientNet-Lite3 encoder, 21.3M params). Outputs <em>relative inverse depth</em> (unknown scale and shift).</li>
+    <li><strong>MiDaS Fine-tune Loss:</strong> masked <strong>scale-and-shift-invariant (SSI) loss</strong> from the MiDaS paper (Ranftl et al., 2020): prediction and 1/GT are each normalised per image (median, mean abs deviation), then L1. Fits the relative output, unlike the L1 placeholder used in the M1 speed benchmark.</li>
+    <li><strong>Alignment for Evaluation:</strong> per image, least-squares scale <em>s</em> and shift <em>t</em> so that <em>s</em>&middot;pred + <em>t</em> &asymp; 1/GT on valid pixels, then depth = 1 / (<em>s</em>&middot;pred + <em>t</em>), clipped to the domain cap. The U-Net is reported raw (metres) and with the same alignment for a fair comparison.</li>
   </ul>
 
   <h3>3.3 Evaluation Metrics</h3>
   <ul>
-    <li><strong>Abs Rel (Absolute Relative Error):</strong> `(1/N) * sum(|d - d*| / d*)` &rarr; Lower is better (&darr;).</li>
-    <li><strong>RMSE (Root Mean Squared Error):</strong> `sqrt((1/N) * sum((d - d*)^2))` &rarr; Lower is better (&darr;).</li>
-    <li><strong>Threshold Accuracy (&delta; &lt; 1.25<sup>k</sup>):</strong> % of valid pixels with `max(d/d*, d*/d) < 1.25^k` for k = 1, 2, 3 &rarr; Higher is better (&uarr;).</li>
+    <li><strong>Abs Rel (main metric):</strong> mean(|d &minus; d*| / d*) &rarr; lower is better (&darr;).</li>
+    <li><strong>RMSE:</strong> sqrt(mean((d &minus; d*)<sup>2</sup>)) in metres &rarr; lower is better (&darr;).</li>
+    <li><strong>&delta;1:</strong> % of valid pixels with max(d/d*, d*/d) &lt; 1.25 &rarr; higher is better (&uarr;).</li>
+    <li>Computed per image on valid pixels only, then averaged over images; reported for indoor, outdoor and overall. Predictions are clipped into the valid range instead of being dropped, so bad pixels still count.</li>
+    <li><strong>Sanity check:</strong> feeding GT as the prediction gives Abs Rel = RMSE = 0 and &delta;1 = 100%; feeding 1/GT scaled and shifted through the alignment recovers GT (<code>tests/test_metrics.py</code>).</li>
   </ul>
 
   <!-- 4. Experimental Setup -->
   <h2>4. Experimental Setup</h2>
 
-  <h3>4.1 Controlled Experiment Design</h3>
+  <h3>4.1 Controlled Experiment Specification</h3>
+  <table>
+    <tr><th>Item</th><th>Experiment: full fine-tune vs. frozen encoder (MiDaS_small)</th></tr>
+    <tr><td>Hypothesis</td><td>Updating the encoder lets MiDaS adapt its features to DIODE (laser GT, outdoor scenes), so full fine-tuning gets lower val Abs Rel than freezing the encoder.</td></tr>
+    <tr><td>Changed factor</td><td>Only <code>freeze_encoder</code>: false (all 21.3M params train) vs. true (encoder weights and BatchNorm stats fixed, decoder trains).</td></tr>
+    <tr><td>Fixed factors</td><td>Same subset and scene split, preprocessing, SSI loss, AdamW (lr 5e-5, wd 1e-4), cosine schedule, batch 8, 10 epochs, AMP, seed 42, same checkpoint rule and alignment (<code>configs/midas_full.yaml</code> vs <code>configs/midas_frozen.yaml</code>).</td></tr>
+    <tr><td>Metric</td><td>Val Abs Rel (overall, plus indoor / outdoor), with RMSE and &delta;1 as secondary; also train time and peak VRAM.</td></tr>
+    <tr><td>Decision criterion</td><td>Full FT is better only if its overall val Abs Rel is lower than frozen by more than the seed-to-seed spread (std over 3 seeds). Otherwise the cheaper frozen setup is preferred.</td></tr>
+  </table>
   <ul>
-    <li><strong>Research Question:</strong> Does full fine-tuning (Option B) outperform encoder-frozen fine-tuning (Option A)?</li>
-    <li><strong>Variable Factor:</strong> <strong>Option A:</strong> Frozen encoder (decoder only) vs. <strong>Option B:</strong> Full fine-tuning (all layers).</li>
-    <li><strong>Controlled Factors:</strong> Same split, preprocessing, SILog loss, AdamW, batch size 8, 20 epochs.</li>
-    <li><strong>Runs &amp; Seeds:</strong> 3 seeds (42, 43, 44), reporting Mean &plusmn; Std Dev.</li>
-    <li><strong>Hypothesis:</strong> Full fine-tuning adapts the MiDaS encoder to DIODE's depth scale, so Option B achieves lower Abs Rel than Option A.</li>
+    <li><strong>Draft vs. Final:</strong> this Draft runs <strong>1 seed (42) per config</strong>. The Final will run <strong>3 seeds (42, 43, 44)</strong> and report mean &plusmn; std, to check whether the gap is larger than seed noise.</li>
+    <li><strong>Checkpoint rule (all trained models):</strong> keep the epoch with the lowest overall val Abs Rel.</li>
+    <li><strong>Baseline budget:</strong> U-Net trains until a 60-minute budget (max 40 epochs).</li>
+    <li><strong>Reproducibility:</strong> one shared config (<code>configs/base.yaml</code>), seeds for python/numpy/torch/workers, cuDNN deterministic. Running the same smoke config twice gave identical numbers.</li>
   </ul>
 
   <h3>4.2 Hardware &amp; Speed Benchmark</h3>
@@ -259,10 +266,11 @@
   <h2>8. Limitations and Conclusion</h2>
   <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
   <ol>
+    <li>Val and test each have only <strong>1 indoor scene and 1 outdoor scene</strong> (val outdoor = scene 00017, a forest), so val numbers depend heavily on those two scenes.</li>
     <li>Outdoor val has higher sky/invalid pixel rate (~44% vs ~30% in train).</li>
-    <li>Laser ground truth has minor noise at sharp object edges (edge bleeding).</li>
-    <li>DIODE only has upward/level camera angles (000&ndash;050); no downward floor views.</li>
-    <li>Downsampling to 384&times;288 smooths fine details like wires and thin branches.</li>
+    <li>Laser ground truth has noise at sharp object edges, leaves and glass (edge bleeding).</li>
+    <li>DIODE only has upward/level camera angles (000&ndash;050); this is a property of the original dataset, not of our subset.</li>
+    <li>Images are resized from 1024&times;768 to 384&times;288, which smooths fine details like wires and thin branches.</li>
     <li>All three splits come from the DIODE training set (no public test set available), so results are not directly comparable to published DIODE benchmarks.</li>
   </ol>
 
