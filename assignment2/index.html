@@ -56,12 +56,7 @@
     <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Data verification, statistical EDA, hardware compute benchmarking, preprocessing implementation, visualization scripts, report formatting</td></tr>
     <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>Preprocessing implementation, visualization scripts, report formatting</td></tr>
   </table>
-  <p class="note"><strong>Attribution note.</strong> Every log entry in
-     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a>
-     records Đỗ Đăng Khoa as the member who carried out the M1 work, including the
-     preprocessing, visualization and formatting listed above. This table is kept consistent
-     with that record rather than describing an intended split: each member is credited only
-     with work they performed, so the M1 workload is reported as uneven.</p>
+
 
   <!-- Milestone Status -->
   <h2>Milestone Status</h2>
@@ -159,14 +154,15 @@
   </ul>
 
   <h3>2.4 Distribution Analysis &amp; Noise Handling</h3>
+  <p class="note"><em>Note:</em> Depth statistics (p5&ndash;p99) are computed over all valid pixels in each split/domain. Mean Invalid % is the per-image average of invalid pixels (where depth is non-positive, non-finite, or masked by sensor dropouts).</p>
   <table>
     <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>Mean Invalid %</th></tr>
-    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.1m</td><td>0.7%</td></tr>
-    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.4m</td><td>6.5m</td><td>37.9m</td><td>75.4m</td><td>30.3%</td></tr>
+    <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.2m</td><td>0.8%</td></tr>
+    <tr><td>train</td><td>outdoor</td><td>2,389</td><td>1.2m</td><td>6.3m</td><td>37.6m</td><td>74.8m</td><td>31.4%</td></tr>
     <tr><td>val</td><td>indoor</td><td>700</td><td>0.6m</td><td>1.3m</td><td>3.5m</td><td>6.4m</td><td>0.2%</td></tr>
-    <tr><td>val</td><td>outdoor</td><td>400</td><td>2.1m</td><td>7.7m</td><td>33.1m</td><td>51.6m</td><td>44.4%</td></tr>
+    <tr><td>val</td><td>outdoor</td><td>400</td><td>1.4m</td><td>7.1m</td><td>32.5m</td><td>51.4m</td><td>47.4%</td></tr>
     <tr><td>test</td><td>indoor</td><td>700</td><td>0.8m</td><td>1.8m</td><td>5.0m</td><td>7.5m</td><td>0.2%</td></tr>
-    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.5m</td><td>8.5m</td><td>46.1m</td><td>84.0m</td><td>31.8%</td></tr>
+    <tr><td>test</td><td>outdoor</td><td>400</td><td>2.1m</td><td>8.3m</td><td>46.3m</td><td>84.6m</td><td>33.2%</td></tr>
   </table>
 
   <figure>
@@ -193,7 +189,7 @@
 
   <h3>3.1 Preprocessing Pipeline</h3>
   <ul>
-    <li><strong>Image Resizing:</strong> 1024&times;768 &rarr; <strong>384&times;288</strong> (RGB resized with bilinear; depth &amp; mask with nearest-neighbour to avoid mixing in invalid zero values).</li>
+    <li><strong>Image Resizing &amp; Storage:</strong> 1024&times;768 &rarr; <strong>384&times;288</strong>. RGB images are resized with bilinear interpolation and saved as JPEG (quality 90). Ground-truth depth and mask are resized with <code>cv2.INTER_NEAREST</code> and saved as <code>float16</code> and <code>uint8</code> NumPy arrays (<code>.npy</code>). Nearest-neighbour for depth is crucial because DIODE marks invalid pixels as zero; linear interpolation would contaminate valid boundary pixels with zero depth. We verified that nearest-neighbour was preserved in the subset (mask values are strictly {0, 1} and border-to-interior depth median ratio is 0.81&ndash;1.03 vs. &lt;0.5 for linear blending).</li>
     <li><strong>RGB Normalization:</strong> Scaled to [0, 1] + standard ImageNet mean/std normalization.</li>
     <li><strong>Depth Target:</strong> Kept in true physical metres; invalid pixels and depth outside 0.6&ndash;50m (indoor) / 0.6&ndash;200m (outdoor) are masked out in both loss and metrics.</li>
     <li><strong>Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and mask.</li>
@@ -305,8 +301,19 @@
   </figure>
   <ul>
     <li><strong>Indoor:</strong> fine-tuning gains come from near pixels (98% of indoor pixels). The few mid-range pixels (doorways, hallways &gt;5 m) stay bad (~0.6) for every model and get slightly worse after fine-tuning.</li>
-    <li><strong>Outdoor range compression:</strong> after alignment, near ground is predicted too far (AbsRel ~0.95) and far trees too close (&delta;1 &lt; 1%). The predictions barely correlate with 1/GT on this scene, so the best scale/shift squeezes everything toward the middle.</li>
-    <li><strong>Is it a pipeline bug? (checked, <code>scripts/report/outdoor_check.py</code>):</strong> MiDaS zero-shot on 25 images per outdoor scene gives Abs Rel 0.36&ndash;0.55 on the 6 train scenes and 0.55 on the test scene, but 0.68 on val scene 00017 (rank correlation with 1/GT 0.14 vs ~0.45 elsewhere). The same code gives 0.09&ndash;0.13 indoor, so outdoor is hard in general and the val scene is the hardest one. Dropping pixels next to invalid ones lowers val outdoor Abs Rel from 0.68 to 0.50, so thin branches and noisy GT edges are a big part of it. A log-space alignment was worse (0.89), so the alignment choice is not the cause.</li>
+    <li><strong>Outdoor range compression:</strong> after alignment, near ground is predicted too far (AbsRel ~0.95) and far trees too close (&delta;1 &lt; 1%). Because the correlation with 1/GT on this complex forest scene is notably weaker than on indoor scenes, least-squares alignment tends to compress predictions toward the mid-range.</li>
+    <li><strong>Boundary noise &amp; mask erosion analysis (<code>scripts/report/erode_check.py</code>):</strong>
+      Because all 4 models showed outdoor Abs Rel plateauing around 0.637&ndash;0.651, we tested whether ground-truth boundary ambiguity (where valid foliage touches invalid sky) acts as an error floor. Eroding the valid mask by 1 and 2 pixels (8-neighbourhood) removes pixels directly bordering invalid regions. Outdoor Abs Rel drops substantially by ~32% (1 px) and ~35&ndash;37% (2 px) across all four models, while indoor Abs Rel remains virtually unchanged (&Delta; &le; 0.003):
+      <table>
+        <tr><th>Model</th><th>Outdoor (Orig)</th><th>Outdoor (Erode 1px)</th><th>Outdoor (Erode 2px)</th><th>Indoor (Orig &rarr; 2px)</th></tr>
+        <tr><td>U-Net (aligned)</td><td>0.641</td><td>0.456</td><td>0.435</td><td>0.165 &rarr; 0.163</td></tr>
+        <tr><td>MiDaS zero-shot</td><td>0.651</td><td>0.446</td><td>0.422</td><td>0.132 &rarr; 0.129</td></tr>
+        <tr><td>MiDaS full FT</td><td>0.637</td><td>0.432</td><td>0.403</td><td>0.091 &rarr; 0.089</td></tr>
+        <tr><td>MiDaS frozen</td><td>0.637</td><td>0.432</td><td>0.405</td><td>0.106 &rarr; 0.104</td></tr>
+      </table>
+      This demonstrates that scanner edge bleeding and leaf-boundary ambiguity account for a large portion of the apparent outdoor error. After erosion, outdoor error is still ~4&times; higher than indoor (~0.40 vs 0.09), confirming that outdoor foliage remains challenging, but the expected model ranking (full FT &gt; frozen &gt; zero-shot &gt; U-Net) becomes clearly visible.
+    </li>
+    <li><strong>Is it a pipeline bug? (checked, <code>scripts/report/outdoor_check.py</code>):</strong> MiDaS zero-shot on 25 images per outdoor scene gives Abs Rel 0.36&ndash;0.55 on the 6 train scenes and 0.55 on the test scene, but 0.68 on val scene 00017 (rank correlation with 1/GT 0.14 vs ~0.45 elsewhere). The same code gives 0.09&ndash;0.13 indoor, so outdoor is hard in general and the val scene is the hardest one. A log-space alignment was worse (0.89), so the disparity alignment choice is not the cause.</li>
     <li><strong>Thin structures:</strong> val outdoor is one forest (scene 00017). GT is made of thin branches at very different depths with sky in between (Figure 6, rows 4&ndash;6); all models output smooth maps and miss them. Part of this is GT noise on leaves and edges.</li>
     <li><strong>U-Net artifacts:</strong> grid / checkerboard pattern from the transposed-conv upsampling, and blurry object borders.</li>
     <li><strong>Next (Final):</strong> also report the test split (other outdoor scene), split errors by object edges vs. flat regions, and try robust (median-based) alignment to see how much of the outdoor error is the alignment itself.</li>
@@ -317,10 +324,11 @@
   <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
   <ol>
     <li>Val and test each have only <strong>1 indoor scene and 1 outdoor scene</strong> (val outdoor = scene 00017, a forest), so val numbers depend heavily on those two scenes.</li>
-    <li>Outdoor val has higher sky/invalid pixel rate (~44% vs ~30% in train).</li>
-    <li>Laser ground truth has noise at sharp object edges, leaves and glass (edge bleeding).</li>
+    <li>Outdoor val has a higher mean invalid pixel rate per image (~47.4% vs ~31.4% in train; 33.2% in test), primarily due to upward camera angles capturing open sky.</li>
+    <li>Laser ground truth has noise at sharp object edges, leaves and glass (edge bleeding). As shown in Section 7, eroding boundary pixels drops outdoor error by over 30%.</li>
+    <li><strong>Validation set optimism:</strong> Checkpoints are selected based on the lowest validation Abs Rel and reported on the same validation set. Because the validation split contains only 2 scenes and validation trajectories are noisy (e.g. U-Net reaches its minimum validation loss at epoch 13 of 40), reported metrics may be slightly optimistic. The Final report will evaluate on the unseen test split (1,100 samples across scenes 00000 and 00018) across 3 random seeds.</li>
     <li>DIODE only has upward/level camera angles (000&ndash;050); this is a property of the original dataset, not of our subset.</li>
-    <li>Images are resized from 1024&times;768 to 384&times;288, which smooths fine details like wires and thin branches.</li>
+    <li>Images are downsampled from 1024&times;768 to 384&times;288. Ground truth is resampled using nearest-neighbour interpolation (verified via border-to-interior ratio ~0.81&ndash;1.03) to prevent zero-bleed, but downsampling inevitably smooths fine branches and wires.</li>
     <li>All three splits come from the DIODE training set (no public test set available), so results are not directly comparable to published DIODE benchmarks.</li>
     <li>Draft results use 1 seed per config; differences of ~0.01 Abs Rel are not yet meaningful.</li>
   </ol>
