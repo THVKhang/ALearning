@@ -1,0 +1,7 @@
+name: midas_full
+model: midas_small
+freeze_encoder: false
+
+train:
+  epochs: 10
+  lr: 5.0e-5

@@ -1,0 +1,8 @@
+name: baseline_unet
+model: unet
+
+train:
+  epochs: 40
+  lr: 3.0e-4
+  time_budget_min: 60
+  silog_lambda: 0.5

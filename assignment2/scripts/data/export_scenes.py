@@ -4,7 +4,7 @@ import os
 import sys
 from collections import Counter
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from src.data.dataset import SPLITS, list_samples
 
 

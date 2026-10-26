@@ -1,0 +1,8 @@
+# same as midas_full.yaml, only freeze_encoder changes
+name: midas_frozen
+model: midas_small
+freeze_encoder: true
+
+train:
+  epochs: 10
+  lr: 5.0e-5
