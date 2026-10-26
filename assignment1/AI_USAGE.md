@@ -2,33 +2,34 @@
 
 **Course:** CO3133 – Deep Learning and Its Applications
 **Semester:** 261
-**Group:** Nhóm CR7
+**Group:** Nhóm CR7 (Trần Hoàng Vỹ Khang – `2352502`, Đỗ Đăng Khoa – `2352554`, Dương Đăng Khoa – `2352551`)
 **Assignment:** 1 – Foundations of Deep Learning Pipelines and Architectures
 
 This file is the detailed log required by handbook Section 5.1, item 3. Summary versions
-appear on the [shared landing page](../index.html) (Section 5.1, item 1) and on the
-[Assignment 1 page](index.html) (Section 5.1, item 2). The report-level disclosure required
-by the same item is pending the M2 Final report; it will carry the same content as the
-Summary below. The nine fields that Section 5.2 makes mandatory for each tool are all
-recorded here — see *Mandatory field coverage* for where each one sits.
+appear on the [shared landing page](../index.html) (Section 5.1, item 1), on the
+[Assignment 1 page](index.html) (Section 5.1, item 2), and in the M2 Final Report. The nine
+fields that Section 5.2 makes mandatory for each tool are all recorded here — see
+*Mandatory field coverage* for where each one sits.
 
-## Summary
+## Summary (All Group Members)
 
-| Tool | Purpose | Used by |
+| Tool | Purpose | Used by / Verified by |
 |---|---|---|
-| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the Assignment 1 source code — architecture, naming, dead code, consistency between modules — and code-cleanliness suggestions | Trần Hoàng Vỹ Khang |
-| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the MLP and CNN code on the `mlp-cnn` branch contributed by another member | Trần Hoàng Vỹ Khang |
-| Claude Code (Claude Opus 5) | **Implementation** of the CNN, LSTM/GRU and Transformer models, the shared sequence representation and the inference-timing fix; drafting of the results and analysis sections | Trần Hoàng Vỹ Khang |
+| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the Assignment 1 source code — architecture, naming, dead code, consistency between modules — and code-cleanliness suggestions (Entry 1) | Used by: Trần Hoàng Vỹ Khang (`2352502`); Linear/MLP baselines co-verified by Đỗ Đăng Khoa (`2352554`) |
+| Claude Code (Claude Sonnet 5, Claude Opus 5) | Review of the MLP and CNN code on the `mlp-cnn` branch contributed by Đỗ Đăng Khoa (Entry 2) | Used by: Trần Hoàng Vỹ Khang (`2352502`); branch authored by Đỗ Đăng Khoa (`2352554`) |
+| Claude Code (Claude Opus 5) | **Implementation** of the CNN, LSTM/GRU and Transformer models, the shared sequence representation and the inference-timing fix; drafting of the results and analysis sections (Entry 3) | Used by: Trần Hoàng Vỹ Khang (`2352502`); results & sequence models co-verified by Đỗ Đăng Khoa (`2352554`) and Dương Đăng Khoa (`2352551`) |
+| Google Antigravity (AGY) Agent | Combined 6-model curve/confusion-matrix plotting in `scripts/compare.py` and structuring/refining the M2 Final English report so claims match single-seed evidence (Entry 4) | Used & verified by: Trần Hoàng Vỹ Khang (`2352502`), Đỗ Đăng Khoa (`2352554`), Dương Đăng Khoa (`2352551`) |
 
-The tool was used in two distinct ways, and the distinction matters for this disclosure. For
-the M1 Draft pipeline (Entries 1 and 2) it acted as a **reviewer** of member-written code. For
-the three models added for M2 Final (Entry 3) it acted as an **author**: `src/models/cnn.py`,
-`src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`, the rewritten
-`measure_inference_time`, and the results and analysis sections of `README.md` and
-`index.html` were drafted with the tool. Those files are listed individually in Entry 3 and
-were reviewed and verified line by line by the responsible member, as handbook Section 5.5
-requires. The Linear and MLP models, the dataset layer, the training engine, the metrics, the
-plots and the EDA notebook remain member-written. No other AI tool was used in Assignment 1.
+The tools were used in two distinct ways, and the distinction matters for this disclosure. For
+the M1 Draft pipeline (Entries 1 and 2) Claude Code acted as a **reviewer** of member-written code
+(Linear and MLP models by Đỗ Đăng Khoa and Trần Hoàng Vỹ Khang; dataset, trainer, metrics, plots
+and EDA notebook by Trần Hoàng Vỹ Khang). For the three models added for M2 Final (Entry 3) and
+the combined plotting / report drafting (Entry 4), AI tools acted as **authors/assistants**:
+`src/models/cnn.py`, `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`,
+the rewritten `measure_inference_time`, the combined multi-model plots in `scripts/compare.py`,
+and the results/analysis sections of `README.md`, `index.html`, and the M2 Final report were
+drafted with AI assistance and verified line by line by all three group members (Trần Hoàng Vỹ
+Khang, Đỗ Đăng Khoa, Dương Đăng Khoa), as handbook Section 5.5 requires.
 
 ## Mandatory field coverage (handbook Section 5.2)
 

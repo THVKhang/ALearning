@@ -193,43 +193,58 @@ global shape, makes the pattern explicit:
 | GRU | 0.8143 | 0.9588 | 0.1444 |
 | Transformer | 0.7801 | 0.9507 | 0.1707 |
 
-- **Inductive bias beats raw capacity.** The CNN wins with **50,378 parameters - 4.0x fewer
-  than the MLP and 5.4x fewer than the Transformer** - for +0.026 macro-F1 over the MLP.
-  Convolution supplies two priors for free that the other models must learn from 54,000
-  images: neighbouring pixels are related, and a feature means the same thing wherever it
-  appears. On a dataset this size that is worth more than parameters.
-- **The whole ranking is decided inside the upper-body cluster.** The other six classes are
+- **Hypothesis evaluation (partially supported in this run).** Our hypothesis that 2D spatial
+  inductive bias tops the benchmark and linear flattening ranks last is supported (`CNN`
+  0.9163 first, `Linear` 0.8441 last), and `GRU` (0.9010) outperforms the flattened `MLP`
+  (0.8902) with **3.3x fewer parameters** (61,962 vs. 203,530). However, the sub-hypothesis
+  that preserving 1D row structure always beats pixel flattening is **only partially
+  supported**: `LSTM` (0.8898) does not beat `MLP` (0.8902), and the row-token `Transformer`
+  (0.8825) scores lower still under this 15-epoch budget.
+- **Inductive bias beats raw capacity in this 15-epoch run.** The CNN wins with **50,378
+  parameters - 4.0x fewer than the MLP and 5.4x fewer than the Transformer** - for +0.026
+  macro-F1 over the MLP. Convolution supplies two priors for free that the other models must
+  learn from 54,000 images: neighbouring pixels are related, and a feature means the same
+  thing wherever it appears.
+- **The ranking is largely decided inside the upper-body cluster.** The other six classes are
   effectively saturated - every model except the linear one is above 0.94 on them, and the
-  spread across models is 0.014. The upper-body spread is 0.063, 4.5x wider. Those four
-  classes differ in local texture (a knit surface, a button placket, a collar) at exactly
-  the scale a 3x3 kernel over a 28x28 image resolves, which is why the model gap and the
-  cluster gap close together.
+  spread across models is 0.014. The upper-body spread is 0.063, 4.5x wider. This pattern is
+  consistent with the hypothesis that those four classes differ in local 2D features (a knit
+  surface, a button placket, a collar) at the scale a 3x3 kernel over a 28x28 image resolves.
 - **Shirt is the floor for every architecture**, 0.5999 to 0.7586. The top Shirt confusions
-  of the CNN are Shirt into T-shirt/top (113 images), Shirt into Coat (64) and Shirt into
-  Dress (38). Even the best model leaves Shirt 0.16 F1 below its own macro-F1, so this is
-  label ambiguity in Fashion-MNIST at 28x28 grayscale, not a capacity limit - no model here
-  fixes it and scaling one up is unlikely to. The confusion is also disproportionately
-  stubborn: going from the linear model to the CNN cuts total errors by 46% (1,560 to 835)
-  but Shirt into T-shirt/top by only 16% (134 to 113).
-- **The sequence models land between the MLP and the CNN, and the row representation says
-  why.** Reading the image as 28 row tokens destroys the vertical axis but keeps each row
-  intact, so a GRU retains a weaker spatial prior than convolution and a stronger one than
-  the MLP, which flattens both axes away. The result follows that ordering exactly: GRU
-  0.9010 > MLP 0.8902, and with **3.3x fewer parameters** (61,962 against 203,530).
-- **GRU beats LSTM here: +0.011 macro-F1 with 75% of the parameters.** Over a 28-step
-  sequence the separate cell state of the LSTM has no long-range dependency to protect, so
-  its third gate only adds parameters to overfit with. This is the optional Section 11.2
-  comparison, and on this task the simpler cell is the better one.
-- **The Transformer is the weakest non-linear model despite having the most parameters.**
-  It starts with no locality prior at all - self-attention treats the 28 rows as an unordered
-  set and has to learn adjacency through the learned positional encoding - and its
-  upper-body gap (0.1707) is the widest of any non-linear model. Its error profile shows the
-  same thing in detail: Shirt into Pullover 113 confusions against 75 for the CNN, and Coat
-  into Pullover 98 against 45. The gap between CNN and Transformer is not spread across the
-  dataset; it is almost entirely these texture classes.
+  of the CNN are Shirt into T-shirt/top (113 images), Shirt into Coat (64), Shirt into Dress
+  (38) and Shirt into Pullover (33; so Shirt into Pullover/Coat totals 33 + 64 = 97). Going
+  from the linear model to the CNN cuts total errors by 46.5% (1,560 to 835) and Shirt into
+  Pullover/Coat by 54.0% (211 to 97), but Shirt into T-shirt/top by only 15.7% (134 to 113).
+  We hypothesize that a substantial part of this residual Shirt-vs-T-shirt error comes from
+  visual ambiguity in Fashion-MNIST at 28x28 grayscale rather than model capacity alone.
+- **Row representation helps parameter efficiency, but does not automatically beat MLP.**
+  Reading the image as 28 row tokens destroys the vertical axis while keeping each horizontal
+  row intact. That lets `GRU` (0.9010, 61,962 params) and `LSTM` (0.8898, 82,186 params)
+  match or slightly exceed the flattened `MLP` (0.8902, 203,530 params) with 2.5x-3.3x fewer
+  parameters, but `LSTM` (0.8898) is a counterexample to any blanket claim that row sequences
+  always outperform flattening.
+- **GRU beats LSTM in accuracy (+0.0112 macro-F1 with 75% of the parameters and 0.0050 vs.
+  0.0085 ms/img forward latency), while LSTM trains 8.3% faster in wall-clock time (200.7 s
+  vs. 218.9 s).** Checking `history.json` across all 15 epochs shows that GRU achieves lower
+  training loss at every epoch from 1 to 15 (`0.7579 -> 0.2153` vs. LSTM `0.7697 -> 0.2284`;
+  `0.2286` vs. `0.2460` at best epoch 13) and lower validation loss at every epoch from 1 to
+  15 (`0.4863 -> 0.2666` vs. LSTM `0.5093 -> 0.2868`; `0.2632` vs. `0.2872` at epoch 13).
+  Thus, GRU's F1 lead comes from faster optimization over the 15-epoch budget rather than
+  LSTM overfitting.
+- **The Transformer is the weakest non-linear model in this 15-epoch run despite having the
+  most parameters.** It starts with no locality prior at all - self-attention treats the 28
+  rows as an unordered set and has to learn adjacency through the learned positional encoding
+  - and its upper-body gap (0.1707) is the widest of any non-linear model (e.g., Shirt into
+  Pullover/Coat is 113 + 100 = 213 confusions against 33 + 64 = 97 for the CNN, and Coat into
+  Pullover is 98 against 35 for the CNN).
 
 ### What this comparison does not show
 
+- **Single-seed evaluation (`seed = 42`).** All six models were run once with `seed = 42`
+  (~20 minutes total across all six runs). Consequently, small differences of around ~0.01
+  macro-F1 or less (`MLP 0.8902` vs. `LSTM 0.8898`, `GRU 0.9010` vs. `MLP 0.8902`, and
+  `LSTM 0.8898` vs. `Transformer 0.8825`) apply to this run only and cannot be declared
+  statistically significant without multi-seed `mean ± std`.
 - **Two models are not converged.** The MLP and the Transformer both selected the last epoch
   in the budget (15 / 15) with validation macro-F1 still rising, so 0.8902 and 0.8825 are
   lower bounds for those architectures, not their ceilings. The Transformer is the one most

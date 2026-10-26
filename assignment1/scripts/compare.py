@@ -177,6 +177,98 @@ def format_error_breakdown_table(runs):
     return "\n".join(lines)
 
 
+def plot_combined_curves(runs, out_path):
+    """6x2 grid: one row per model, left = train/val loss, right = train/val macro-F1."""
+    import matplotlib.pyplot as plt
+    from src.utils.plots import INK, MUTED, TRAIN_COLOR, VAL_COLOR, _style
+
+    short_titles = {
+        "linear": "Linear / Softmax",
+        "mlp": "MLP (784-256-10)",
+        "cnn": "CNN (32-64 conv-pool)",
+        "lstm": "LSTM (28 rows, h=128)",
+        "gru": "GRU (28 rows, h=128)",
+        "transformer": "Transformer (28 rows, 2L)",
+    }
+
+    fig, axes = plt.subplots(len(MODELS), 2, figsize=(10.5, 13.5), constrained_layout=True,
+                             sharex=True)
+    for row_idx, (key, _) in enumerate(MODELS):
+        hist = runs[key]["history"]["history"]
+        best_ep = runs[key]["history"]["best_epoch"]
+        epochs = [r["epoch"] for r in hist]
+        title_prefix = short_titles[key]
+
+        panels = [
+            ("train_loss", "val_loss", f"{title_prefix} — Cross-entropy loss"),
+            ("train_macro_f1", "val_macro_f1", f"{title_prefix} — Macro-F1 (best ep {best_ep})"),
+        ]
+        for col_idx, (t_key, v_key, panel_title) in enumerate(panels):
+            ax = axes[row_idx, col_idx]
+            ax.plot(epochs, [r[t_key] for r in hist], color=TRAIN_COLOR,
+                    linewidth=1.8, marker="o", markersize=3.2, label="train")
+            ax.plot(epochs, [r[v_key] for r in hist], color=VAL_COLOR,
+                    linewidth=1.8, linestyle="--", marker="s", markersize=3.2, label="validation")
+            ax.axvline(best_ep, color=MUTED, linestyle=":", linewidth=1.1, alpha=0.8)
+            ax.set_title(panel_title, fontsize=9.5)
+            if row_idx == len(MODELS) - 1:
+                ax.set_xlabel("epoch")
+            if row_idx == 0 and col_idx == 0:
+                ax.legend(frameon=False, fontsize=8.5, labelcolor=INK)
+            _style(ax)
+
+    fig.suptitle("Training and validation curves across all six models (Fashion-MNIST, seed 42)",
+                 fontsize=12, color=INK)
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+
+
+def plot_combined_confusion_matrices(runs, out_path):
+    """3x2 grid of row-normalized test confusion matrices across all six models."""
+    import matplotlib.pyplot as plt
+    from src.utils.plots import INK, MUTED, SEQUENTIAL_CMAP
+
+    short_titles = {
+        "linear": "Linear / Softmax (macro-F1 0.8441)",
+        "mlp": "MLP (macro-F1 0.8902)",
+        "cnn": "CNN (macro-F1 0.9163)",
+        "lstm": "LSTM (macro-F1 0.8898)",
+        "gru": "GRU (macro-F1 0.9010)",
+        "transformer": "Transformer (macro-F1 0.8825)",
+    }
+
+    classes = runs["linear"]["config"]["data"]["classes"]
+    fig, axes = plt.subplots(3, 2, figsize=(12.5, 16.0), constrained_layout=True)
+
+    for idx, (key, _) in enumerate(MODELS):
+        ax = axes[idx // 2, idx % 2]
+        cm = np.asarray(runs[key]["metrics"]["confusion_matrix"], dtype=float)
+        shown = cm / cm.sum(axis=1, keepdims=True)
+
+        image = ax.imshow(shown, cmap=SEQUENTIAL_CMAP, vmin=0, vmax=1)
+        ax.set_xticks(range(len(classes)), classes, rotation=45, ha="right", fontsize=8)
+        ax.set_yticks(range(len(classes)), classes, fontsize=8)
+        if idx // 2 == 2:
+            ax.set_xlabel("predicted", fontsize=9, color=MUTED)
+        if idx % 2 == 0:
+            ax.set_ylabel("true", fontsize=9, color=MUTED)
+        ax.set_title(short_titles[key], fontsize=10, color=INK)
+
+        threshold = shown.max() * 0.6
+        for r in range(shown.shape[0]):
+            for c in range(shown.shape[1]):
+                val = shown[r, c]
+                ax.text(c, r, f"{val:.2f}", ha="center", va="center", fontsize=6.8,
+                        color="#ffffff" if val > threshold else INK)
+
+    bar = fig.colorbar(image, ax=axes.ravel().tolist(), fraction=0.018, pad=0.02)
+    bar.set_label("per-class recall (row-normalized)", color=MUTED, fontsize=9)
+    fig.suptitle("Row-normalized test confusion matrices across all six models (10,000 test images)",
+                 fontsize=12.5, color=INK)
+    fig.savefig(out_path, dpi=150)
+    plt.close(fig)
+
+
 def regenerate_figures(runs, dataset, seed, export_assets=False):
     assets_dir = ROOT / "assets"
     for key, _ in MODELS:
@@ -193,10 +285,19 @@ def regenerate_figures(runs, dataset, seed, export_assets=False):
 
         if export_assets:
             assets_dir.mkdir(parents=True, exist_ok=True)
-            plot_curves(run["history"]["history"], assets_dir / f"curves_{key}.png",
-                        title=f"{key} on {dataset} (seed {seed})")
-            plot_confusion_matrix(cm, classes, assets_dir / f"confusion_matrix_{key}.png",
-                                  title=f"{key} - test split")
+            asset_curves = assets_dir / f"curves_{key}.png"
+            asset_cm = assets_dir / f"confusion_matrix_{key}.png"
+            if not asset_curves.exists():
+                plot_curves(run["history"]["history"], asset_curves,
+                            title=f"{key} on {dataset} (seed {seed})")
+            if not asset_cm.exists():
+                plot_confusion_matrix(cm, classes, asset_cm,
+                                      title=f"{key} - test split")
+
+    if export_assets:
+        assets_dir.mkdir(parents=True, exist_ok=True)
+        plot_combined_curves(runs, assets_dir / "curves_all_models.png")
+        plot_combined_confusion_matrices(runs, assets_dir / "confusion_matrix_all_models.png")
 
 
 def main():
