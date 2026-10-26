@@ -1,19 +1,14 @@
-# Rebuild proposal/scenes_used.csv from the data and check the splits are scene-disjoint.
-# The committed CSV is the evidence for the no-leakage claim, so it has to be derivable
-# from the data rather than typed out by hand.
-
 import argparse
 import csv
 import os
 import sys
 from collections import Counter
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 from src.data.dataset import SPLITS, list_samples
 
 
 def scene_of(sample_id):
-    # e.g. 00005_00039_indoors_250_050 -> ("00005", "indoor")
     scene, _, dom = sample_id.split("_")[:3]
     return scene, "indoor" if dom == "indoors" else "outdoor"
 
@@ -33,7 +28,7 @@ def main():
     rows = sorted(({"scene": s, "split": sp, "domain": d, "samples": n}
                    for (s, sp, d), n in counts.items()), key=lambda r: r["scene"])
 
-    # A scene in two splits is exactly the leakage the scene-level split exists to stop.
+    # Check that scenes do not leak across splits
     seen = {}
     for r in rows:
         if r["scene"] in seen:

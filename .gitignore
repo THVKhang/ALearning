@@ -248,8 +248,5 @@ assignment2/outputs/*/*
 
 assignment3/outputs/*
 !assignment3/outputs/.gitkeep
-!assignment3/outputs/*/
-assignment3/outputs/*/*
-!assignment3/outputs/*/config.json
-!assignment3/outputs/*/history.json
-!assignment3/outputs/*/metrics_test.json
+
+docs/

@@ -1,0 +1,20 @@
+# shared settings, every experiment yaml overrides only what it changes
+seed: 42
+deterministic: true
+output_root: outputs
+
+data:
+  root: data/diode_subset
+  batch_size: 8
+  num_workers: 4
+  augment: true          # random hflip, train only
+
+train:
+  epochs: 10
+  lr: 1.0e-4
+  weight_decay: 1.0e-4
+  amp: true
+  time_budget_min: null  # stop early when the next epoch would go over this
+
+eval:
+  batch_size: 8

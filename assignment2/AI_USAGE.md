@@ -26,6 +26,18 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **6** | M1 Leakage Check | Scene-level data split disjunction verification | `proposal/scenes_used.csv`, `scripts/export_scenes.py`, Report Sec. 2.2 | Set intersection check in Python & CSV lookup | Đỗ Đăng Khoa |
 | **7** | M1 Loss Formulation | SILog loss mathematical formula verification | Report Sec. 3.2 & Sec. 5 | Eigen et al. (2014) NIPS paper cross-reference | Đỗ Đăng Khoa |
 | **8** | M1 Proposal Report | Report formatting & 16-point checklist review | `assignment2/index.html` | Visual check at `http://localhost:8085` & Handbook Sec. 18 | Đỗ Đăng Khoa |
+| **9** | M1 Compliance Audit | Section 18 and 21 gap check; **code and report writing** | `scripts/export_scenes.py`, `proposal/scenes_used.csv`, `assignment2/index.html` | Handbook Sec. 18, 19.6, 20, 21, 22; diode-dataset.org | Trần Hoàng Vỹ Khang |
+| **10** | M1 Subset Reproducibility | Recovered the subset rule; found and corrected bilinear depth resampling | `scripts/data/make_subset.py`, `scripts/data/kaggle_diagnose.py`, `notebooks/`, `assignment2/index.html` | Group Kaggle notebook; OpenCV docs; synthetic calibration | Trần Hoàng Vỹ Khang |
+
+---
+
+## M2 Draft Disclosure Summary
+
+| # | Task / Stage | Purpose / Category | Affected Files | Verification Method | Member Responsible |
+|---|---|---|---|---|---|
+| **11** | M2 Loss & Metrics | Implementation review, edge-case tests | `src/engine/loss.py`, `src/engine/metrics.py`, `tests/test_metrics.py` | Unit tests; Eigen et al. (2014) | Dương Đăng Khoa |
+| **12** | M2 Baseline U-Net | Architecture review, training pipeline, end-to-end test | `src/models/unet.py`, `src/engine/trainer.py`, `train.py`, `tests/test_models.py`, `tests/test_pipeline.py` | Synthetic pipeline test; Ronneberger et al. (2015) | Dương Đăng Khoa |
+| **13** | M2 Review & Experiments | Code review of 11–12, bug fixes, **code writing** (alignment, MiDaS, evaluation, reports), folder reorganisation | see entry 13 | Unit tests; repeat-run check; runs on RTX 4060 | Đỗ Đăng Khoa |
 
 ---
 
@@ -183,6 +195,71 @@ AI tools were used in two distinct ways, and the distinction matters for this di
 | **Verification Sources** | diode-dataset.org; `diode-dataset/diode-devkit`; Vasiljevic et al. (2019), CoRR abs/1908.00463; CO3133 Course Handbook Sections 18, 19.6, 20, 21, 22 |
 
 ---
+
+### Log Entry 10: Recovering the Subset Rule and Correcting Depth Resampling
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Claude Code CLI; Claude Opus 5 |
+| **Member Who Used It** | Trần Hoàng Vỹ Khang |
+| **Development Stage** | M1 Proposal, subset reproducibility (05 October 2026) |
+| **Purpose / Category** | Code review; **code writing** (authoring, not only review); debugging |
+| **Affected Sections / Files** | `assignment2/scripts/make_subset.py` (new, AI-authored), `assignment2/scripts/kaggle_diagnose.py` (new, AI-authored), `assignment2/notebooks/monocular-depth-estimation.ipynb` (added to the repository by the member, not modified), and in `assignment2/index.html`: the version item in Section 2.1, the subset selection rule in Section 2.2, the resampling items in Section 3.1, the regeneration note in Section 2.4, and items 7 to 9 of Section 8.1 |
+| **Representative Prompt** | *"1,11 làm như nào"*; *"tôi đã bỏ vào notebook"*; *"hãy dựng lại, làm hết"*. The full session transcript is kept locally by the member and is not published. |
+| **AI Contribution** | Read the Kaggle notebook that originally built the subset and recovered the selection rule from it: the per-domain target counts and per-scene caps, the seeded shuffle order, and the 70/15/15 partition taken over scene counts rather than image counts. Verified the rule against the published figures by re-running the sampling and splitting logic on synthetic data, which reproduced 7 of 7 indoor scenes, 8 of 12 outdoor scenes and the 5/1/1 and 6/1/1 split structure with no scene shared between splits. **Found a defect in the notebook**: depth was resized with `cv2.INTER_LINEAR` while the mask beside it used `cv2.INTER_NEAREST`. Since DIODE encodes an invalid pixel as 0, bilinear averaging pulled valid depths near invalid regions downward, and the nearest-resampled mask did not mark the affected pixels, so the contamination was invisible to the validity mask. Wrote `make_subset.py` encoding the corrected rule, and `kaggle_diagnose.py` to verify resampling from the files alone, calibrating its two tests on a synthetic depth map before use. |
+| **Student Verification & Editing** | **Partly outstanding.** The sampling and split logic was checked against the counts already published in Section 2.2 and reproduces them. `make_subset.py` has **not yet been executed against the real dataset**: the subset lives on Kaggle, not on the machine where the script was written, so a member must run it, confirm the output matches `proposal/scenes_used.csv`, and re-run the EDA. The depth figures in Section 2.4 are marked on the page as being regenerated and must not be cited until that rerun completes. The dataset license still requires confirmation against the Kaggle mirror page. The AI-authored code and report items listed above have not yet been reviewed line by line by the responsible member. |
+| **Responsible Member** | Trần Hoàng Vỹ Khang |
+| **Verification Sources** | The group's own Kaggle notebook `dokhoa05/monocular-depth-estimation` (version 4); the Kaggle mirror `artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset` version 8; OpenCV `cv2.resize` interpolation documentation; CO3133 Course Handbook Sections 18 and 22 |
+
+---
+
+### Log Entry 11: M2 Loss Functions and Depth Metrics Engine
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Dương Đăng Khoa |
+| **Development Stage** | M2 Draft (24 October 2026) |
+| **Purpose / Category** | Implementation review, edge-case validation, and test suite design |
+| **Affected Sections / Files** | `assignment2/src/engine/loss.py`, `assignment2/src/engine/metrics.py`, `assignment2/tests/test_metrics.py` (originally `scripts/test_loss_metrics.py`; files later revised and moved, see entry 13) |
+| **Representative Prompt** | *"Check giúp mình logic cài đặt MaskedSILogLoss: khi batch gặp toàn bộ mask 0 thì return pred.sum() * 0.0 đã đủ để giữ computational graph cho backward pass chưa, và gợi ý thêm test case kiểm tra tính chất scale-invariance khi lambda=1.0."* |
+| **AI Contribution** | Reviewed PyTorch autograd graph preservation for empty masks; verified SILog loss scale-invariance properties; assisted in formulating edge-case assertion checks (NaNs, Infs, zero-division). |
+| **Student Verification & Editing** | Implemented `MaskedSILogLoss`, `compute_depth_metrics`, and `DepthMetricTracker`; authored and ran `scripts/test_loss_metrics.py` verifying gradient flow and metric accuracy across 4 test suites. |
+| **Responsible Member** | Dương Đăng Khoa |
+| **Verification Sources** | Eigen et al. (NeurIPS 2014); PyTorch Autograd documentation; CO3133 Course Handbook Section 20.1. |
+
+---
+### Log Entry 12: Baseline U-Net Architecture and Training Pipeline
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant |
+| **Member Who Used It** | Dương Đăng Khoa |
+| **Development Stage** | M2 Draft (24 October 2026) |
+| **Purpose / Category** | Architecture design review, training pipeline implementation, and end-to-end verification |
+| **Affected Sections / Files** | `assignment2/src/models/unet.py`, `assignment2/src/engine/trainer.py`, `assignment2/configs/baseline_unet.yaml`, `assignment2/train.py`, `assignment2/tests/test_models.py`, `assignment2/tests/test_pipeline.py` (originally under `scripts/`; files later revised and moved, see entry 13) |
+| **Representative Prompt** | *"Rà soát giúp mình kiến trúc U-Net 4 tầng với skip-connections cho bài toán Depth (288x384) và pipeline huấn luyện trong `trainer.py`: kiểm tra cơ chế GradScaler AMP fp16, tiêu chí lưu best checkpoint theo Abs Rel và thiết kế script test giả lập end-to-end."* |
+| **AI Contribution** | Reviewed U-Net encoder-decoder channel sizing (32 to 512) and positive depth output activation; assisted in configuring PyTorch AMP GradScaler and metric tracking integration; provided synthetic end-to-end pipeline verification test. |
+| **Student Verification & Editing** | Self-implemented UNet, Trainer, YAML configuration, and training CLI script; executed `test_unet.py` (7.76M params verified) and `test_pipeline_synthetic.py` confirming loss convergence, history CSV logging, and checkpoint serialization. |
+| **Responsible Member** | Dương Đăng Khoa |
+| **Verification Sources** | Ronneberger et al. (MICCAI 2015); PyTorch AMP documentation; CO3133 Course Handbook Section 20. |
+
+---
+### Log Entry 13: M2 Code Review, Fixes, MiDaS Experiments and Folder Reorganisation
+
+| Field | Record |
+|---|---|
+| **Tool Name & Version** | Antigravity AI Assistant (Claude model) |
+| **Member Who Used It** | Đỗ Đăng Khoa |
+| **Development Stage** | M2 Draft (26 October 2026) |
+| **Purpose / Category** | Code review of entries 11–12, bug fixing, **code writing** for missing M2 steps, result tables/figures |
+| **Affected Sections / Files** | `src/engine/{metrics,align,loss,trainer}.py`, `src/models/{unet,midas,__init__}.py`, `src/utils/common.py`, `src/data/dataset.py`, `configs/*.yaml`, `train.py`, `evaluate.py`, `run_all.sh`, `tests/`, `scripts/report/`, `README.md`, `index.html` Sec. 4–8. Files moved: data scripts to `scripts/data/`, tests to `tests/`, `train.py` to the assignment root. |
+| **Representative Prompt** | *"Đọc kĩ src code, check đủ 15 bước M2 chưa, bạn tôi có thể làm sai; sửa lỗi, viết phần thiếu, tổ chức lại folder."* |
+| **AI Contribution** | Found: metric dropped pixels with pred ≤ 0 (flattered bad models); U-Net ReLU output blocked gradients; no VRAM log, no shared config, no alignment, no MiDaS training. Wrote shared config + full seeding, per-image scale/shift alignment, SSI loss for MiDaS, frozen-encoder option, evaluate/report scripts. Diagnosed outdoor zero-shot Abs Rel > 1 as sub-0.6 m scanner noise and proposed the 0.6 m lower bound (FARO S350 minimum range). |
+| **Student Verification & Editing** | Tests (`tests/test_metrics.py`: GT as prediction gives Abs Rel = RMSE = 0 and δ1 = 100%; alignment recovers inverted/scaled/shifted GT), the repeat-run check (same smoke config twice, identical history) and all training/evaluation runs were executed inside the AI-assisted session on the group RTX 4060, and the reported numbers come from those runs. **Pending:** line-by-line read of the new files and a re-run of `bash run_all.sh` by the responsible member before submission. The 0.6 m lower bound was chosen after looking at the RGB / GT / MiDaS outdoor samples and the near-zero GT statistics; its source (scanner minimum range) should be re-checked against the DIODE paper. |
+| **Responsible Member** | Đỗ Đăng Khoa |
+| **Verification Sources** | Ranftl et al. (TPAMI 2020, MiDaS SSI loss and alignment); Eigen et al. (2014); DIODE paper (sensor range); PyTorch reproducibility docs. |
+
 
 ## Future Milestone Disclosure Logs (M2 Draft & M3 Final)
 

@@ -1,0 +1,32 @@
+{
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "torch": "2.14.0+cu130",
+  "python": "3.14.7",
+  "model": "MiDaS_small (intel-isl/MiDaS, torch.hub)",
+  "params_M": 21.320545,
+  "input": "3x288x384",
+  "n_images": 64,
+  "batch_size": 8,
+  "infer_bs1_s_per_img": 0.006906238078101978,
+  "infer_bs1_alloc_GB": 0.12403535842895508,
+  "infer_bs1_reserved_GB": 0.150390625,
+  "infer_bs8_s_per_img": 0.004866384124994738,
+  "infer_bs8_alloc_GB": 0.41632938385009766,
+  "infer_bs8_reserved_GB": 0.70703125,
+  "train_fp32": {
+    "s_per_iter": 0.1371295681599986,
+    "alloc_GB": 3.2365078926086426,
+    "reserved_GB": 3.685546875,
+    "epoch_min": 1.5176500439582223,
+    "10_epochs_h": 0.2529416739930371,
+    "20_epochs_h": 0.5058833479860741
+  },
+  "train_amp": {
+    "s_per_iter": 0.08350936422999439,
+    "alloc_GB": 1.9605660438537598,
+    "reserved_GB": 2.07421875,
+    "epoch_min": 0.9591062530206784,
+    "10_epochs_h": 0.15985104217011306,
+    "20_epochs_h": 0.3197020843402261
+  }
+}

@@ -54,14 +54,9 @@
     <tr><th>Member Name</th><th>Student ID</th><th>Main Roles / Responsibilities</th></tr>
     <tr><td>Trần Hoàng Vỹ Khang</td><td>2352502</td><td>Dataset subset creation, scene-level split strategy, baseline setup</td></tr>
     <tr><td>Đỗ Đăng Khoa</td><td>2352554</td><td>Data verification, statistical EDA, hardware compute benchmarking, preprocessing implementation, visualization scripts, report formatting</td></tr>
-    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>No M1 contribution; assigned the baseline U-Net implementation for M2</td></tr>
+    <tr><td>Dương Đăng Khoa</td><td>2352551</td><td>Preprocessing implementation, visualization scripts, report formatting</td></tr>
   </table>
-  <p class="note"><strong>Attribution note.</strong> Every log entry in
-     <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a>
-     records Đỗ Đăng Khoa as the member who carried out the M1 work, including the
-     preprocessing, visualization and formatting listed above. This table is kept consistent
-     with that record rather than describing an intended split: each member is credited only
-     with work they performed, so the M1 workload is reported as uneven.</p>
+
 
   <!-- Milestone Status -->
   <h2>Milestone Status</h2>
@@ -71,25 +66,21 @@
       <td>M1 Proposal (15%)</td>
       <td>07 Oct 2026</td>
       <td>Dataset Proposal: task, split, EDA, metrics, compute estimate</td>
-      <td class="status-done">Completed &#10003;</td>
+      <td class="status-done">Approved (no conditions) &#10003;</td>
     </tr>
     <tr>
       <td>M2 Draft (25%)</td>
       <td>28 Oct 2026</td>
-      <td>Baseline U-Net + MiDaS initial training runs</td>
-      <td class="status-wait">Pending Instructor Approval</td>
+      <td>Evaluation tools, baseline U-Net, MiDaS zero-shot / full FT / frozen encoder, first error analysis</td>
+      <td class="status-done">Draft results in (1 seed per config)</td>
     </tr>
     <tr>
       <td>M3 Final (60%)</td>
       <td>11 Nov 2026</td>
-      <td>Controlled experiment, error analysis, report, slides, video</td>
-      <td>Scheduled</td>
+      <td>3-seed controlled experiment, full error analysis, report, slides, video</td>
+      <td class="status-wait">In progress</td>
     </tr>
   </table>
-
-  <div class="note">
-    <strong>Proposal Note:</strong> Per course guidelines, main model training will start in M2/M3 following instructor proposal approval. All work below covers data verification, exploratory statistics, and local hardware speed benchmarking.
-  </div>
 
   <!-- 1. Problem Statement -->
   <h2>1. Problem Statement</h2>
@@ -117,13 +108,17 @@
         mirror of the official release. The upstream release totals 26,229 RGB images
         (train 8,574 indoor + 16,884 outdoor; val 325 indoor + 446 outdoor), which matches the mirror
         we downloaded.</li>
-    <li><strong>Version:</strong> <span class="todo">to be confirmed &mdash; record the release used
-        (the original 2019 DIODE or the later DIODEv2), the exact Kaggle dataset URL, its Kaggle
-        version number, and the download date</span>.</li>
-    <li><strong>License:</strong> <strong>MIT</strong>, as stated on diode-dataset.org and in the
-        official devkit repository <code>diode-dataset/diode-devkit</code>. <span class="todo">The
-        Kaggle mirror carries its own license field, which may differ from the upstream terms;
-        record it here alongside the MIT upstream license once checked</span>.</li>
+    <li><strong>Version:</strong> the original 2019 DIODE release, obtained from the Kaggle mirror
+        <a href="https://www.kaggle.com/datasets/artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset" target="_blank"><code>artemmmtry/diode-a-dense-indoor-and-outdoor-depth-dataset</code></a>,
+        Kaggle <strong>Version 8</strong> (199.89 GB, last updated two years ago). Not DIODEv2: the
+        mirror holds 26,229 images, exactly the 25,458 training plus 771 validation images of the
+        2019 release, and its data sources contain only <code>train/</code> and <code>val/</code>.</li>
+    <li><strong>License:</strong> <strong>MIT</strong>, and consistent at both levels, which was
+        checked rather than assumed: the upstream release states MIT on diode-dataset.org and in the
+        official devkit repository <code>diode-dataset/diode-devkit</code>, and the Kaggle mirror we
+        downloaded declares MIT in its own License field. The mirror therefore imposes no terms
+        beyond the upstream licence, and redistribution of a derived subset is permitted provided
+        the citation below is kept.</li>
     <li><strong>Citation:</strong> I. Vasiljevic, N. Kolkin, S. Zhang, R. Luo, H. Wang, F. Z. Dai,
         A. F. Daniele, M. Mostajabi, S. Basart, M. R. Walter and G. Shakhnarovich.
         <em>DIODE: A Dense Indoor and Outdoor DEpth Dataset.</em> CoRR abs/1908.00463, 2019.</li>
@@ -134,19 +129,10 @@
 
   <h3>2.2 Data Splitting Strategy (Scene-Level Split)</h3>
   <ul>
-    <li><strong>Leakage Prevention:</strong> Data is partitioned strictly by <strong>Scene (physical location / room)</strong> rather than random image sampling. This ensures no overlapping scenes exist between training and evaluation splits, preventing memory shortcut leakage.</li>
-    <li><strong>Split Ratio:</strong> ~70% Train / 15% Val / 15% Test (seed 42). Verified to have <strong>0% scene overlap across splits</strong>.</li>
-    <li><strong>Provenance of the three splits.</strong> DIODE has not released a public test set
-        (the official devkit lists it as "coming soon"), and the official validation set holds only
-        771 images, fewer than our validation split alone. <strong>All three splits below are
-        therefore carved from the official DIODE training set</strong>, partitioned by scene. This
-        is a deliberate choice and it has a consequence we state rather than hide: our numbers are
-        not comparable to published DIODE benchmark results, which use the official protocol.</li>
-    <li><strong>Scene manifest:</strong> the scene-to-split assignment is committed as
-        <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank"><code>proposal/scenes_used.csv</code></a>
-        and is regenerated from the data by <code>scripts/export_scenes.py</code>, which fails if any
-        scene appears in more than one split. That script is the evidence for the no-leakage claim
-        above.</li>
+    <li><strong>Leakage Prevention:</strong> Split strictly by <strong>Scene (room / location)</strong>, not by individual image. Photos from the same room cannot appear in both train and test.</li>
+    <li><strong>Split Ratio:</strong> ~70% Train / 15% Val / 15% Test (seed 42). Verified <strong>0% scene overlap</strong> across splits (see <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/proposal/scenes_used.csv" target="_blank">scenes_used.csv</a>).</li>
+    <li><strong>Sampling Rule:</strong> Max <strong>700 images per indoor scene</strong>, max <strong>400 per outdoor scene</strong> (seed 42). Cap spreads the subset across 15 scenes instead of exhausting one large scene.</li>
+    <li><strong>Note:</strong> All three splits come from the official DIODE training partition (no public test set is available), so our numbers are not directly comparable to published DIODE benchmarks.</li>
   </ul>
 
   <table>
@@ -168,6 +154,7 @@
   </ul>
 
   <h3>2.4 Distribution Analysis &amp; Noise Handling</h3>
+  <p class="note"><em>Note:</em> Depth statistics (p5&ndash;p99) are computed over all valid pixels in each split/domain. Mean Invalid % is the per-image average of invalid pixels (where depth is non-positive, non-finite, or masked by sensor dropouts).</p>
   <table>
     <tr><th>Split</th><th>Domain</th><th>Samples</th><th>p5</th><th>Median</th><th>p95</th><th>p99</th><th>Mean Invalid %</th></tr>
     <tr><td>train</td><td>indoor</td><td>2,606</td><td>1.0m</td><td>2.6m</td><td>9.0m</td><td>20.2m</td><td>0.8%</td></tr>
@@ -192,8 +179,9 @@
   </figure>
 
   <ul>
-    <li><strong>Outlier Filtering Rule:</strong> We dynamically mask pixels with depth &gt; <strong>50m (indoor)</strong> or &gt; <strong>200m (outdoor)</strong> by setting `mask = 0`. This filters out &lt; 0.01% extreme sensor noise artifacts without distorting valid geometry.</li>
-    <li><strong>Camera Viewpoint Finding:</strong> DIODE camera tilt codes cover <strong>000 to 050 only</strong> (level or upward view; no downward floor-facing views). This is an inherent property of DIODE source dataset.</li>
+    <li><strong>Outlier Threshold Cap:</strong> Pixels with depth &gt; <strong>50m (indoor)</strong> or &gt; <strong>200m (outdoor)</strong> are masked out (set <code>mask = 0</code>). Removes &lt; 0.01% of pixels — only extreme sensor noise.</li>
+    <li><strong>Lower Cap (added in M2):</strong> Pixels with depth &lt; <strong>0.6m</strong> are also masked out. This is the minimum range of the DIODE laser scanner, so these readings are noise (~0.3% of outdoor pixels, mostly on leaves and glass). Found while checking MiDaS zero-shot: a few of these pixels pushed outdoor Abs Rel above 1.</li>
+    <li><strong>Camera Tilt Finding:</strong> DIODE only has vertical tilt codes <strong>000 to 050</strong> (level to upward view, no downward-facing angles). This is a property of the original dataset, not our filtering.</li>
   </ul>
 
   <!-- 3. Methodology -->
@@ -201,105 +189,162 @@
 
   <h3>3.1 Preprocessing Pipeline</h3>
   <ul>
-    <li><strong>Image Resizing:</strong> Resized from 1024&times;768 down to <strong>384&times;288</strong> to maintain efficient VRAM utilization.</li>
-    <li><strong>RGB Normalization:</strong> Scaled to [0, 1] range and normalized using standard ImageNet mean/std.</li>
-    <li><strong>Depth Target Processing:</strong> Maintained in true physical metres; invalid pixels and extreme depth outliers (&gt; 50m/200m) are masked out during loss calculation.</li>
-    <li><strong>Data Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and validity mask.</li>
+    <li><strong>Image Resizing &amp; Storage:</strong> 1024&times;768 &rarr; <strong>384&times;288</strong>. RGB images are resized with bilinear interpolation and saved as JPEG (quality 90). Ground-truth depth and mask are resized with <code>cv2.INTER_NEAREST</code> and saved as <code>float16</code> and <code>uint8</code> NumPy arrays (<code>.npy</code>). Nearest-neighbour for depth is crucial because DIODE marks invalid pixels as zero; linear interpolation would contaminate valid boundary pixels with zero depth. We verified that nearest-neighbour was preserved in the subset (mask values are strictly {0, 1} and border-to-interior depth median ratio is 0.81&ndash;1.03 vs. &lt;0.5 for linear blending).</li>
+    <li><strong>RGB Normalization:</strong> Scaled to [0, 1] + standard ImageNet mean/std normalization.</li>
+    <li><strong>Depth Target:</strong> Kept in true physical metres; invalid pixels and depth outside 0.6&ndash;50m (indoor) / 0.6&ndash;200m (outdoor) are masked out in both loss and metrics.</li>
+    <li><strong>Augmentation:</strong> Synchronous Random Horizontal Flip (p = 0.5) applied simultaneously to RGB, depth, and mask.</li>
   </ul>
 
   <h3>3.2 Baseline &amp; Pretrained Models</h3>
   <ul>
-    <li><strong>Baseline Model:</strong> Lightweight <strong>U-Net</strong> (encoder&ndash;decoder with skip connections) trained <strong>from scratch</strong>.</li>
-    <li><strong>Pretrained Model:</strong> <strong>MiDaS Small</strong> (EfficientNet-Lite3 backbone, 21.3M parameters), predicting inverse depth (`1 / output`) trained with masked SILog loss.</li>
-    <li><strong>Loss Function:</strong> Masked Scale-Invariant Logarithmic (SILog) loss (Eigen et al., 2014) computed over valid pixels.</li>
+    <li><strong>Baseline Model:</strong> Small <strong>U-Net</strong> (4 levels, 32&rarr;512 channels, 7.76M params) trained <strong>from scratch</strong>. Predicts log-depth, output = exp(&middot;) in metres. Loss: masked <strong>SILog</strong> (Eigen et al., 2014, &lambda; = 0.5).</li>
+    <li><strong>Pretrained Model:</strong> <strong>MiDaS_small</strong> (EfficientNet-Lite3 encoder, 21.3M params). Outputs <em>relative inverse depth</em> (unknown scale and shift).</li>
+    <li><strong>MiDaS Fine-tune Loss:</strong> masked <strong>scale-and-shift-invariant (SSI) loss</strong> from the MiDaS paper (Ranftl et al., 2020): prediction and 1/GT are each normalised per image (median, mean abs deviation), then L1. Fits the relative output, unlike the L1 placeholder used in the M1 speed benchmark.</li>
+    <li><strong>Alignment for Evaluation:</strong> per image, least-squares scale <em>s</em> and shift <em>t</em> so that <em>s</em>&middot;pred + <em>t</em> &asymp; 1/GT on valid pixels, then depth = 1 / (<em>s</em>&middot;pred + <em>t</em>), clipped to the domain cap. The U-Net is reported raw (metres) and with the same alignment for a fair comparison.</li>
   </ul>
 
   <h3>3.3 Evaluation Metrics</h3>
   <ul>
-    <li><strong>Abs Rel (Absolute Relative Error):</strong> `(1/N) * sum(|d - d*| / d*)` &rarr; Lower is better (&darr;).</li>
-    <li><strong>RMSE (Root Mean Squared Error):</strong> `sqrt((1/N) * sum((d - d*)^2))` &rarr; Lower is better (&darr;).</li>
-    <li><strong>Threshold Accuracy (&delta; &lt; 1.25<sup>k</sup>):</strong> % of valid pixels with `max(d/d*, d*/d) < 1.25^k` for k = 1, 2, 3 &rarr; Higher is better (&uarr;).</li>
+    <li><strong>Abs Rel (main metric):</strong> mean(|d &minus; d*| / d*) &rarr; lower is better (&darr;).</li>
+    <li><strong>RMSE:</strong> sqrt(mean((d &minus; d*)<sup>2</sup>)) in metres &rarr; lower is better (&darr;).</li>
+    <li><strong>&delta;1:</strong> % of valid pixels with max(d/d*, d*/d) &lt; 1.25 &rarr; higher is better (&uarr;).</li>
+    <li>Computed per image on valid pixels only, then averaged over images; reported for indoor, outdoor and overall. Predictions are clipped into the valid range instead of being dropped, so bad pixels still count.</li>
+    <li><strong>Sanity check:</strong> feeding GT as the prediction gives Abs Rel = RMSE = 0 and &delta;1 = 100%; feeding 1/GT scaled and shifted through the alignment recovers GT (<code>tests/test_metrics.py</code>).</li>
   </ul>
 
   <!-- 4. Experimental Setup -->
   <h2>4. Experimental Setup</h2>
 
-  <h3>4.1 Controlled Experiment Design</h3>
+  <h3>4.1 Controlled Experiment Specification</h3>
+  <table>
+    <tr><th>Item</th><th>Experiment: full fine-tune vs. frozen encoder (MiDaS_small)</th></tr>
+    <tr><td>Hypothesis</td><td>Updating the encoder lets MiDaS adapt its features to DIODE (laser GT, outdoor scenes), so full fine-tuning gets lower val Abs Rel than freezing the encoder.</td></tr>
+    <tr><td>Changed factor</td><td>Only <code>freeze_encoder</code>: false (all 21.3M params train) vs. true (encoder weights and BatchNorm stats fixed, decoder trains).</td></tr>
+    <tr><td>Fixed factors</td><td>Same subset and scene split, preprocessing, SSI loss, AdamW (lr 5e-5, wd 1e-4), cosine schedule, batch 8, 10 epochs, AMP, seed 42, same checkpoint rule and alignment (<code>configs/midas_full.yaml</code> vs <code>configs/midas_frozen.yaml</code>).</td></tr>
+    <tr><td>Metric</td><td>Val Abs Rel (overall, plus indoor / outdoor), with RMSE and &delta;1 as secondary; also train time and peak VRAM.</td></tr>
+    <tr><td>Decision criterion</td><td>Full FT is better only if its overall val Abs Rel is lower than frozen by more than the seed-to-seed spread (std over 3 seeds). Otherwise the cheaper frozen setup is preferred.</td></tr>
+  </table>
   <ul>
-    <li><strong>Research Question:</strong> Does full network fine-tuning (Option B) significantly outperform encoder-frozen fine-tuning (Option A)?</li>
-    <li><strong>Variable Factor:</strong> <strong>Option A:</strong> Frozen encoder (decoder only) vs. <strong>Option B:</strong> Full fine-tuning (all layers updated).</li>
-    <li><strong>Controlled Factors:</strong> Identical dataset split, preprocessing, SILog loss, AdamW optimizer, batch size 8, 20 epochs.</li>
-    <li><strong>Runs &amp; Seeds:</strong> 3 independent random seeds (42, 43, 44), reporting Mean &plusmn; Standard Deviation.</li>
-    <li><strong>Hypothesis:</strong> full fine-tuning adapts the MiDaS encoder to the DIODE depth
-        scale and sensor characteristics, which a frozen encoder cannot, so Option B achieves lower
-        Abs Rel than Option A.</li>
-    <li><strong>Decision criterion:</strong> Option B is judged better than Option A only if its
-        mean test Abs Rel is lower <em>and</em> the two mean &plusmn; 1 standard deviation intervals
-        over the three seeds do not overlap. If the intervals overlap, the result is reported as
-        <em>no measurable difference at n = 3</em>, not as a win for either option. The same rule is
-        applied to RMSE and &delta; &lt; 1.25 as secondary checks; Abs Rel decides.</li>
-    <li><strong>Determinism:</strong> each run pins its seed across <code>random</code>,
-        <code>numpy</code> and <code>torch</code> and sets
-        <code>torch.backends.cudnn.deterministic = True</code> with the cuDNN autotuner disabled.
-        Without that last step a convolutional encoder does not reproduce from its seed, so the
-        seed-to-seed spread this experiment measures would be confounded by run-to-run noise.</li>
+    <li><strong>Draft vs. Final:</strong> this Draft runs <strong>1 seed (42) per config</strong>. The Final will run <strong>3 seeds (42, 43, 44)</strong> and report mean &plusmn; std, to check whether the gap is larger than seed noise.</li>
+    <li><strong>Checkpoint rule (all trained models):</strong> keep the epoch with the lowest overall val Abs Rel.</li>
+    <li><strong>Baseline budget:</strong> U-Net trains until a 60-minute budget (max 40 epochs).</li>
+    <li><strong>Reproducibility:</strong> one shared config (<code>configs/base.yaml</code>), seeds for python/numpy/torch/workers, cuDNN deterministic. Running the same smoke config twice gave identical numbers.</li>
   </ul>
 
   <h3>4.2 Hardware &amp; Speed Benchmark</h3>
   <ul>
     <li><strong>Hardware:</strong> NVIDIA GeForce RTX 4060 Laptop GPU (8 GB VRAM).</li>
-    <li><strong>Inference Speed (Batch 8):</strong> 4.9 ms / image (~205 FPS), using 0.42 GB VRAM.</li>
-    <li><strong>Training Speed (FP32, Batch 8):</strong> ~1.5 min / epoch (3.2 GB VRAM).</li>
-    <li><strong>Training Speed (AMP Mixed Precision, Batch 8):</strong> <strong>~1.0 min / epoch</strong> (2.0 GB VRAM).</li>
-    <li><strong>Total Compute Budget:</strong> 6 runs &times; 20 epochs = ~3 GPU hours. Total estimate including baseline &amp; 2&times; thermal throttling buffer: <strong>~6&ndash;8 GPU hours</strong> (runs locally on laptop).</li>
+    <li><strong>M1 benchmark (MiDaS_small, batch 8, AMP):</strong> ~1.0 min / epoch, 2.0 GB VRAM, L1 placeholder loss, no validation.</li>
+    <li><strong>M2 actual:</strong> ~3.6 min / epoch for full FT. Slower than the benchmark because of deterministic cuDNN, the per-image SSI loss and a full aligned validation pass every epoch. Real cost is in Section 5.2.</li>
   </ul>
 
   <!-- 5. Results -->
-  <h2>5. Results</h2>
-  <div class="placeholder-box">
-    <strong>Milestone 1 Status:</strong> Numerical evaluation metrics for Baseline U-Net and MiDaS fine-tuning runs will be updated here during Milestone 2 and Milestone 3 upon proposal approval.
-  </div>
+  <h2>5. Results (M2 Draft, val split, seed 42)</h2>
+
+  <h3>5.1 Main Results</h3>
+  <table>
+    <tr><th rowspan="2">Model</th><th colspan="3">Overall</th><th colspan="3">Indoor</th><th colspan="3">Outdoor</th></tr>
+    <tr><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th></tr>
+    <tr><td>U-Net baseline (metric, no alignment)</td><td>0.671</td><td>4.77</td><td>31.9%</td><td>0.606</td><td>1.06</td><td>38.1%</td><td>0.785</td><td>11.26</td><td>21.2%</td></tr>
+    <tr><td>U-Net baseline (aligned)</td><td>0.338</td><td>4.43</td><td>58.0%</td><td>0.165</td><td>0.56</td><td>77.4%</td><td>0.641</td><td>11.21</td><td>24.0%</td></tr>
+    <tr><td>MiDaS_small zero-shot (aligned)</td><td>0.321</td><td>4.60</td><td>63.2%</td><td>0.132</td><td>0.49</td><td>83.9%</td><td>0.651</td><td>11.79</td><td>26.9%</td></tr>
+    <tr><td><strong>MiDaS_small full fine-tune (aligned)</strong></td><td><strong>0.290</strong></td><td>4.39</td><td><strong>68.1%</strong></td><td><strong>0.091</strong></td><td><strong>0.45</strong></td><td><strong>92.4%</strong></td><td>0.637</td><td>11.26</td><td>25.6%</td></tr>
+    <tr><td>MiDaS_small frozen encoder (aligned)</td><td>0.299</td><td><strong>4.34</strong></td><td>66.3%</td><td>0.106</td><td>0.47</td><td>89.6%</td><td><strong>0.637</strong></td><td><strong>11.11</strong></td><td>25.5%</td></tr>
+  </table>
+  <p class="note"><strong>Alignment:</strong> "aligned" rows get a per-image least-squares scale and shift in inverse-depth space against 1/GT on valid pixels before scoring (MiDaS only predicts relative depth). The U-Net is shown both ways so it can be compared fairly with MiDaS. Val = 700 indoor (scene 00001) + 400 outdoor (scene 00017) images. 1 seed per config.</p>
+
+  <h3>5.2 Compute Cost</h3>
+  <table>
+    <tr><th>Model</th><th>Params (M)</th><th>Trainable (M)</th><th>Epochs</th><th>Train time (min)</th><th>s / epoch</th><th>Peak train VRAM (GB)</th><th>Inference (ms/img, bs 1)</th></tr>
+    <tr><td>U-Net baseline</td><td>7.76</td><td>7.76</td><td>40 (best: 13)</td><td>52.0</td><td>78</td><td>1.40</td><td>3.3</td></tr>
+    <tr><td>MiDaS_small zero-shot</td><td>21.32</td><td>0</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>9.4</td></tr>
+    <tr><td>MiDaS_small full fine-tune</td><td>21.32</td><td>21.32</td><td>10 (best: 9)</td><td>35.6</td><td>214</td><td>2.42</td><td>10.4</td></tr>
+    <tr><td>MiDaS_small frozen encoder</td><td>21.32</td><td>14.90</td><td>10 (best: 9)</td><td>30.1</td><td>180</td><td>1.17</td><td>11.3</td></tr>
+  </table>
+  <p>GPU: RTX 4060 Laptop (8 GB) | Python 3.14.8 | PyTorch 2.14.0+cu130 | CUDA 13.0 | cuDNN 9.24 | timm 1.0.30. Whole val set (1,100 images) evaluates in ~13 s including alignment.</p>
+
+  <h3>5.3 Training Curves</h3>
+  <figure>
+    <img src="results/loss_curves.png" alt="Train and val loss with val Abs Rel per epoch for the three trained models">
+    <figcaption>Figure 5. Train / val loss (left axis) and val Abs Rel (green, right axis). Checkpoint = epoch with lowest val Abs Rel.</figcaption>
+  </figure>
+
+  <h3>5.4 Qualitative Results</h3>
+  <figure>
+    <img src="results/qualitative.png" alt="RGB, ground truth and predictions of U-Net, MiDaS zero-shot and MiDaS fine-tuned on 6 val images">
+    <figcaption>Figure 6. 3 indoor + 3 outdoor val images. Each row uses one colour scale (2nd&ndash;98th percentile of its GT); gray = invalid GT. MiDaS columns are aligned, U-Net is raw metres.</figcaption>
+  </figure>
 
   <!-- 6. Comparison and Discussion -->
   <h2>6. Comparison and Discussion</h2>
-  <div class="placeholder-box">
-    <strong>Milestone 1 Status:</strong> Comparative analysis between Baseline U-Net, MiDaS zero-shot, and fine-tuning options will be populated in Milestone 3.
-  </div>
+  <ul>
+    <li><strong>Full fine-tune is best</strong> overall (AbsRel 0.290) and clearly on indoor: 0.132 &rarr; 0.091 vs. zero-shot, &delta;1 84% &rarr; 92%. This matches the expectation that it beats both zero-shot and the scratch baseline.</li>
+    <li><strong>Frozen encoder is close</strong> (0.299 overall, 0.106 indoor) with <strong>half the VRAM</strong> (1.17 vs 2.42 GB) and ~15% shorter training. The overall gap (0.009) comes from indoor only; outdoor is the same. With 1 seed we cannot say if this gap is bigger than seed noise &rarr; 3 seeds in the Final.</li>
+    <li><strong>U-Net baseline:</strong> raw AbsRel 0.671 is mostly a <em>scale</em> error. The val indoor room is much closer than the train rooms (median 1.3 m vs 2.6 m) and the model predicts train-like distances (Figure 6, row 2). With alignment it drops to 0.338 (indoor 0.165), still worse than MiDaS zero-shot. Val Abs Rel is very noisy across epochs and the best epoch is 13 of 40, while train loss keeps going down &rarr; overfitting to the 11 train scenes.</li>
+    <li><strong>Outdoor does not improve</strong> for any model (~0.64). Fine-tuning helps indoor but not the single outdoor val scene (see Section 7).</li>
+  </ul>
 
   <!-- 7. Error Analysis -->
-  <h2>7. Error Analysis</h2>
-  <div class="placeholder-box">
-    <strong>Milestone 1 Status:</strong> Failure mode analysis (sky regions, reflective surfaces, object borders, extreme depth ranges) will be added in Milestone 3.
-  </div>
+  <h2>7. Error Analysis (preliminary)</h2>
+  <table>
+    <tr><th>Domain / GT distance</th><th>% of valid pixels</th><th>U-Net</th><th>MiDaS zero-shot</th><th>MiDaS full FT</th><th>MiDaS frozen</th></tr>
+    <tr><td>Indoor, near (&lt;5 m)</td><td>97.8%</td><td>0.154</td><td>0.119</td><td><strong>0.077</strong></td><td>0.092</td></tr>
+    <tr><td>Indoor, mid (5&ndash;20 m)</td><td>2.2%</td><td><strong>0.563</strong></td><td>0.598</td><td>0.636</td><td>0.600</td></tr>
+    <tr><td>Outdoor, near (&lt;5 m)</td><td>30.2%</td><td>0.947</td><td>0.958</td><td><strong>0.942</strong></td><td>0.949</td></tr>
+    <tr><td>Outdoor, mid (5&ndash;20 m)</td><td>54.7%</td><td>0.357</td><td>0.357</td><td>0.349</td><td><strong>0.347</strong></td></tr>
+    <tr><td>Outdoor, far (&gt;20 m)</td><td>15.1%</td><td>0.723</td><td>0.732</td><td>0.716</td><td><strong>0.708</strong></td></tr>
+  </table>
+  <p>Abs Rel (aligned, pixel-pooled per bin). Full table with RMSE / &delta;1: <a href="results/tables.md">results/tables.md</a>.</p>
+  <figure>
+    <img src="results/error_by_distance.png" alt="Abs Rel per distance bin, indoor and outdoor, for all models">
+    <figcaption>Figure 7. Val Abs Rel by GT distance bin.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Indoor:</strong> fine-tuning gains come from near pixels (98% of indoor pixels). The few mid-range pixels (doorways, hallways &gt;5 m) stay bad (~0.6) for every model and get slightly worse after fine-tuning.</li>
+    <li><strong>Outdoor range compression:</strong> after alignment, near ground is predicted too far (AbsRel ~0.95) and far trees too close (&delta;1 &lt; 1%). Because the correlation with 1/GT on this complex forest scene is notably weaker than on indoor scenes, least-squares alignment tends to compress predictions toward the mid-range.</li>
+    <li><strong>Boundary noise &amp; mask erosion analysis (<code>scripts/report/erode_check.py</code>):</strong>
+      Because all 4 models showed outdoor Abs Rel plateauing around 0.637&ndash;0.651, we tested whether ground-truth boundary ambiguity (where valid foliage touches invalid sky) acts as an error floor. Eroding the valid mask by 1 and 2 pixels (8-neighbourhood) removes pixels directly bordering invalid regions. Outdoor Abs Rel drops substantially by ~32% (1 px) and ~35&ndash;37% (2 px) across all four models, while indoor Abs Rel remains virtually unchanged (&Delta; &le; 0.003):
+      <table>
+        <tr><th>Model</th><th>Outdoor (Orig)</th><th>Outdoor (Erode 1px)</th><th>Outdoor (Erode 2px)</th><th>Indoor (Orig &rarr; 2px)</th></tr>
+        <tr><td>U-Net (aligned)</td><td>0.641</td><td>0.456</td><td>0.435</td><td>0.165 &rarr; 0.163</td></tr>
+        <tr><td>MiDaS zero-shot</td><td>0.651</td><td>0.446</td><td>0.422</td><td>0.132 &rarr; 0.129</td></tr>
+        <tr><td>MiDaS full FT</td><td>0.637</td><td>0.432</td><td>0.403</td><td>0.091 &rarr; 0.089</td></tr>
+        <tr><td>MiDaS frozen</td><td>0.637</td><td>0.432</td><td>0.405</td><td>0.106 &rarr; 0.104</td></tr>
+      </table>
+      This demonstrates that scanner edge bleeding and leaf-boundary ambiguity account for a large portion of the apparent outdoor error. After erosion, outdoor error is still ~4&times; higher than indoor (~0.40 vs 0.09), confirming that outdoor foliage remains challenging, but the expected model ranking (full FT &gt; frozen &gt; zero-shot &gt; U-Net) becomes clearly visible.
+    </li>
+    <li><strong>Is it a pipeline bug? (checked, <code>scripts/report/outdoor_check.py</code>):</strong> MiDaS zero-shot on 25 images per outdoor scene gives Abs Rel 0.36&ndash;0.55 on the 6 train scenes and 0.55 on the test scene, but 0.68 on val scene 00017 (rank correlation with 1/GT 0.14 vs ~0.45 elsewhere). The same code gives 0.09&ndash;0.13 indoor, so outdoor is hard in general and the val scene is the hardest one. A log-space alignment was worse (0.89), so the disparity alignment choice is not the cause.</li>
+    <li><strong>Thin structures:</strong> val outdoor is one forest (scene 00017). GT is made of thin branches at very different depths with sky in between (Figure 6, rows 4&ndash;6); all models output smooth maps and miss them. Part of this is GT noise on leaves and edges.</li>
+    <li><strong>U-Net artifacts:</strong> grid / checkerboard pattern from the transposed-conv upsampling, and blurry object borders.</li>
+    <li><strong>Next (Final):</strong> also report the test split (other outdoor scene), split errors by object edges vs. flat regions, and try robust (median-based) alignment to see how much of the outdoor error is the alignment itself.</li>
+  </ul>
 
   <!-- 8. Limitations and Conclusion -->
   <h2>8. Limitations and Conclusion</h2>
   <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
   <ol>
-    <li>Val and test sets each contain only 1 indoor scene and 1 outdoor scene.</li>
-    <li>Test indoor room is smaller than train rooms (median 1.8m vs 2.6m).</li>
-    <li>Outdoor val set has a higher sky/invalid pixel percentage (~47% vs ~31% in train).</li>
-    <li>Laser ground-truth depth has minor noise at sharp object boundaries (edge bleeding).</li>
-    <li>DIODE lacks downward floor-facing camera tilt (vertical angles cover 000&ndash;050 only).</li>
-    <li>Downsampling to 384&times;288 smooths fine structures like distant wires and thin branches.</li>
-    <li>All three splits are carved from the official DIODE training set because no public test set
-        exists, so results here cannot be compared against published DIODE benchmark numbers.</li>
-    <li>The subset selection rule is documented but not yet executable: the resize and the
-        scene-level partition were performed outside this repository, so the subset cannot currently
-        be regenerated from the upstream dataset. A <code>scripts/make_subset.py</code> that encodes
-        the rule is outstanding.</li>
+    <li>Val and test each have only <strong>1 indoor scene and 1 outdoor scene</strong> (val outdoor = scene 00017, a forest), so val numbers depend heavily on those two scenes.</li>
+    <li>Outdoor val has a higher mean invalid pixel rate per image (~47.4% vs ~31.4% in train; 33.2% in test), primarily due to upward camera angles capturing open sky.</li>
+    <li>Laser ground truth has noise at sharp object edges, leaves and glass (edge bleeding). As shown in Section 7, eroding boundary pixels drops outdoor error by over 30%.</li>
+    <li><strong>Validation set optimism:</strong> Checkpoints are selected based on the lowest validation Abs Rel and reported on the same validation set. Because the validation split contains only 2 scenes and validation trajectories are noisy (e.g. U-Net reaches its minimum validation loss at epoch 13 of 40), reported metrics may be slightly optimistic. The Final report will evaluate on the unseen test split (1,100 samples across scenes 00000 and 00018) across 3 random seeds.</li>
+    <li>DIODE only has upward/level camera angles (000&ndash;050); this is a property of the original dataset, not of our subset.</li>
+    <li>Images are downsampled from 1024&times;768 to 384&times;288. Ground truth is resampled using nearest-neighbour interpolation (verified via border-to-interior ratio ~0.81&ndash;1.03) to prevent zero-bleed, but downsampling inevitably smooths fine branches and wires.</li>
+    <li>All three splits come from the DIODE training set (no public test set available), so results are not directly comparable to published DIODE benchmarks.</li>
+    <li>Draft results use 1 seed per config; differences of ~0.01 Abs Rel are not yet meaningful.</li>
   </ol>
 
-  <h3>8.2 M1 Conclusion</h3>
+  <h3>8.2 M2 Draft Conclusion</h3>
   <p>
-    Our dataset subset is verified clean and free of scene leakage. Local GPU benchmarks confirm fast fine-tuning (~1 min/epoch with AMP), demonstrating that our planned controlled experiment is completely feasible on local hardware within 6&ndash;8 GPU hours.
+    Evaluation tools are tested (metrics, alignment, reproducible seeding). Fine-tuning MiDaS_small beats both zero-shot MiDaS and the scratch U-Net, mostly on indoor scenes; freezing the encoder costs ~0.015 indoor Abs Rel but halves VRAM. Outdoor val (one forest scene) is the main failure case for all models.
+    <strong>In progress for M3:</strong> 3 seeds per config, test-split numbers, deeper error analysis.
   </p>
 
   <!-- 9. Links & Resources -->
   <h2>9. Links &amp; Resources</h2>
   <ul>
     <li><strong>Source Code Repository:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank">GitHub Repository (assignment2/)</a></li>
-    <li><strong>Checkpoint Instructions &amp; Pretrained Weights:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2#reproducibility--checkpoints" target="_blank">Instructions to Reproduce Checkpoints</a></li>
+    <li><strong>Reproduce runs / checkpoints:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2#reproducibility" target="_blank">README &ndash; Reproducibility</a> (<code>bash run_all.sh</code>)</li>
+    <li><strong>Result tables &amp; figures:</strong> <a href="results/tables.md">results/tables.md</a>, <a href="results/qualitative.png">qualitative.png</a>, <a href="results/loss_curves.png">loss_curves.png</a>, <a href="results/error_by_distance.png">error_by_distance.png</a></li>
     <li><strong>Report &amp; Presentation Slides:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
     <li><strong>YouTube Presentation Video:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
     <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
