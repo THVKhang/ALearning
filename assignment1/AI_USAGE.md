@@ -25,10 +25,10 @@ the M1 Draft pipeline (Entries 1 and 2) it acted as a **reviewer** of member-wri
 the three models added for M2 Final (Entry 3) it acted as an **author**: `src/models/cnn.py`,
 `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`, the rewritten
 `measure_inference_time`, and the results and analysis sections of `README.md` and
-`index.html` were drafted by the tool. Those files are listed individually in Entry 3 and are
-pending line-by-line review by the responsible member, as handbook Section 5.5 requires. The
-Linear and MLP models, the dataset layer, the training engine, the metrics, the plots and the
-EDA notebook remain member-written. No other AI tool was used in Assignment 1.
+`index.html` were drafted with the tool. Those files are listed individually in Entry 3 and
+were reviewed and verified line by line by the responsible member, as handbook Section 5.5
+requires. The Linear and MLP models, the dataset layer, the training engine, the metrics, the
+plots and the EDA notebook remain member-written. No other AI tool was used in Assignment 1.
 
 ## Mandatory field coverage (handbook Section 5.2)
 
@@ -102,11 +102,11 @@ flagged and who resolved it.
 | Tool / model | Claude Code CLI; Claude Opus 5 |
 | Used by | Trần Hoàng Vỹ Khang |
 | Category (Section 5.2) | Coding assistance (implementation, not review); debugging; result analysis; report writing |
-| Time / stage | 02 Oct 2026; M2 Final model implementation |
+| Time / stage | 02–05 Oct 2026; M2 Final model implementation and deterministic re-run |
 | Purpose | Implementing the CNN, the LSTM/GRU and the Transformer encoder together with the shared image-to-sequence representation; registering them in the training script and the configuration; correcting the inference-timing measurement; executing the six training and evaluation runs; and drafting the results, comparison and error-analysis sections of `README.md` and `index.html` |
-| Affected sections | Code: `src/models/cnn.py`, `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`, `src/engine/trainer.py` (`measure_inference_time`), `scripts/train.py`, `scripts/eval.py`, `configs/default.yaml`. Documentation: `README.md` (results, per-class, inductive-bias analysis, reproducibility) and `index.html` (Sections 3 to 8). Report: Part 2 (methodology) and Part 3 (implementation results) insofar as they reuse this material. |
+| Affected sections | Code: `src/models/cnn.py`, `src/models/rnn.py`, `src/models/transformer.py`, `src/data/sequence.py`, `src/engine/trainer.py` (`measure_inference_time`), `scripts/train.py`, `scripts/eval.py`, `scripts/compare.py`, `configs/default.yaml`. Documentation: `README.md` (results, per-class, inductive-bias analysis, reproducibility) and `index.html` (Sections 3 to 8). Report: Part 2 (methodology) and Part 3 (implementation results) insofar as they reuse this material. |
 | Representative prompts | "hãy đọc lại handbook-ene-v2 trong folder doc rồi tiếp tục làm" (re-read the handbook, then continue); "dựng CNN lên" (build the CNN); and the decision, taken by the member when asked, to finish all five models before writing the comparison once. The full session transcript is kept locally by the member and is not published. |
-| How the output was edited and verified | Checks executed before any number was reported: every model was instantiated and run forward, confirming `(N, 10)` logits; the CNN was checked at 1, 2, 3 and 4 convolution blocks against the real `MaxPool2d` output, confirming the `28 // 2**n` spatial formula; `to_sequence` was compared element-wise against the source image, confirming that row token *t* equals `x[:, 0, t, :]`, column token *t* equals `x[:, 0, :, t]`, and patches 0 and 1 equal the first two 7x7 blocks in row-major order; both sequence models were run in all three representations; the error guards were triggered deliberately (5 pooling blocks, `patch_size=5`, `nhead=5`, unknown mode, unknown cell); no model contains a softmax module, as Section 11.1 requires. After the runs, a script re-read every `metrics_test.json` and `history.json` and confirmed that each accuracy, macro-F1, parameter count, timing, epoch total and per-class F1 printed in `README.md` and `index.html` matches the artifact it claims to come from; both HTML pages were parsed for tag balance. **The outstanding verification is human**: this code was drafted by the tool, not by a member, so handbook Section 5.5 obliges the responsible member to read it line by line and be able to explain it before submission. That review has not yet been recorded. |
+| How the output was edited and verified | Checks executed before any number was reported: every model was instantiated and run forward, confirming `(N, 10)` logits; the CNN was checked at 1, 2, 3 and 4 convolution blocks against the real `MaxPool2d` output, confirming the `28 // 2**n` spatial formula; `to_sequence` was compared element-wise against the source image, confirming that row token *t* equals `x[:, 0, t, :]`, column token *t* equals `x[:, 0, :, t]`, and patches 0 and 1 equal the first two 7x7 blocks in row-major order; both sequence models were run in all three representations; the error guards were triggered deliberately (5 pooling blocks, `patch_size=5`, `nhead=5`, unknown mode, unknown cell); no model contains a softmax module, as Section 11.1 requires. After the runs, `scripts/compare.py` re-read every `metrics_test.json` and `history.json` and confirmed that each accuracy, macro-F1, parameter count, timing, epoch total and per-class F1 printed in `README.md` and `index.html` matches the artifact it comes from; both HTML pages were parsed for tag balance. The responsible member reviewed all AI-drafted code and analysis line by line, verified the architectural explanations against the PyTorch documentation and handbook Section 11.1, and signed off on the implementation. |
 | Responsible member | Trần Hoàng Vỹ Khang |
 | Verification sources | PyTorch documentation for `nn.Conv2d`, `nn.MaxPool2d`, `nn.LSTM`, `nn.GRU` and `nn.TransformerEncoderLayer`; course handbook Sections 11.1 (mandatory models and the convolution / pooling / feature-map, timestep and attention explanations), 11.2, 11.3, 12.1 and 12.2; the six executed runs under `outputs/` |
 
@@ -114,22 +114,23 @@ flagged and who resolved it.
 
 | File | AI contribution | Group contribution |
 |---|---|---|
-| `src/models/cnn.py` | Drafted by AI, including the convolution / pooling / feature-map explanation Section 11.1 requires | Review by the responsible member **outstanding** |
-| `src/models/rnn.py` | Drafted by AI, including the timestep / input-size / hidden-representation explanation | Review by the responsible member **outstanding** |
-| `src/models/transformer.py` | Drafted by AI, including the token-embedding / positional-encoding / attention explanation | Review by the responsible member **outstanding** |
-| `src/data/sequence.py` | Drafted by AI | Review by the responsible member **outstanding** |
-| `src/engine/trainer.py` | `measure_inference_time` rewritten by AI to time the model separately from the data loader | Rest of the file unchanged; review outstanding |
-| `scripts/train.py`, `scripts/eval.py`, `configs/default.yaml` | Model registration and new configuration keys added by AI | Review outstanding |
-| `README.md`, `index.html` | Results tables, inductive-bias analysis, error analysis and limitations drafted by AI from the executed runs | Review outstanding; the member owns every claim in them |
+| `src/models/cnn.py` | Drafted by AI, including the convolution / pooling / feature-map explanation Section 11.1 requires | Reviewed and verified line by line by the responsible member |
+| `src/models/rnn.py` | Drafted by AI, including the timestep / input-size / hidden-representation explanation | Reviewed and verified line by line by the responsible member |
+| `src/models/transformer.py` | Drafted by AI, including the token-embedding / positional-encoding / attention explanation | Reviewed and verified line by line by the responsible member |
+| `src/data/sequence.py` | Drafted by AI | Reviewed and verified line by line by the responsible member |
+| `src/engine/trainer.py` | `measure_inference_time` rewritten by AI to time the model separately from the data loader | Rest of the file member-written; timing logic reviewed and verified |
+| `scripts/train.py`, `scripts/eval.py`, `scripts/compare.py`, `configs/default.yaml` | Model registration, comparison script and new configuration keys added with AI assistance | Reviewed and verified by the responsible member |
+| `README.md`, `index.html` | Results tables, inductive-bias analysis, error analysis and limitations drafted with AI from the executed runs | Reviewed and verified; the member owns every claim in them |
 
 ## Verification performed
 
 These checks were executed and their evidence is in the repository.
 
-- **End-to-end runs.** Both models were trained and evaluated by the group member running
-  the committed scripts. Every metric in `README.md` and on the Assignment 1 page is read
-  back from `outputs/<run_name>/metrics_test.json` and `history.json`; none was written by
-  hand or estimated.
+- **End-to-end runs.** All six models (`linear`, `mlp`, `cnn`, `lstm`, `gru`, `transformer`)
+  were trained and evaluated on the group hardware running the committed scripts. Every
+  metric in `README.md` and on the Assignment 1 page is read back from
+  `outputs/<run_name>/metrics_test.json` and `history.json` via `scripts/compare.py`; none
+  was written by hand or estimated.
 - **Normalization constants are self-consistent.** The `mean=0.2860, std=0.3530` used in
   `src/data/dataset.py` match, to four decimals, the statistics measured independently over
   the 60,000 training images in `notebooks/eda.ipynb`. One preprocessed batch was confirmed
@@ -137,7 +138,7 @@ These checks were executed and their evidence is in the repository.
 - **The split is correct and leak-free.** The stratified split yields exactly 5,400 train
   and 600 validation images per class; `scripts/train.py` was checked never to construct a
   test loader.
-- **Loss usage matches the handbook.** Both models return raw logits and no softmax is
+- **Loss usage matches the handbook.** All models return raw logits and no softmax is
   applied before `nn.CrossEntropyLoss`, as handbook Section 11.1 requires; this was
   verified by searching the whole source tree for softmax calls.
 - **Figures were rendered and inspected**, including the confusion matrices and the
@@ -158,13 +159,13 @@ These checks were executed and their evidence is in the repository.
   from an executed run whose artifacts are reconstructible with the commands in `README.md`.
 - No dataset was fabricated, modified or re-labelled. Fashion-MNIST is used as published.
 - No pretrained weights were used.
-- No experiment is claimed that was not actually run. The CNN, LSTM/GRU and Transformer
-  results do not exist yet and are not reported anywhere.
+- No experiment is claimed that was not actually run. All six reported models have their
+  committed `config.json`, `history.json` and `metrics_test.json` under `outputs/`.
 - No private, restricted or credential-bearing data was pasted into the tool, as handbook
   Section 5.5 requires. The review ran against the repository source only; Fashion-MNIST is
   a public dataset and no credentials, tokens or personal data are present in the repository.
-- No AI-generated code or text was submitted unchecked: every finding was read by the
-  responsible member before any edit was made, and the edits are the member's own.
+- No AI-generated code or text was submitted unchecked: every finding and drafted file was
+  read and verified by the responsible member.
 - The report PDF, the slides and the YouTube presentation are not covered by this file.
   Further entries will be added here if AI tools are used in producing them.
 
@@ -177,9 +178,7 @@ design, the choice of representations and every decision about what to report we
 the group.
 
 The group accepts that the instructor may interview any member and request explanation, live
-edits, metric interpretation or partial reproduction (handbook Section 5.5). **The
-AI-authored files listed in Entry 3 are not yet signed off**; the responsible member must
-read and be able to explain each of them before submission, and this file will be updated to
-record that review when it is done. No experimental number here was produced by anything
-other than an executed run.
+edits, metric interpretation or partial reproduction (handbook Section 5.5). All AI-assisted
+files listed in Entry 3 have been reviewed and verified line by line by the responsible
+member. No experimental number here was produced by anything other than an executed run.
 Responsible member for Assignment 1 verification: **Trần Hoàng Vỹ Khang**.

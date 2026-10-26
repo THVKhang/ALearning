@@ -17,9 +17,9 @@ Classification.
 
 All five mandatory models of handbook Section 11.1 are now implemented, trained and
 compared: Linear/softmax, MLP, CNN, LSTM **and** GRU (training both is also the optional
-Section 11.2 extension), and Transformer. What remains for M2 Final is the report PDF, the
-slides, the YouTube video, and `scripts/compare.py`, which is still an empty stub - the
-tables below were assembled directly from the `metrics_test.json` of each run.
+Section 11.2 extension), and Transformer. `scripts/compare.py` aggregates the committed
+`metrics_test.json` and `history.json` artifacts of all six runs to print the comparison
+tables below and regenerate the curve and confusion-matrix figures.
 
 ## Project layout
 
@@ -38,9 +38,9 @@ assignment1/
 │   └── utils/{seed,metrics,plots}.py     reproducibility, accuracy + macro-F1, figures
 ├── scripts/train.py            train one model, write checkpoint + curves
 ├── scripts/eval.py             evaluate a checkpoint on the test split
-├── scripts/compare.py          gather metrics of all five models (M2, empty)
+├── scripts/compare.py          gather metrics, comparison tables and figures of all runs
 ├── notebooks/eda.ipynb         exploratory data analysis (executed, outputs included)
-└── outputs/                    run artifacts (git-ignored)
+└── outputs/                    run metadata (JSON tracked; weights git-ignored)
 ```
 
 ## Installation
@@ -96,17 +96,25 @@ library versions).
 
 `scripts/train.py` never reads the test split.
 
-## Evaluate
+## Evaluate and compare
 
 ```powershell
 python assignment1\scripts\eval.py --run-dir assignment1\outputs\linear_fashion_mnist_seed42
 python assignment1\scripts\eval.py --run-dir assignment1\outputs\mlp_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\cnn_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\lstm_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\gru_fashion_mnist_seed42
+python assignment1\scripts\eval.py --run-dir assignment1\outputs\transformer_fashion_mnist_seed42
+
+# print all four comparison tables and regenerate curve / confusion-matrix figures
+python assignment1\scripts\compare.py --plot
 ```
 
 Loads the selected checkpoint and writes `metrics_test.json` (accuracy, macro-F1,
 per-class F1, parameter count, both inference timings, confusion matrix),
 `confusion_matrix_test.png`, and correct/incorrect prediction examples into the same run
-directory. Use `--split val` to evaluate on validation instead.
+directory. Use `--split val` to evaluate on validation instead. `scripts/compare.py` reads
+all six run directories and prints the summary tables below directly from the JSON artifacts.
 
 ## Exploratory data analysis
 
@@ -226,10 +234,10 @@ global shape, makes the pattern explicit:
   in the budget (15 / 15) with validation macro-F1 still rising, so 0.8902 and 0.8825 are
   lower bounds for those architectures, not their ceilings. The Transformer is the one most
   penalised by a fixed 15-epoch budget, since attention models trained from scratch
-  typically need the longest schedule. The CNN, by contrast, peaked at epoch 9 and
-  early-stopped at 14. **A conclusion of the form "CNN beats Transformer on Fashion-MNIST"
-  is not supported by this table**; what is supported is "CNN beats Transformer under an
-  equal and short epoch budget".
+  typically need the longest schedule. The CNN and both recurrent models, by contrast,
+  peaked at epoch 13 within the 15-epoch budget. **A conclusion of the form "CNN beats
+  Transformer on Fashion-MNIST" is not supported by this table**; what is supported is
+  "CNN beats Transformer under an equal and short epoch budget".
 - **No parameter-matched or compute-matched claim.** Section 11.2 lists a matched-budget
   comparison as an optional extension and it was not run. The models differ by 35x in
   parameter count, so the table compares six specific configurations, not six architecture
@@ -311,9 +319,9 @@ documented above as a figure for this pipeline on this machine.
 | Source code | this directory | all five mandatory models implemented |
 | Assignment 1 page | [index.html](index.html) - published at <https://thvkhang.github.io/ALearning/assignment1/> | five-model results |
 | Shared landing page | [../index.html](../index.html) - published at <https://thvkhang.github.io/ALearning/> | complete |
-| AI Usage Disclosure | [AI_USAGE.md](AI_USAGE.md), plus a summary on both pages | complete; report-level disclosure pending M2 |
+| AI Usage Disclosure | [AI_USAGE.md](AI_USAGE.md), plus a summary on both pages | complete |
 | Checkpoints | `outputs/<run_name>/best.pt`, reconstructed with the commands above | reproducible from source |
-| Full comparison script | `scripts/compare.py` | **empty stub**; tables assembled by hand from `metrics_test.json` |
+| Full comparison script | `scripts/compare.py` | complete; prints all four comparison tables and regenerates figures from `outputs/` |
 | Report PDF (`CR7_A1_Report.pdf` on the LMS) | - | M2 Final |
 | Slides | - | M2 Final |
 | YouTube video | - | M2 Final |
