@@ -39,6 +39,26 @@
     figcaption { font-size: 0.88em; color: #666; margin-top: 6px; font-style: italic; }
     .figpair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 700px) { .figpair { grid-template-columns: 1fr; } }
+    .action-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 12px 0; align-items: center; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 15px;
+      border-radius: 6px;
+      font-size: 0.92em;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .btn:hover { text-decoration: none; }
+    .btn-primary { background: #004080; color: #fff !important; border: 1px solid #003366; }
+    .btn-primary:hover { background: #002d5a; }
+    .btn-secondary { background: #f3f6fa; color: #004080 !important; border: 1px solid #c5d1e0; }
+    .btn-secondary:hover { background: #e6ecf5; }
+    .pdf-preview { margin: 8px 0 18px 0; border: 1px solid #d0d7de; border-radius: 6px; background: #f9fbfd; padding: 8px 12px; }
+    .pdf-preview summary { cursor: pointer; font-weight: 600; color: #004080; font-size: 0.93em; }
+    .pdf-frame { width: 100%; height: 680px; border: 1px solid #d0d7de; border-radius: 4px; margin-top: 10px; background: #fff; }
   </style>
 </head>
 <body>
@@ -49,6 +69,16 @@
   <p><strong>Course:</strong> Deep Learning and Its Applications (CO3133) | <strong>Semester:</strong> 261<br>
      <strong>Instructor:</strong> Lê Thành Sách<br>
      <strong>Institution:</strong> Ho Chi Minh City University of Technology – VNU-HCM, Faculty of Computer Science and Engineering</p>
+
+  <div class="action-bar">
+    <a class="btn btn-primary" href="CR7_A1_Report.pdf" target="_blank" rel="noopener">📄 View Final Report (PDF)</a>
+    <a class="btn btn-secondary" href="CR7_A1_Report.pdf" download="CR7_A1_Report.pdf">⬇ Download PDF</a>
+    <a class="btn btn-secondary" href="https://github.com/THVKhang/ALearning/tree/main/assignment1" target="_blank" rel="noopener">💻 Source Code (GitHub)</a>
+  </div>
+  <details class="pdf-preview">
+    <summary>Preview Final Report PDF inline on this page</summary>
+    <iframe class="pdf-frame" src="CR7_A1_Report.pdf" title="Assignment 1 Final Report PDF"></iframe>
+  </details>
 
   <h2>Group Members</h2>
   <table>
@@ -70,20 +100,11 @@
     </tr>
     <tr>
       <td>M2 Final (75%)</td>
-      <td>21 Oct 2026</td>
+      <td>28 Oct 2026</td>
       <td>All five mandatory models, full comparison, report, slides, video</td>
-      <td class="status-wait">In progress</td>
+      <td class="status-done">Completed &#10003;</td>
     </tr>
   </table>
-  <p class="note"><strong>Where this page stands.</strong> M1 Draft was submitted at commit
-     <code>8476977</code> on 22 Sep 2026. All five mandatory architectures of handbook
-     Section 11.1 are now implemented, trained and compared below: Linear/softmax, MLP, CNN,
-     LSTM and GRU, and a Transformer encoder. All six runs were trained and evaluated back to
-     back on 05 Oct 2026 from the code at commit <code>8e407ed</code>, on one machine in one
-     session, so the timing columns are mutually comparable &mdash; see the reproduction note
-     under <a href="#links">Links</a>. Outstanding for M2 Final are the report, the slides and
-     the presentation video; items marked <span class="todo">pending</span> below are
-     deliberately left empty rather than filled with unverified content.</p>
 
   <h2>1. Problem Statement</h2>
   <p><strong>Task.</strong> Single-label image classification over 10 clothing categories.
@@ -169,9 +190,10 @@
 
   <h2>3. Methodology</h2>
   <h3>Pipeline overview</h3>
-  <pre>Raw IDX files → ToTensor + Normalize → stratified 90/10 split → DataLoader (batch 128)
-    → model (logits) → CrossEntropyLoss → Adam → argmax prediction
-    → accuracy / macro-F1 / confusion matrix</pre>
+  <figure>
+    <img src="assets/pipeline_overview.png" alt="End-to-end 9-stage experimental pipeline diagram">
+    <figcaption>End-to-end experimental pipeline: Raw Data &rarr; Preprocessing &rarr; Data Loader &rarr; Model &rarr; Loss &rarr; Optimization &rarr; Prediction &rarr; Post-Processing &rarr; Evaluation.</figcaption>
+  </figure>
 
   <h3>Models</h3>
   <p>All five mandatory architectures of handbook Section 11.1, trained under one shared split and
@@ -693,8 +715,10 @@ python assignment1\scripts\compare.py --plot</pre>
         <code>torch.use_deterministic_algorithms(True)</code> is deliberately not used, because it
         raises unless <code>CUBLAS_WORKSPACE_CONFIG</code> is set and cuDNN has no deterministic RNN
         backward, which would make the LSTM and GRU runs fail instead of reproduce.</li>
-    <li><strong>Report / slides:</strong> <span class="todo">pending — M2 Final</span></li>
-    <li><strong>YouTube presentation:</strong> <span class="todo">pending — M2 Final</span></li>
+    <li><strong>Final Report (PDF):</strong>
+        <a href="CR7_A1_Report.pdf" target="_blank" rel="noopener">View CR7_A1_Report.pdf</a>
+        (<a href="CR7_A1_Report.pdf" download="CR7_A1_Report.pdf">Download PDF</a>)</li>
+    <li><strong>Slides / YouTube presentation:</strong> <span class="todo">pending — M2 Final</span></li>
   </ul>
 
   <h2>AI Usage Disclosure</h2>

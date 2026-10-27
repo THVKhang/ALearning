@@ -250,6 +250,12 @@ assignment2/outputs/*/*
 !assignment2/outputs/*/metrics_test.json
 !assignment2/outputs/*/midas_small.json
 !assignment2/outputs/*/summary.md
+assignment2/outputs/baseline_unet/
+assignment2/outputs/midas_frozen/
+assignment2/outputs/midas_full/
+assignment2/outputs/midas_zeroshot/
+assignment2/outputs/*.log
+assignment2/outputs/figures/
 
 assignment3/outputs/*
 !assignment3/outputs/.gitkeep

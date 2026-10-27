@@ -269,6 +269,138 @@ def plot_combined_confusion_matrices(runs, out_path):
     plt.close(fig)
 
 
+def plot_pipeline_overview(out_path):
+    """9-stage end-to-end pipeline overview diagram for Section 2.1 of the report."""
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+
+    fig, ax = plt.subplots(figsize=(14.5, 6.6), dpi=200)
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 50)
+    ax.axis("off")
+
+    c_data_bg, c_data_bd = "#EBF3F9", "#0072B2"
+    c_model_bg, c_model_bd = "#FDF2E9", "#D55E00"
+    c_eval_bg, c_eval_bd = "#EAF6F0", "#009E73"
+    ink, muted = "#1A1A1A", "#3D3D3D"
+
+    top_banners = [
+        (1.5, 44.8, 56.4, 3.6, "#F4F8FB", "#9CC2DF",
+         "STAGE GROUP I — DATA PREPARATION & INPUT REPRESENTATION", "#005A8D"),
+        (60.3, 44.8, 38.2, 3.6, "#FEF8F3", "#E8B892",
+         "STAGE GROUP II — FORWARD & LOSS COMPUTATION", "#A84600"),
+    ]
+    for bx, by, bw, bh, bg, bd, label, tc in top_banners:
+        ax.add_patch(FancyBboxPatch((bx, by), bw, bh,
+                                    boxstyle="round,pad=0.2,rounding_size=0.6",
+                                    facecolor=bg, edgecolor=bd, linewidth=1.1))
+        ax.text(bx + bw / 2, by + bh / 2, label, ha="center", va="center",
+                fontsize=8.5, fontweight="bold", color=tc)
+
+    top_boxes = [
+        (1.5, 27.5, 17.2, 15.5, c_data_bg, c_data_bd, "1. Raw Data",
+         "Fashion-MNIST corpus\n70,000 grayscale images\nResolution: $1 \\times 28 \\times 28$\n"
+         "Pixel range: $[0, 255]$\n10 balanced classes"),
+        (21.1, 27.5, 17.2, 15.5, c_data_bg, c_data_bd, "2. Preprocessing",
+         "Rescale intensities to $[0, 1]$\nStandardize ($\\mu=0.2860, \\sigma=0.3530$)\n"
+         "Input representations:\n• Flat vector $(784)$\n• 2D grid $(1,28,28)$ | Sequence $(28,28)$"),
+        (40.7, 27.5, 17.2, 15.5, c_data_bg, c_data_bd, "3. Data Loader",
+         "Stratified split (seed $= 42$):\n• Train: 54,000 (5,400/class)\n"
+         "• Validation: 6,000 (600/class)\n• Test: 10,000 (1,000/class)\nMini-batches ($B = 128$)"),
+        (60.3, 27.5, 18.0, 15.5, c_model_bg, c_model_bd, "4. Model  $f_\\theta(X)$",
+         "Five Architecture Families:\nLinear | MLP | CNN |\nLSTM & GRU | Transformer\n"
+         "Maps input batch $X$ to\nunnormalized logits $z \\in \\mathbb{R}^{B \\times 10}$"),
+        (80.7, 27.5, 17.8, 15.5, c_model_bg, c_model_bd, "5. Loss  $\\mathcal{L}(\\theta)$",
+         "Multi-class Cross-Entropy\non unnormalized logits:\n"
+         "$\\mathcal{L} = -(1/B)\\,\\Sigma \\log\\,\\mathrm{softmax}(z)_y$\nComputed on training &\nvalidation splits"),
+    ]
+
+    bot_boxes = [
+        (1.5, 5.2, 22.0, 15.5, c_model_bg, c_model_bd, "6. Optimization",
+         "Adam ($\\eta = 10^{-3}$, weight decay $= 0$)\nBudget: 15 epochs (early-stop patience $= 5$)\n"
+         "Update rule: $\\theta \\leftarrow \\theta - \\eta \\nabla_\\theta \\mathcal{L}(\\theta)$\nMonitors validation Macro-F1"),
+        (26.5, 5.2, 22.0, 15.5, c_eval_bg, c_eval_bd, "7. Prediction",
+         "Deterministic evaluation mode\n(dropout disabled, batch stats frozen)\n"
+         "Per-image class assignment:\n$\\hat{y} = \\mathrm{argmax}_{c \\in \\{0,\\dots,9\\}}\\, z_c$"),
+        (51.5, 5.2, 22.0, 15.5, c_eval_bg, c_eval_bd, "8. Post-Processing",
+         "Checkpoint selection criterion:\nRestore parameters $\\theta^*$ from epoch\n"
+         "with highest validation Macro-F1\nMap indices $\\hat{y}$ to garment categories"),
+        (76.5, 5.2, 22.0, 15.5, c_eval_bg, c_eval_bd, "9. Evaluation",
+         "Held-out Test Split ($N = 10,000$):\n• Test Accuracy & Macro-F1\n"
+         "• Per-Class F1 & Confusion Matrix\n• Upper-Body vs. Other-6 F1 Gap\n• Compute (MACs/FLOPs) & Latency"),
+    ]
+
+    bot_banners = [
+        (1.5, 0.6, 22.0, 3.4, "#FEF8F3", "#E8B892",
+         "STAGE GROUP II (CONT.) — PARAMETER UPDATE", "#A84600"),
+        (26.5, 0.6, 72.0, 3.4, "#F2F9F6", "#9CD4B8",
+         "STAGE GROUP III — MODEL SELECTION, INFERENCE & HELD-OUT TEST EVALUATION", "#007354"),
+    ]
+    for bx, by, bw, bh, bg, bd, label, tc in bot_banners:
+        ax.add_patch(FancyBboxPatch((bx, by), bw, bh,
+                                    boxstyle="round,pad=0.2,rounding_size=0.6",
+                                    facecolor=bg, edgecolor=bd, linewidth=1.1))
+        ax.text(bx + bw / 2, by + bh / 2, label, ha="center", va="center",
+                fontsize=8.3, fontweight="bold", color=tc)
+
+    def _draw_box(x, y, w, h, bg, bd, title, body):
+        ax.add_patch(FancyBboxPatch((x, y), w, h,
+                                    boxstyle="round,pad=0.25,rounding_size=0.9",
+                                    facecolor=bg, edgecolor=bd, linewidth=1.6))
+        ax.plot([x + 0.7, x + w - 0.7], [y + h - 3.4, y + h - 3.4],
+                color=bd, linewidth=0.9, alpha=0.55)
+        ax.text(x + w / 2, y + h - 1.8, title, ha="center", va="center",
+                fontsize=9.6, fontweight="bold", color=ink)
+        ax.text(x + w / 2, y + (h - 3.4) / 2, body, ha="center", va="center",
+                fontsize=7.9, color=muted, linespacing=1.35)
+
+    for box in top_boxes + bot_boxes:
+        _draw_box(*box)
+
+    for i in range(4):
+        x1 = top_boxes[i][0] + top_boxes[i][2] + 0.2
+        x2 = top_boxes[i + 1][0] - 0.2
+        y = top_boxes[i][1] + top_boxes[i][3] / 2
+        ax.add_patch(FancyArrowPatch((x1, y), (x2, y),
+                                     arrowstyle="-|>,head_length=5.5,head_width=3.2",
+                                     color="#2B2B2B", linewidth=1.7))
+
+    for i in range(3):
+        x1 = bot_boxes[i][0] + bot_boxes[i][2] + 0.2
+        x2 = bot_boxes[i + 1][0] - 0.2
+        y = bot_boxes[i][1] + bot_boxes[i][3] / 2
+        ax.add_patch(FancyArrowPatch((x1, y), (x2, y),
+                                     arrowstyle="-|>,head_length=5.5,head_width=3.2",
+                                     color="#2B2B2B", linewidth=1.7))
+
+    x_loss = top_boxes[4][0] + top_boxes[4][2] / 2
+    y_top_bot = top_boxes[4][1] - 0.25
+    x_opt = bot_boxes[0][0] + bot_boxes[0][2] / 2
+    y_bot_top = bot_boxes[0][1] + bot_boxes[0][3] + 0.25
+    y_route = 23.3
+
+    ax.plot([x_loss, x_loss, x_opt], [y_top_bot, y_route, y_route],
+            color="#D55E00", linewidth=1.8, solid_capstyle="round")
+    ax.add_patch(FancyArrowPatch((x_opt, y_route), (x_opt, y_bot_top),
+                                 arrowstyle="-|>,head_length=5.5,head_width=3.2",
+                                 color="#D55E00", linewidth=1.8))
+    ax.text(36.0, y_route, "  Backward pass ($\\nabla_\\theta \\mathcal{L}$) & epoch validation check  ",
+            ha="center", va="center", fontsize=8.0, fontweight="bold", color="#A84600",
+            bbox=dict(boxstyle="round,pad=0.3", facecolor="#FFF8F2",
+                      edgecolor="#D55E00", linewidth=1.0))
+
+    x_model = top_boxes[3][0] + top_boxes[3][2] / 2
+    ax.add_patch(FancyArrowPatch((x_model, y_route), (x_model, y_top_bot),
+                                 arrowstyle="-|>,head_length=5.2,head_width=3.0",
+                                 color="#0072B2", linewidth=1.6, linestyle="--"))
+    ax.text(x_model - 1.2, (y_route + y_top_bot) / 2 + 0.15, "Update $\\theta$",
+            ha="right", va="center", fontsize=7.9, fontweight="bold", color="#005A8D")
+
+    plt.tight_layout(pad=0.3)
+    fig.savefig(out_path, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+
 def regenerate_figures(runs, dataset, seed, export_assets=False):
     assets_dir = ROOT / "assets"
     for key, _ in MODELS:
@@ -296,6 +428,7 @@ def regenerate_figures(runs, dataset, seed, export_assets=False):
 
     if export_assets:
         assets_dir.mkdir(parents=True, exist_ok=True)
+        plot_pipeline_overview(assets_dir / "pipeline_overview.png")
         plot_combined_curves(runs, assets_dir / "curves_all_models.png")
         plot_combined_confusion_matrices(runs, assets_dir / "confusion_matrix_all_models.png")
 
