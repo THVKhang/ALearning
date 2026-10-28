@@ -56,9 +56,13 @@
     .btn-primary:hover { background: #002d5a; }
     .btn-secondary { background: #f3f6fa; color: #004080 !important; border: 1px solid #c5d1e0; }
     .btn-secondary:hover { background: #e6ecf5; }
+    .btn-youtube { background: #cc0000; color: #fff !important; border: 1px solid #990000; }
+    .btn-youtube:hover { background: #a30000; }
     .pdf-preview { margin: 8px 0 18px 0; border: 1px solid #d0d7de; border-radius: 6px; background: #f9fbfd; padding: 8px 12px; }
     .pdf-preview summary { cursor: pointer; font-weight: 600; color: #004080; font-size: 0.93em; }
     .pdf-frame { width: 100%; height: 680px; border: 1px solid #d0d7de; border-radius: 4px; margin-top: 10px; background: #fff; }
+    .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 6px; border: 1px solid #d0d7de; margin: 12px 0 20px 0; background: #000; }
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
   </style>
 </head>
 <body>
@@ -71,9 +75,13 @@
      <strong>Institution:</strong> Ho Chi Minh City University of Technology – VNU-HCM, Faculty of Computer Science and Engineering</p>
 
   <div class="action-bar">
+    <a class="btn btn-youtube" href="https://youtu.be/lFTBr2wld7Q" target="_blank" rel="noopener">▶ Watch YouTube Presentation</a>
     <a class="btn btn-primary" href="CR7_A1_Report.pdf" target="_blank" rel="noopener">📄 View Final Report (PDF)</a>
     <a class="btn btn-secondary" href="CR7_A1_Report.pdf" download="CR7_A1_Report.pdf">⬇ Download PDF</a>
     <a class="btn btn-secondary" href="https://github.com/THVKhang/ALearning/tree/main/assignment1" target="_blank" rel="noopener">💻 Source Code (GitHub)</a>
+  </div>
+  <div class="video-container">
+    <iframe src="https://www.youtube.com/embed/lFTBr2wld7Q" title="Assignment 1 – YouTube Presentation (Nhóm CR7)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
   </div>
   <details class="pdf-preview">
     <summary>Preview Final Report PDF inline on this page</summary>
@@ -718,7 +726,8 @@ python assignment1\scripts\compare.py --plot</pre>
     <li><strong>Final Report (PDF):</strong>
         <a href="CR7_A1_Report.pdf" target="_blank" rel="noopener">View CR7_A1_Report.pdf</a>
         (<a href="CR7_A1_Report.pdf" download="CR7_A1_Report.pdf">Download PDF</a>)</li>
-    <li><strong>Slides / YouTube presentation:</strong> <span class="todo">pending — M2 Final</span></li>
+    <li><strong>YouTube Presentation:</strong>
+        <a href="https://youtu.be/lFTBr2wld7Q" target="_blank" rel="noopener">Watch YouTube Presentation (https://youtu.be/lFTBr2wld7Q)</a></li>
   </ul>
 
   <h2>AI Usage Disclosure</h2>
