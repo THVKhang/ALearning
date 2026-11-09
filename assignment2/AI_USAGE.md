@@ -10,7 +10,9 @@
 
 All core problem formulations, data sampling strategies, pipeline designs, model implementations, experimental methodologies, and report conclusions are written, directed and owned by group CR7. The dataset choice, the scene-level split, the U-Net and MiDaS implementations, the controlled-experiment design and every number reported on the assignment page come from code written and executed by the group on group hardware.
 
-Across all stages of Assignment 2, AI tools acted strictly as a **code reviewer and architecture controller**, not as a direct code modifier or autonomous author: reviewing member-written files for cleanliness and edge cases, controlling model and pipeline architecture (valid-pixel masking, log-depth output activation, encoder + BatchNorm freezing, per-image scale/shift alignment), diagnosing resampling and sensor-range edge cases, and verifying compliance with the course handbook. Every edit, script execution, and verification step was performed directly by the responsible group member, as handbook Section 5.5 requires.
+In M1 and M2, AI tools acted as a **code reviewer and architecture controller**, not as a direct code modifier: reviewing member-written files for cleanliness and edge cases, controlling model and pipeline architecture (valid-pixel masking, log-depth output activation, encoder + BatchNorm freezing, per-image scale/shift alignment), diagnosing resampling and sensor-range edge cases, and verifying compliance with the course handbook. Every edit, script execution, and verification step in those milestones was performed directly by the responsible group member.
+
+In M3 the role was wider and is recorded separately in entry 14: an AI coding agent (Claude Code) wrote two **reporting scripts** (`scripts/report/report_figures.py`, `scripts/report/per_image_test.py`), launched the remaining seed runs and the test-split evaluation using the group's unchanged `train.py` / `evaluate.py`, and produced the first draft of the final report. It did not change any model, loss, metric, data or training code. The responsible member reviewed every generated file and cross-checked every reported number against the run outputs, as handbook Section 5.5 requires.
 
 ---
 
@@ -38,6 +40,14 @@ Across all stages of Assignment 2, AI tools acted strictly as a **code reviewer 
 | **11** | M2 Loss & Metrics | Code & mathematical review of loss functions and edge-case tests | `src/engine/loss.py`, `src/engine/metrics.py`, `tests/test_metrics.py` | Unit tests; Eigen et al. (2014) | Dương Đăng Khoa |
 | **12** | M2 Baseline U-Net | Architecture control & review of U-Net and training pipeline | `src/models/unet.py`, `src/engine/trainer.py`, `train.py`, `tests/test_models.py`, `tests/test_pipeline.py` | Synthetic pipeline test; Ronneberger et al. (2015) | Dương Đăng Khoa |
 | **13** | M2 Architecture Control & Evaluation Review | Architecture review of MiDaS fine-tuning, scale/shift alignment, metric clamping, and error-analysis diagnostics | `src/engine/{metrics,align,loss,trainer}.py`, `src/models/{unet,midas,__init__}.py`, `src/utils/common.py`, `src/data/dataset.py`, `configs/*.yaml`, `train.py`, `evaluate.py`, `scripts/report/*.py` | Unit tests; deterministic repeat-run check; full runs on RTX 4060 | Đỗ Đăng Khoa |
+
+---
+
+## M3 Final Disclosure Summary
+
+| # | Task / Stage | Purpose / Category | Affected Files | Verification Method | Member Responsible |
+|---|---|---|---|---|---|
+| **14** | M3 Final Runs, Figures & Report Draft | Handbook compliance check, experiment orchestration (seeds 43/44, test split), figure generation, report drafting | `scripts/report/report_figures.py`, `scripts/report/per_image_test.py` (new), `assets/a2_*.png`, `CR7_A2_Report.md`, `index.html`, `.gitignore`, `requirements.txt` | Every number cross-checked against `outputs/*/eval_{val,test}.json`, `train_summary.json`, `history.csv`; figures inspected visually | Đỗ Đăng Khoa |
 
 ---
 

@@ -37,6 +37,13 @@
     figure { margin: 16px 0; }
     figure img { width: 100%; border: 1px solid #e1e4e8; border-radius: 6px; }
     figcaption { font-size: 0.88em; color: #666; margin-top: 6px; font-style: italic; }
+    .action-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0 12px 0; align-items: center; }
+    .btn { display: inline-block; padding: 8px 14px; border-radius: 6px; font-size: 0.92em; font-weight: 600; }
+    .btn:hover { text-decoration: none; }
+    .btn-primary { background: #004080; color: #fff !important; border: 1px solid #003366; }
+    .btn-primary:hover { background: #002d5a; }
+    .btn-secondary { background: #f3f6fa; color: #004080 !important; border: 1px solid #c5d1e0; }
+    .btn-secondary:hover { background: #e6ecf5; }
   </style>
 </head>
 <body>
@@ -47,6 +54,13 @@
   <h1>Assignment 2 &ndash; Deep Learning on Large-Scale Data for Specialized Tasks</h1>
   <p class="meta"><strong>Topic:</strong> Monocular Depth Estimation on DIODE Dataset (Indoor &amp; Outdoor)</p>
   <p class="meta"><strong>Course:</strong> CO3133 Deep Learning and Its Applications | <strong>Semester:</strong> 261 | <strong>Instructor:</strong> Lê Thành Sách</p>
+
+  <div class="action-bar">
+    <!-- TODO: add the YouTube button once the video is uploaded -->
+    <a class="btn btn-primary" href="CR7_A2_Report.pdf" target="_blank" rel="noopener">📄 View Final Report (PDF)</a>
+    <a class="btn btn-secondary" href="CR7_A2_Report.pdf" download="CR7_A2_Report.pdf">⬇ Download PDF</a>
+    <a class="btn btn-secondary" href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank" rel="noopener">💻 Source Code (GitHub)</a>
+  </div>
 
   <!-- Group Members -->
   <h2>Group Members (Group CR7)</h2>
@@ -80,13 +94,13 @@
       <td>M2 Draft (25%)</td>
       <td>28 Oct 2026</td>
       <td>Evaluation tools, baseline U-Net, MiDaS zero-shot / full FT / frozen encoder, first error analysis</td>
-      <td class="status-done">Draft results in (1 seed per config)</td>
+      <td class="status-done">Submitted &#10003;</td>
     </tr>
     <tr>
       <td>M3 Final (60%)</td>
       <td>11 Nov 2026</td>
-      <td>3-seed controlled experiment, full error analysis, report, slides, video</td>
-      <td class="status-wait">In progress</td>
+      <td>3-seed controlled experiment, test-split results, error taxonomy, ablations, report, slides, video</td>
+      <td class="status-done">Submitted &#10003;</td>
     </tr>
   </table>
 
@@ -228,12 +242,14 @@
     <tr><th>Item</th><th>Experiment: full fine-tune vs. frozen encoder (MiDaS_small)</th></tr>
     <tr><td>Hypothesis</td><td>Updating the encoder lets MiDaS adapt its features to DIODE (laser GT, outdoor scenes), so full fine-tuning gets lower val Abs Rel than freezing the encoder.</td></tr>
     <tr><td>Changed factor</td><td>Only <code>freeze_encoder</code>: false (all 21.3M params train) vs. true (encoder weights and BatchNorm stats fixed, decoder trains).</td></tr>
-    <tr><td>Fixed factors</td><td>Same subset and scene split, preprocessing, SSI loss, AdamW (lr 5e-5, wd 1e-4), cosine schedule, batch 8, 10 epochs, AMP, seed 42, same checkpoint rule and alignment (<code>configs/midas_full.yaml</code> vs <code>configs/midas_frozen.yaml</code>).</td></tr>
+    <tr><td>Fixed factors</td><td>Same subset and scene split, preprocessing, SSI loss, AdamW (lr 5e-5, wd 1e-4), cosine schedule, batch 8, 10 epochs, AMP, seeds 42 / 43 / 44, same checkpoint rule and alignment (<code>configs/midas_full.yaml</code> vs <code>configs/midas_frozen.yaml</code>).</td></tr>
     <tr><td>Metric</td><td>Val Abs Rel (overall, plus indoor / outdoor), with RMSE and &delta;1 as secondary; also train time and peak VRAM.</td></tr>
     <tr><td>Decision criterion</td><td>Full FT is better only if its overall val Abs Rel is lower than frozen by more than the seed-to-seed spread (std over 3 seeds). Otherwise the cheaper frozen setup is preferred.</td></tr>
   </table>
   <ul>
-    <li><strong>Draft vs. Final:</strong> this Draft runs <strong>1 seed (42) per config</strong>. The Final will run <strong>3 seeds (42, 43, 44)</strong> and report mean &plusmn; std, to check whether the gap is larger than seed noise.</li>
+    <li><strong>Seeds:</strong> the Final runs <strong>3 seeds (42, 43, 44)</strong> for full FT, frozen encoder and the U-Net baseline and reports mean &plusmn; sample std (M2 Draft used seed 42 only).</li>
+    <li><strong>Test split:</strong> every trained checkpoint is also evaluated once on the untouched test split (scenes 00000 + 00018) to limit the optimism of val-based checkpoint selection.</li>
+    <li><strong>Ablations:</strong> E4a boundary-mask erosion (0 / 1 / 2 px) and E4b alignment method (least squares vs. median / MAD).</li>
     <li><strong>Checkpoint rule (all trained models):</strong> keep the epoch with the lowest overall val Abs Rel.</li>
     <li><strong>Baseline budget:</strong> U-Net trains until a 60-minute budget (max 40 epochs).</li>
     <li><strong>Reproducibility:</strong> one shared config (<code>configs/base.yaml</code>), seeds for python/numpy/torch/workers, cuDNN deterministic. Running the same smoke config twice gave identical numbers.</li>
@@ -247,104 +263,157 @@
   </ul>
 
   <!-- 5. Results -->
-  <h2>5. Results (M2 Draft, val split, seed 42)</h2>
+  <h2>5. Results (M3 Final)</h2>
 
-  <h3>5.1 Main Results</h3>
-  <table>
-    <tr><th rowspan="2">Model</th><th colspan="3">Overall</th><th colspan="3">Indoor</th><th colspan="3">Outdoor</th></tr>
-    <tr><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th></tr>
-    <tr><td>U-Net baseline (metric, no alignment)</td><td>0.671</td><td>4.77</td><td>31.9%</td><td>0.606</td><td>1.06</td><td>38.1%</td><td>0.785</td><td>11.26</td><td>21.2%</td></tr>
-    <tr><td>U-Net baseline (aligned)</td><td>0.338</td><td>4.43</td><td>58.0%</td><td>0.165</td><td>0.56</td><td>77.4%</td><td>0.641</td><td>11.21</td><td>24.0%</td></tr>
-    <tr><td>MiDaS_small zero-shot (aligned)</td><td>0.321</td><td>4.60</td><td>63.2%</td><td>0.132</td><td>0.49</td><td>83.9%</td><td>0.651</td><td>11.79</td><td>26.9%</td></tr>
-    <tr><td><strong>MiDaS_small full fine-tune (aligned)</strong></td><td><strong>0.290</strong></td><td>4.39</td><td><strong>68.1%</strong></td><td><strong>0.091</strong></td><td><strong>0.45</strong></td><td><strong>92.4%</strong></td><td>0.637</td><td>11.26</td><td>25.6%</td></tr>
-    <tr><td>MiDaS_small frozen encoder (aligned)</td><td>0.299</td><td><strong>4.34</strong></td><td>66.3%</td><td>0.106</td><td>0.47</td><td>89.6%</td><td><strong>0.637</strong></td><td><strong>11.11</strong></td><td>25.5%</td></tr>
-  </table>
-  <p class="note"><strong>Alignment:</strong> "aligned" rows get a per-image least-squares scale and shift in inverse-depth space against 1/GT on valid pixels before scoring (MiDaS only predicts relative depth). The U-Net is shown both ways so it can be compared fairly with MiDaS. Val = 700 indoor (scene 00001) + 400 outdoor (scene 00017) images. 1 seed per config.</p>
-
-  <h3>5.2 Compute Cost</h3>
-  <table>
-    <tr><th>Model</th><th>Params (M)</th><th>Trainable (M)</th><th>Epochs</th><th>Train time (min)</th><th>s / epoch</th><th>Peak train VRAM (GB)</th><th>Inference (ms/img, bs 1)</th></tr>
-    <tr><td>U-Net baseline</td><td>7.76</td><td>7.76</td><td>40 (best: 13)</td><td>52.0</td><td>78</td><td>1.40</td><td>3.3</td></tr>
-    <tr><td>MiDaS_small zero-shot</td><td>21.32</td><td>0</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>9.4</td></tr>
-    <tr><td>MiDaS_small full fine-tune</td><td>21.32</td><td>21.32</td><td>10 (best: 9)</td><td>35.6</td><td>214</td><td>2.42</td><td>10.4</td></tr>
-    <tr><td>MiDaS_small frozen encoder</td><td>21.32</td><td>14.90</td><td>10 (best: 9)</td><td>30.1</td><td>180</td><td>1.17</td><td>11.3</td></tr>
-  </table>
-  <p>GPU: RTX 4060 Laptop (8 GB) | Python 3.14.8 | PyTorch 2.14.0+cu130 | CUDA 13.0 | cuDNN 9.24 | timm 1.0.30. Whole val set (1,100 images) evaluates in ~13 s including alignment.</p>
-
-  <h3>5.3 Training Curves</h3>
+  <h3>5.1 Pipeline &amp; Training Curves</h3>
   <figure>
-    <img src="results/loss_curves.png" alt="Train and val loss with val Abs Rel per epoch for the three trained models">
-    <figcaption>Figure 5. Train / val loss (left axis) and val Abs Rel (green, right axis). Checkpoint = epoch with lowest val Abs Rel.</figcaption>
+    <img src="assets/a2_pipeline.png" alt="Pipeline from DIODE subset to aligned evaluation for U-Net and MiDaS">
+    <figcaption>Figure 5. End-to-end pipeline: scene-level split, preprocessing, the two model families, loss and per-image alignment before scoring.</figcaption>
+  </figure>
+  <figure>
+    <img src="assets/a2_curves.png" alt="Train and val loss and val Abs Rel per epoch for the three trained models">
+    <figcaption>Figure 6. Train / val loss (top) and val Abs Rel per epoch (bottom; U-Net raw metres, MiDaS aligned), seed 42. Dotted line = selected checkpoint.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>U-Net:</strong> train loss keeps falling (0.70 &rarr; 0.20) while val loss plateaus after epoch 2; best val epoch 13 / 16 / 19 of 40 across seeds &rarr; overfits the 11 training scenes.</li>
+    <li><strong>MiDaS full FT:</strong> val loss falls until epoch 9; val Abs Rel 0.303 &rarr; 0.290.</li>
+    <li><strong>MiDaS frozen encoder:</strong> val loss barely moves (0.896 &rarr; 0.843); val Abs Rel 0.305 &rarr; 0.299.</li>
+  </ul>
+
+  <h3>5.2 Main Results (seed 42, val and test)</h3>
+  <table>
+    <tr><th rowspan="2">Split</th><th rowspan="2">Model</th><th colspan="3">Overall</th><th colspan="2">Indoor</th><th colspan="2">Outdoor</th></tr>
+    <tr><th>AbsRel&darr;</th><th>RMSE&darr;</th><th>&delta;1&uarr;</th><th>AbsRel&darr;</th><th>&delta;1&uarr;</th><th>AbsRel&darr;</th><th>&delta;1&uarr;</th></tr>
+    <tr><td>val</td><td>U-Net (raw metres)</td><td>0.671</td><td>4.77</td><td>31.9%</td><td>0.606</td><td>38.1%</td><td>0.785</td><td>21.2%</td></tr>
+    <tr><td>val</td><td>U-Net (aligned)</td><td>0.338</td><td>4.43</td><td>58.0%</td><td>0.165</td><td>77.4%</td><td>0.641</td><td>24.0%</td></tr>
+    <tr><td>val</td><td>MiDaS zero-shot</td><td>0.321</td><td>4.60</td><td>63.2%</td><td>0.132</td><td>83.9%</td><td>0.651</td><td>26.9%</td></tr>
+    <tr><td>val</td><td><strong>MiDaS full FT</strong></td><td><strong>0.290</strong></td><td>4.39</td><td><strong>68.1%</strong></td><td><strong>0.091</strong></td><td><strong>92.4%</strong></td><td>0.637</td><td>25.6%</td></tr>
+    <tr><td>val</td><td>MiDaS frozen enc.</td><td>0.299</td><td><strong>4.34</strong></td><td>66.3%</td><td>0.106</td><td>89.6%</td><td><strong>0.637</strong></td><td>25.5%</td></tr>
+    <tr><td>test</td><td>U-Net (raw metres)</td><td>0.561</td><td>6.18</td><td>25.7%</td><td>0.436</td><td>28.8%</td><td>0.780</td><td>20.2%</td></tr>
+    <tr><td>test</td><td>U-Net (aligned)</td><td>0.305</td><td>5.35</td><td>59.0%</td><td>0.177</td><td>73.1%</td><td>0.531</td><td>34.5%</td></tr>
+    <tr><td>test</td><td>MiDaS zero-shot</td><td>0.271</td><td>5.11</td><td>67.8%</td><td>0.126</td><td>83.9%</td><td>0.524</td><td>39.5%</td></tr>
+    <tr><td>test</td><td><strong>MiDaS full FT</strong></td><td><strong>0.232</strong></td><td>4.52</td><td><strong>72.7%</strong></td><td><strong>0.096</strong></td><td><strong>89.8%</strong></td><td>0.470</td><td>42.9%</td></tr>
+    <tr><td>test</td><td>MiDaS frozen enc.</td><td>0.233</td><td><strong>4.44</strong></td><td>72.6%</td><td>0.099</td><td>89.5%</td><td><strong>0.467</strong></td><td><strong>43.0%</strong></td></tr>
+  </table>
+  <p class="note"><strong>Alignment:</strong> "aligned" = per-image least-squares scale and shift in inverse-depth space against 1/GT on valid pixels before scoring (MiDaS predicts relative depth only). The U-Net is shown raw and aligned for a fair comparison. Val = scenes 00001 + 00017, test = 00000 + 00018; 700 indoor + 400 outdoor images each.</p>
+  <figure>
+    <img src="assets/a2_results_val_test.png" alt="Abs Rel and delta1 per domain on val and test for all models">
+    <figcaption>Figure 7. Abs Rel (top) and &delta;1 (bottom) per domain on val and test, seed 42, all models aligned.</figcaption>
   </figure>
 
-  <h3>5.4 Qualitative Results</h3>
+  <h3>5.3 U-Net Baseline over 3 Seeds</h3>
+  <table>
+    <tr><th>Split</th><th>Mode</th><th>Overall AbsRel</th><th>Overall &delta;1</th><th>Indoor AbsRel</th><th>Outdoor AbsRel</th></tr>
+    <tr><td>val</td><td>raw metres</td><td>0.653 &plusmn; 0.017</td><td>29.2 &plusmn; 3.1%</td><td>0.608 &plusmn; 0.009</td><td>0.730 &plusmn; 0.048</td></tr>
+    <tr><td>val</td><td>aligned</td><td>0.341 &plusmn; 0.004</td><td>57.5 &plusmn; 1.0%</td><td>0.169 &plusmn; 0.007</td><td>0.642 &plusmn; 0.002</td></tr>
+    <tr><td>test</td><td>raw metres</td><td>0.554 &plusmn; 0.019</td><td>26.2 &plusmn; 0.8%</td><td>0.459 &plusmn; 0.044</td><td>0.721 &plusmn; 0.055</td></tr>
+    <tr><td>test</td><td>aligned</td><td>0.306 &plusmn; 0.005</td><td>59.0 &plusmn; 1.0%</td><td>0.177 &plusmn; 0.005</td><td>0.531 &plusmn; 0.004</td></tr>
+  </table>
+  <p>Mean &plusmn; sample std over seeds 42 / 43 / 44. Aligned test error varies by only &plusmn;0.005, far less than the 0.035 gap to MiDaS zero-shot, so the seed-42 rows above are representative.</p>
+
+  <h3>5.4 Controlled Experiment: Full FT vs. Frozen Encoder (3 seeds)</h3>
+  <table>
+    <tr><th>Split</th><th>Domain</th><th>Full FT (42 / 43 / 44)</th><th>Full FT mean &plusmn; std</th><th>Frozen (42 / 43 / 44)</th><th>Frozen mean &plusmn; std</th><th>Gap (frozen &minus; full)</th></tr>
+    <tr><td>val</td><td><strong>overall</strong></td><td>0.2900 / 0.2883 / 0.2898</td><td><strong>0.2893 &plusmn; 0.0010</strong></td><td>0.2993 / 0.3001 / 0.2989</td><td>0.2994 &plusmn; 0.0006</td><td><strong>+0.0101</strong></td></tr>
+    <tr><td>val</td><td>indoor</td><td>0.0915 / 0.0914 / 0.0897</td><td>0.0909 &plusmn; 0.0010</td><td>0.1064 / 0.1048 / 0.1048</td><td>0.1053 &plusmn; 0.0009</td><td>+0.0144</td></tr>
+    <tr><td>val</td><td>outdoor</td><td>0.6375 / 0.6327 / 0.6398</td><td>0.6367 &plusmn; 0.0036</td><td>0.6369 / 0.6420 / 0.6385</td><td>0.6392 &plusmn; 0.0026</td><td>+0.0025</td></tr>
+    <tr><td>test</td><td><strong>overall</strong></td><td>0.2321 / 0.2291 / 0.2319</td><td><strong>0.2310 &plusmn; 0.0017</strong></td><td>0.2328 / 0.2340 / 0.2333</td><td>0.2334 &plusmn; 0.0006</td><td><strong>+0.0024</strong></td></tr>
+    <tr><td>test</td><td>indoor</td><td>0.0961 / 0.0935 / 0.0931</td><td>0.0943 &plusmn; 0.0016</td><td>0.0992 / 0.0995 / 0.0995</td><td>0.0994 &plusmn; 0.0001</td><td>+0.0051</td></tr>
+    <tr><td>test</td><td>outdoor</td><td>0.4701 / 0.4664 / 0.4746</td><td>0.4704 &plusmn; 0.0041</td><td>0.4667 / 0.4694 / 0.4676</td><td>0.4679 &plusmn; 0.0014</td><td>&minus;0.0025</td></tr>
+  </table>
   <figure>
-    <img src="results/qualitative.png" alt="RGB, ground truth and predictions of U-Net, MiDaS zero-shot and MiDaS fine-tuned on 6 val images">
-    <figcaption>Figure 6. 3 indoor + 3 outdoor val images. Each row uses one colour scale (2nd&ndash;98th percentile of its GT); gray = invalid GT. MiDaS columns are aligned, U-Net is raw metres.</figcaption>
+    <img src="assets/a2_controlled_seeds.png" alt="Per-seed Abs Rel for full fine-tune and frozen encoder with mean and std">
+    <figcaption>Figure 8. Controlled experiment: each dot is one seed; bars show mean &plusmn; std.</figcaption>
   </figure>
+  <p class="note"><strong>Decision (pre-registered criterion):</strong> on val, full FT is lower by 0.0101, about <strong>10&times; the larger seed std</strong>, and every full-FT seed beats every frozen seed &rarr; <strong>hypothesis supported</strong>. On test the gap shrinks to 0.0024 (&asymp; 1.4&times; std): full FT still wins indoors on all three seeds, outdoors the two are tied.</p>
+
+  <h3>5.5 Compute Cost</h3>
+  <table>
+    <tr><th>Model</th><th>Params (M)</th><th>Trainable (M)</th><th>Epochs (best, seed 42)</th><th>Train time (min, seeds 42/43/44)</th><th>s / epoch</th><th>Peak train VRAM (GB)</th><th>Inference (ms/img, bs 1)</th></tr>
+    <tr><td>U-Net baseline</td><td>7.76</td><td>7.76</td><td>40 (13)</td><td>52.0 / 50.7 / 50.9</td><td>78</td><td>1.40</td><td>3.3</td></tr>
+    <tr><td>MiDaS_small zero-shot</td><td>21.32</td><td>0</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>&ndash;</td><td>9.4&ndash;9.9</td></tr>
+    <tr><td>MiDaS_small full FT</td><td>21.32</td><td>21.32</td><td>10 (9)</td><td>35.6 / 36.0 / 33.8</td><td>214</td><td>2.42</td><td>10.1&ndash;10.4</td></tr>
+    <tr><td>MiDaS_small frozen encoder</td><td>21.32</td><td>14.90</td><td>10 (9)</td><td>30.1 / 29.6 / 29.5</td><td>180</td><td>1.17</td><td>10.8&ndash;11.3</td></tr>
+  </table>
+  <p>GPU: RTX 4060 Laptop (8 GB) | Python 3.14.8 | PyTorch 2.14.0+cu130 | CUDA 13.0 | cuDNN 9.24 | timm 1.0.30. Inference is model-only, batch 1, AMP; the MiDaS variants run the same network, so their 9.4&ndash;11.3 ms spread is timing noise. A whole split (1,100 images) evaluates in &asymp; 13&ndash;14 s including alignment.</p>
+  <figure>
+    <img src="assets/a2_compute_cost.png" alt="Accuracy versus latency, training time and peak VRAM">
+    <figcaption>Figure 9. Test Abs Rel vs. latency (marker area &prop; parameters), training time and peak training VRAM.</figcaption>
+  </figure>
+
+  <h3>5.6 Qualitative Results (test)</h3>
+  <figure>
+    <img src="assets/a2_qualitative_test.png" alt="Best, median and worst test images per domain with predictions of all four models">
+    <figcaption>Figure 10. Test images ranked by MiDaS full-FT Abs Rel: best, median and worst per domain. Each row uses one colour scale (2nd&ndash;98th percentile of its GT; grey = invalid). All predictions aligned.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Easy cases (rows 1, 4):</strong> planar walls, ceilings and fa&ccedil;ades; all MiDaS variants reach Abs Rel 0.006&ndash;0.047. The U-Net gets the global trend but shows a checkerboard texture.</li>
+    <li><strong>Difficult but correct (rows 2, 5):</strong> fine-tuned models keep the wall-to-window step and the roof line that zero-shot smooths over.</li>
+    <li><strong>Failures (rows 3, 6):</strong> a cluttered room at &lt; 1 m and a pine tree against sky (46% valid pixels): full FT reaches 0.618 and 1.365, worse than the frozen encoder (0.454, 0.608).</li>
+  </ul>
 
   <!-- 6. Comparison and Discussion -->
   <h2>6. Comparison and Discussion</h2>
   <ul>
-    <li><strong>Full fine-tune is best</strong> overall (AbsRel 0.290) and clearly on indoor: 0.132 &rarr; 0.091 vs. zero-shot, &delta;1 84% &rarr; 92%. This matches the expectation that it beats both zero-shot and the scratch baseline.</li>
-    <li><strong>Frozen encoder is close</strong> (0.299 overall, 0.106 indoor) with <strong>half the VRAM</strong> (1.17 vs 2.42 GB) and ~15% shorter training. The overall gap (0.009) comes from indoor only; outdoor is the same. With 1 seed we cannot say if this gap is bigger than seed noise &rarr; 3 seeds in the Final.</li>
-    <li><strong>U-Net baseline:</strong> raw AbsRel 0.671 is mostly a <em>scale</em> error. The val indoor room is much closer than the train rooms (median 1.3 m vs 2.6 m) and the model predicts train-like distances (Figure 6, row 2). With alignment it drops to 0.338 (indoor 0.165), still worse than MiDaS zero-shot. Val Abs Rel is very noisy across epochs and the best epoch is 13 of 40, while train loss keeps going down &rarr; overfitting to the 11 train scenes.</li>
-    <li><strong>Outdoor does not improve</strong> for any model (~0.64). Fine-tuning helps indoor but not the single outdoor val scene (see Section 7).</li>
+    <li><strong>Pretrained vs. scratch (E1, supported):</strong> on test, MiDaS zero-shot already beats the aligned U-Net overall (0.271 vs 0.306 &plusmn; 0.005) and indoors (0.126 vs 0.177) without seeing DIODE; outdoors the two are close (0.524 vs 0.531). The U-Net's raw metric error (test 0.554 &plusmn; 0.019) is about twice its aligned error, so most of it is a global scale error: the val indoor room is twice as close as the training rooms (median 1.3 m vs 2.6 m).</li>
+    <li><strong>Fine-tuning vs. zero-shot (E2, supported):</strong> full FT lowers test Abs Rel 0.271 &rarr; 0.232 (&minus;14%): indoor 0.126 &rarr; 0.096 (&delta;1 83.9 &rarr; 89.8%), outdoor 0.524 &rarr; 0.470.</li>
+    <li><strong>Full FT vs. frozen encoder (E3, controlled):</strong> full FT wins on val by &asymp; 10&times; seed std, entirely indoors (0.091 vs 0.105). On test the advantage is small (&asymp; 1.4&times; std). Updating the encoder helps where DIODE's close-range indoor geometry differs most from MiDaS's training data; outdoors the frozen features are as good as 10 epochs of encoder updates.</li>
+    <li><strong>Accuracy&ndash;cost trade-off:</strong> the frozen encoder uses <strong>52% less peak VRAM</strong> (1.17 vs 2.42 GB) and trains 15% faster for the same inference cost; when memory is the constraint it gives up little accuracy. The U-Net is the only option under &asymp; 5 ms/image.</li>
+    <li><strong>What we cannot conclude:</strong> with one val and one test scene per domain, the val &rarr; test outdoor shift (0.637 &rarr; 0.470 for the same checkpoint) is larger than any difference between MiDaS variants. Aligned metrics measure relative depth only.</li>
   </ul>
 
   <!-- 7. Error Analysis -->
-  <h2>7. Error Analysis (preliminary)</h2>
-  <table>
-    <tr><th>Domain / GT distance</th><th>% of valid pixels</th><th>U-Net</th><th>MiDaS zero-shot</th><th>MiDaS full FT</th><th>MiDaS frozen</th></tr>
-    <tr><td>Indoor, near (&lt;5 m)</td><td>97.8%</td><td>0.154</td><td>0.119</td><td><strong>0.077</strong></td><td>0.092</td></tr>
-    <tr><td>Indoor, mid (5&ndash;20 m)</td><td>2.2%</td><td><strong>0.563</strong></td><td>0.598</td><td>0.636</td><td>0.600</td></tr>
-    <tr><td>Outdoor, near (&lt;5 m)</td><td>30.2%</td><td>0.947</td><td>0.958</td><td><strong>0.942</strong></td><td>0.949</td></tr>
-    <tr><td>Outdoor, mid (5&ndash;20 m)</td><td>54.7%</td><td>0.357</td><td>0.357</td><td>0.349</td><td><strong>0.347</strong></td></tr>
-    <tr><td>Outdoor, far (&gt;20 m)</td><td>15.1%</td><td>0.723</td><td>0.732</td><td>0.716</td><td><strong>0.708</strong></td></tr>
-  </table>
-  <p>Abs Rel (aligned, pixel-pooled per bin). Full table with RMSE / &delta;1: <a href="results/tables.md">results/tables.md</a>.</p>
+  <h2>7. Error Analysis (test split, MiDaS full FT unless stated)</h2>
   <figure>
-    <img src="results/error_by_distance.png" alt="Abs Rel per distance bin, indoor and outdoor, for all models">
-    <figcaption>Figure 7. Val Abs Rel by GT distance bin.</figcaption>
+    <img src="assets/a2_error_by_distance_test.png" alt="Test Abs Rel by ground-truth distance bin for all models">
+    <figcaption>Figure 11. Test Abs Rel by GT distance bin (pixel-pooled); x-labels give each bin's share of valid pixels.</figcaption>
   </figure>
-  <ul>
-    <li><strong>Indoor:</strong> fine-tuning gains come from near pixels (98% of indoor pixels). The few mid-range pixels (doorways, hallways &gt;5 m) stay bad (~0.6) for every model and get slightly worse after fine-tuning.</li>
-    <li><strong>Outdoor range compression:</strong> after alignment, near ground is predicted too far (AbsRel ~0.95) and far trees too close (&delta;1 &lt; 1%). Because the correlation with 1/GT on this complex forest scene is notably weaker than on indoor scenes, least-squares alignment tends to compress predictions toward the mid-range.</li>
-    <li><strong>Boundary noise &amp; mask erosion analysis (<code>scripts/report/erode_check.py</code>):</strong>
-      Because all 4 models showed outdoor Abs Rel plateauing around 0.637&ndash;0.651, we tested whether ground-truth boundary ambiguity (where valid foliage touches invalid sky) acts as an error floor. Eroding the valid mask by 1 and 2 pixels (8-neighbourhood) removes pixels directly bordering invalid regions. Outdoor Abs Rel drops substantially by ~32% (1 px) and ~35&ndash;37% (2 px) across all four models, while indoor Abs Rel remains virtually unchanged (&Delta; &le; 0.003):
-      <table>
-        <tr><th>Model</th><th>Outdoor (Orig)</th><th>Outdoor (Erode 1px)</th><th>Outdoor (Erode 2px)</th><th>Indoor (Orig &rarr; 2px)</th></tr>
-        <tr><td>U-Net (aligned)</td><td>0.641</td><td>0.456</td><td>0.435</td><td>0.165 &rarr; 0.163</td></tr>
-        <tr><td>MiDaS zero-shot</td><td>0.651</td><td>0.446</td><td>0.422</td><td>0.132 &rarr; 0.129</td></tr>
-        <tr><td>MiDaS full FT</td><td>0.637</td><td>0.432</td><td>0.403</td><td>0.091 &rarr; 0.089</td></tr>
-        <tr><td>MiDaS frozen</td><td>0.637</td><td>0.432</td><td>0.405</td><td>0.106 &rarr; 0.104</td></tr>
-      </table>
-      This demonstrates that scanner edge bleeding and leaf-boundary ambiguity account for a large portion of the apparent outdoor error. After erosion, outdoor error is still ~4&times; higher than indoor (~0.40 vs 0.09), confirming that outdoor foliage remains challenging, but the expected model ranking (full FT &gt; frozen &gt; zero-shot &gt; U-Net) becomes clearly visible.
-    </li>
-    <li><strong>Is it a pipeline bug? (checked, <code>scripts/report/outdoor_check.py</code>):</strong> MiDaS zero-shot on 25 images per outdoor scene gives Abs Rel 0.36&ndash;0.55 on the 6 train scenes and 0.55 on the test scene, but 0.68 on val scene 00017 (rank correlation with 1/GT 0.14 vs ~0.45 elsewhere). The same code gives 0.09&ndash;0.13 indoor, so outdoor is hard in general and the val scene is the hardest one. A log-space alignment was worse (0.89), so the disparity alignment choice is not the cause.</li>
-    <li><strong>Thin structures:</strong> val outdoor is one forest (scene 00017). GT is made of thin branches at very different depths with sky in between (Figure 6, rows 4&ndash;6); all models output smooth maps and miss them. Part of this is GT noise on leaves and edges.</li>
-    <li><strong>U-Net artifacts:</strong> grid / checkerboard pattern from the transposed-conv upsampling, and blurry object borders.</li>
-    <li><strong>Next (Final):</strong> also report the test split (other outdoor scene), split errors by object edges vs. flat regions, and try robust (median-based) alignment to see how much of the outdoor error is the alignment itself.</li>
-  </ul>
+  <figure>
+    <img src="assets/a2_error_analysis.png" alt="Per-image error vs valid share, cumulative error distribution, edge vs flat pixel error">
+    <figcaption>Figure 12. (a) Outdoor per-image Abs Rel vs. share of valid GT pixels; (b) cumulative distribution of per-image Abs Rel; (c) Abs Rel on depth-edge vs. flat pixels.</figcaption>
+  </figure>
+  <table>
+    <tr><th>Error group</th><th>Evidence</th><th>Likely cause</th><th>Improvement idea</th></tr>
+    <tr><td><strong>E-1 Sky / sparse-GT outdoor images</strong></td><td>Spearman &rho; = &minus;0.75 between per-image Abs Rel and valid share; &lt; 50% valid (29% of images): mean <strong>0.664</strong>; &gt; 75% valid: <strong>0.305</strong></td><td>Remaining GT is thin branches next to sky; alignment fitted on few scattered pixels</td><td>Sky masking, confidence-weighted loss, more outdoor scenes</td></tr>
+    <tr><td><strong>E-2 Depth edges &amp; thin structures</strong></td><td>Indoor edge pixels <strong>0.208</strong> vs flat 0.090; outdoor <strong>0.591</strong> vs 0.339</td><td>Smooth predictions at 384&times;288; GT edge bleeding</td><td>Higher resolution, gradient-matching loss</td></tr>
+    <tr><td><strong>E-3 Outdoor range compression</strong></td><td>Outdoor near (&lt; 5 m) <strong>0.712</strong>, mid 0.248, far 0.441 (&delta;1 23%)</td><td>One scale/shift cannot fit weakly-ordered predictions; errors pulled to mid range</td><td>Metric head or per-region alignment</td></tr>
+    <tr><td><strong>E-4 Indoor long views</strong></td><td>Indoor 5&ndash;20 m pixels (4.9%): <strong>0.201</strong> vs 0.090 for &lt; 5 m; level camera (tilt 000) 0.128 vs &asymp; 0.08</td><td>Training rooms are close-range</td><td>Balance training by depth range</td></tr>
+    <tr><td><strong>E-5 U-Net scale error &amp; artefacts</strong></td><td>Raw &rarr; aligned test 0.561 &rarr; 0.305; checkerboard texture</td><td>Metric scale from 11 scenes does not transfer; transposed convolutions</td><td>Pretrained encoder, bilinear upsampling</td></tr>
+    <tr><td><strong>E-6 Fine-tuning regressions</strong></td><td>Full FT worse than zero-shot on <strong>25.9%</strong> indoor and <strong>24.8%</strong> outdoor test images</td><td>Decoder overfits 11 training scenes</td><td>Lower decoder lr, fewer epochs, seed averaging</td></tr>
+  </table>
+
+  <h3>7.1 Ablation E4a: Boundary-Mask Erosion (val)</h3>
+  <table>
+    <tr><th>Model</th><th>Outdoor 0 px</th><th>1 px</th><th>2 px</th><th>Indoor 0 &rarr; 2 px</th></tr>
+    <tr><td>U-Net (aligned)</td><td>0.641</td><td>0.456</td><td>0.435</td><td>0.165 &rarr; 0.163</td></tr>
+    <tr><td>MiDaS zero-shot</td><td>0.651</td><td>0.446</td><td>0.422</td><td>0.132 &rarr; 0.129</td></tr>
+    <tr><td>MiDaS full FT</td><td>0.637</td><td>0.432</td><td><strong>0.403</strong></td><td>0.091 &rarr; 0.089</td></tr>
+    <tr><td>MiDaS frozen enc.</td><td>0.637</td><td>0.432</td><td>0.405</td><td>0.106 &rarr; 0.104</td></tr>
+  </table>
+  <p>Eroding the valid mask by 1&ndash;2 px drops outdoor Abs Rel by 29&ndash;37% while indoor changes by &le; 0.003: a large part of the outdoor error sits on boundary bands where the laser GT is unreliable. After erosion the ranking full FT &lt; frozen &lt; zero-shot &lt; U-Net is clear.</p>
+
+  <h3>7.2 Ablation E4b: Alignment Method</h3>
+  <p>Replacing least squares with a robust median / MAD alignment makes every model worse (test, full FT: indoor 0.096 &rarr; 0.204, outdoor 0.470 &rarr; 2.001): far outdoor pixels have near-zero disparity, so matching medians and spreads and then inverting amplifies far-range errors. Least squares is kept. Log-space alignment was also worse (val outdoor 0.89), and MiDaS zero-shot scores 0.36&ndash;0.55 on the training outdoor scenes vs 0.68 on val scene 00017, so the high outdoor val error is a property of that scene, not a pipeline bug.</p>
 
   <!-- 8. Limitations and Conclusion -->
   <h2>8. Limitations and Conclusion</h2>
-  <h3>8.1 Dataset &amp; Pipeline Limitations</h3>
+  <h3>8.1 Limitations</h3>
   <ol>
-    <li>Val and test each have only <strong>1 indoor scene and 1 outdoor scene</strong> (val outdoor = scene 00017, a forest), so val numbers depend heavily on those two scenes.</li>
-    <li>Outdoor val has a higher mean invalid pixel rate per image (~47.4% vs ~31.4% in train; 33.2% in test), primarily due to upward camera angles capturing open sky.</li>
-    <li>Laser ground truth has noise at sharp object edges, leaves and glass (edge bleeding). As shown in Section 7, eroding boundary pixels drops outdoor error by over 30%.</li>
-    <li><strong>Validation set optimism:</strong> Checkpoints are selected based on the lowest validation Abs Rel and reported on the same validation set. Because the validation split contains only 2 scenes and validation trajectories are noisy (e.g. U-Net reaches its minimum validation loss at epoch 13 of 40), reported metrics may be slightly optimistic. The Final report will evaluate on the unseen test split (1,100 samples across scenes 00000 and 00018) across 3 random seeds.</li>
-    <li>DIODE only has upward/level camera angles (000&ndash;050); this is a property of the original dataset, not of our subset.</li>
-    <li>Images are downsampled from 1024&times;768 to 384&times;288. Ground truth is resampled using nearest-neighbour interpolation (verified via border-to-interior ratio ~0.81&ndash;1.03) to prevent zero-bleed, but downsampling inevitably smooths fine branches and wires.</li>
-    <li>All three splits come from the DIODE training set (no public test set available), so results are not directly comparable to published DIODE benchmarks.</li>
-    <li>Draft results use 1 seed per config; differences of ~0.01 Abs Rel are not yet meaningful.</li>
+    <li>Val and test each have only <strong>1 indoor and 1 outdoor scene</strong>; the 0.637 (val) vs 0.470 (test) outdoor gap for the same checkpoint shows how much results depend on scene choice.</li>
+    <li>Laser GT has drop-outs and edge bleeding on leaves, glass and sky boundaries (E-1, E-2, E4a), which put a floor under outdoor error.</li>
+    <li>Aligned evaluation uses GT to fix scale and shift; it measures relative structure, not deployable metric depth.</li>
+    <li>Checkpoints are selected on val; every main number is therefore also reported on the untouched test split.</li>
+    <li>Three seeds give only a rough std estimate; the test-split E3 conclusion is weak. Ten epochs may under-train the frozen variant (its seed-43 best epoch is the last).</li>
+    <li>Only one pretrained backbone (MiDaS_small) fits the 8 GB laptop GPU; inputs are downsampled to 384&times;288, which smooths thin branches and wires.</li>
+    <li>All splits come from the DIODE training partition (no public test labels), so numbers are not comparable to published benchmarks. DIODE has only level/upward camera tilts (000&ndash;050).</li>
   </ol>
 
-  <h3>8.2 M2 Draft Conclusion</h3>
+  <h3>8.2 Conclusion</h3>
   <p>
-    Evaluation tools are tested (metrics, alignment, reproducible seeding). Fine-tuning MiDaS_small beats both zero-shot MiDaS and the scratch U-Net, mostly on indoor scenes; freezing the encoder costs ~0.015 indoor Abs Rel but halves VRAM. Outdoor val (one forest scene) is the main failure case for all models.
-    <strong>In progress for M3:</strong> 3 seeds per config, test-split numbers, deeper error analysis.
+    <strong>Pretraining wins:</strong> fine-tuned MiDaS_small reaches test Abs Rel <strong>0.232</strong> (&delta;1 72.7%) against 0.306 &plusmn; 0.005 for the aligned U-Net and 0.271 for zero-shot MiDaS, with the largest gains indoors (0.096 vs 0.177).
+    <strong>Updating the encoder is worth it by our criterion</strong> (val gap 0.010 &asymp; 10&times; seed std, almost entirely indoors), but on test the advantage is only 0.002, so under a memory constraint the frozen encoder is a reasonable choice (&minus;52% VRAM, &minus;15% training time).
+    Outdoor scenes remain the main failure mode (test Abs Rel &asymp; 0.47 for every MiDaS variant), and a large part of that error comes from sparse, noisy laser GT at sky and foliage boundaries.
+    <strong>Future work:</strong> metric-depth heads or metric-pretrained models to drop the alignment step, edge-aware / gradient-matching losses, sky masking, more outdoor scenes and cross-validation over scenes.
   </p>
 
   <!-- 9. Links & Resources -->
@@ -352,9 +421,11 @@
   <ul>
     <li><strong>Source Code Repository:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2" target="_blank">GitHub Repository (assignment2/)</a></li>
     <li><strong>Reproduce runs / checkpoints:</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2#reproducibility" target="_blank">README &ndash; Reproducibility</a> (<code>bash run_all.sh</code>)</li>
-    <li><strong>Result tables &amp; figures:</strong> <a href="results/tables.md">results/tables.md</a>, <a href="results/qualitative.png">qualitative.png</a>, <a href="results/loss_curves.png">loss_curves.png</a>, <a href="results/error_by_distance.png">error_by_distance.png</a></li>
-    <li><strong>Report &amp; Presentation Slides:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
-    <li><strong>YouTube Presentation Video:</strong> <em>(To be added for M3 Final &ndash; Due 11 Nov 2026)</em></li>
+    <li><strong>Final Report (PDF):</strong> <a href="CR7_A2_Report.pdf" target="_blank" rel="noopener">View CR7_A2_Report.pdf</a> (<a href="CR7_A2_Report.pdf" download="CR7_A2_Report.pdf">Download PDF</a>)</li>
+    <li><strong>Figures (M3):</strong> <a href="https://github.com/THVKhang/ALearning/tree/main/assignment2/assets" target="_blank">assignment2/assets/</a></li>
+    <li><strong>M2 Draft tables &amp; figures (val only, seed 42):</strong> <a href="results/tables.md">results/tables.md</a>, <a href="results/qualitative.png">qualitative.png</a>, <a href="results/loss_curves.png">loss_curves.png</a>, <a href="results/error_by_distance.png">error_by_distance.png</a></li>
+    <li><strong>Presentation Slides:</strong> <em>(link to be added)</em></li>
+    <li><strong>YouTube Presentation Video:</strong> <em>(link to be added)</em></li>
     <li><strong>AI Usage Disclosure:</strong> <a href="https://github.com/THVKhang/ALearning/blob/main/assignment2/AI_USAGE.md" target="_blank">AI_USAGE.md</a></li>
   </ul>
 
