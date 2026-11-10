@@ -235,6 +235,8 @@ assignment1/outputs/*/*
 !assignment1/outputs/*/config.json
 !assignment1/outputs/*/history.json
 !assignment1/outputs/*/metrics_test.json
+assignment2/CR7_A2_Slides.md
+assignment2/demo.py
 
 assignment2/outputs/*
 !assignment2/outputs/.gitkeep
