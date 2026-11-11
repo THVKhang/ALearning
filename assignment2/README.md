@@ -1,6 +1,6 @@
 # Assignment 2 – Monocular Depth Estimation (DIODE)
 
-Group CR7. Full proposal and results: [assignment page](index.html).
+Group CR7. Full results: [assignment page](index.html) · final report `CR7_A2_Report.pdf`.
 
 ## Folder layout
 ```
@@ -12,9 +12,10 @@ src/utils/        seed, config loading, env info
 train.py          train one experiment
 evaluate.py       evaluate a checkpoint (or MiDaS zero-shot) on val / test
 scripts/data/     subset building, EDA, dataset checks (M1)
-scripts/report/   result tables, loss curves, error analysis, qualitative figure
+scripts/report/   diagnostics (erosion, alignment, edges), report figures, per-image test metrics
 tests/            metric / alignment / model / pipeline checks
-results/          tables and figures used on the assignment page
+assets/           figures used in the final report and on the assignment page (M3)
+results/          M2 Draft tables and figures (val split, seed 42)
 ```
 
 ## Setup
@@ -37,39 +38,56 @@ python tests/test_metrics.py                               # metric + alignment 
 python tests/test_models.py                                # U-Net + MiDaS_small shape/grad checks
 python tests/test_pipeline.py                              # synthetic end-to-end Trainer check
 
-python evaluate.py --config configs/midas_zeroshot.yaml    # MiDaS zero-shot on val
-python train.py    --config configs/baseline_unet.yaml     # U-Net from scratch (~1 h budget)
-python train.py    --config configs/midas_full.yaml        # MiDaS full fine-tune
-python train.py    --config configs/midas_frozen.yaml      # MiDaS frozen encoder
-python evaluate.py --config configs/baseline_unet.yaml     # uses outputs/<name>/best.pth
-python evaluate.py --config configs/midas_full.yaml --split test
-python evaluate.py --config configs/midas_frozen.yaml --split test
+# Main runs (seed 42 from configs/base.yaml)
+python evaluate.py --config configs/midas_zeroshot.yaml --split val    # MiDaS zero-shot (no training)
+python evaluate.py --config configs/midas_zeroshot.yaml --split test
+python train.py    --config configs/baseline_unet.yaml     # U-Net from scratch (~52 min, 60-min budget)
+python train.py    --config configs/midas_full.yaml        # MiDaS full fine-tune (~36 min)
+python train.py    --config configs/midas_frozen.yaml      # MiDaS frozen encoder (~30 min)
+for c in baseline_unet midas_full midas_frozen; do         # evaluate outputs/<name>/best.pth
+  python evaluate.py --config configs/$c.yaml --split val
+  python evaluate.py --config configs/$c.yaml --split test
+done
 
-# Multi-seed controlled experiment (M3 Final: seeds 42, 43, 44)
-python train.py    --config configs/midas_full.yaml --seed 43
-python train.py    --config configs/midas_frozen.yaml --seed 43
+# Extra seeds 43 and 44 (controlled experiment + U-Net variance) -> outputs/<name>_seed<N>/
+for s in 43 44; do
+  for c in baseline_unet midas_full midas_frozen; do
+    python train.py    --config configs/$c.yaml --seed $s
+    python evaluate.py --config configs/$c.yaml --seed $s --split val
+    python evaluate.py --config configs/$c.yaml --seed $s --split test
+  done
+done
 
-# Diagnostic & report scripts
-python scripts/report/erode_check.py                       # boundary-mask erosion (0, 1, 2 px)
+# Diagnostics, ablations and report figures (need the seed-42 checkpoints above)
+python scripts/report/erode_check.py                       # E4a boundary-mask erosion (0, 1, 2 px)
+python scripts/report/edge_and_alignment_check.py          # edge vs. flat pixels + E4b median vs. LS alignment
 python scripts/report/outdoor_check.py                     # per-scene outdoor correlation check
-python scripts/report/edge_and_alignment_check.py          # edge vs. flat + median vs. LS alignment
-python scripts/report/make_report.py                       # results/tables.md, loss curves, error plot
-python scripts/report/qualitative.py                       # results/qualitative.png
+python scripts/report/per_image_test.py                    # per-image test metrics + assets/a2_qualitative_test.png
+python scripts/report/report_figures.py                    # all other assets/a2_*.png (needs seeds 42-44)
+python scripts/report/make_report.py                       # M2 Draft: results/tables.md and plots
+python scripts/report/qualitative.py                       # M2 Draft: results/qualitative.png
 ```
-Or everything at once: `bash run_all.sh`. Add `--smoke` to `train.py` for a 1-minute pipeline check.
+Or `bash run_all.sh`. Add `--smoke` to `train.py` for a 1-minute pipeline check.
 
-Each run writes to `outputs/<name>/`: `config.yaml`, `history.csv` (loss, val metrics, epoch
-time, VRAM per epoch), `best.pth`, `train_summary.json`, `eval_val.json`.
+Each run writes to `outputs/<name>/` (or `outputs/<name>_seed<N>/`): `config.yaml`,
+`history.csv` (loss, val metrics, epoch time, VRAM per epoch), `best.pth`,
+`train_summary.json`, `eval_val.json`, `eval_test.json`. Diagnostics go to `outputs/diagnostics/`.
+`outputs/` is not in git; all of it is regenerated by the commands above.
 
 ## Reproducibility
-- Seed 42 for python / numpy / torch / dataloader workers, `cudnn.deterministic=True`,
-  `benchmark=False`, `torch.use_deterministic_algorithms(True, warn_only=True)`.
+- Seeds 42 (default), 43 and 44 for python / numpy / torch / dataloader workers,
+  `cudnn.deterministic=True`, `benchmark=False`,
+  `torch.use_deterministic_algorithms(True, warn_only=True)`.
   Two smoke runs of the same config gave identical loss and metrics.
-- Checkpoint rule: keep the epoch with the lowest overall val Abs Rel.
+- Checkpoint rule: keep the epoch with the lowest overall val Abs Rel. The test split is
+  evaluated only with these final checkpoints.
 - MiDaS outputs relative inverse depth, so before scoring it gets a per-image least-squares
   scale and shift in disparity space against 1/GT on valid pixels. The U-Net is reported both
   raw (metres) and with the same alignment.
-- Checkpoints are not in git (too large); rerun the commands above to recreate them.
+- **Checkpoints** are not in git (U-Net ≈ 31 MB, MiDaS ≈ 86 MB each). Recreate them with the
+  `train.py` commands above; same configs and seeds give the same checkpoints on the same
+  hardware/software (small floating-point differences are possible on other GPUs).
 
-## Draft milestone
-Commit for M2 Draft is tagged `a2-m2-draft`.
+## Milestones
+- M2 Draft: tag `a2-m2-draft`.
+- M3 Final: tag `a2-m3-final` (every number in the final report is regenerated from this commit).
